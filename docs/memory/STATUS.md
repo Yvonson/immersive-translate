@@ -9,6 +9,13 @@
 - 独立根提交 `b8d680ad59bdf3a8f211bd1b78dbeccb7cb7b7cb`；旧稳定标签对应 `a3f814f71e101e95198a439c4b723cf102a24813`。保留独立历史，GitHub 创建时确认 `fork: false`。
 - `.upstream-git-history/` 为完整本地上游历史备份；`.upstream-git-backup/` 为早期不完整备份；两者不进入 Git。
 
+## 评论正文污染修复（2026-10-17）
+
+- 用户确认 Google 译文末尾夹杂“合集、了解细节”；尚无原视频链接。
+- 修复前两项浏览器测试捕获：隐藏节点进入翻译请求、行内评论越界包含作者/时间/工具栏。现已修复提取过滤、站点正文边界、保留片段及动态显隐；不按词删除译文，保留仅译文模式和原节点。
+- 本地 `npm test` 12 项、`npm run test:browser` 15 项、构建和产物检查通过；版本字段不变。
+- 真实 Google 同一接口的原始响应和解析结果均无上述尾词；公开 YouTube 样本确认 `#content-text` 为行内元素，未取得用户原评论现场。证据和限制见 [排查说明](../YOUTUBE-TEXT-EXTRACTION.md)。
+
 ## 界面改版与用户反馈（2026-10-17）
 
 CI 邮件排查（2026-10-17）：文档提交 `dc0e5e6` 的[运行](https://github.com/Yvonson/immersive-translate/actions/runs/39033909751)在第 12 项全屏菜单测试失败，具体为 `DOM.resolveNode: No node with given id found`；安装依赖、单元测试、构建与产物检查均成功。同样插件源码的后续文档提交 `a255a51` [运行成功](https://github.com/Yvonson/immersive-translate/actions/runs/39033931162)。测试辅助函数已改用 `backendNodeId`，避免全屏切换刷新 CDP 文档树使临时前端节点编号失效。本地该用例连续 10 次通过，完整浏览器 12 项、单元 12 项及产物检查通过；本次未修改插件源码或版本字段。

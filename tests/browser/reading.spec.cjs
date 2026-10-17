@@ -41,6 +41,85 @@ test('Ctrl combinations, editable focus and repeat are not paragraph actions',as
   const p=await page();await p.locator('#one').hover();await p.keyboard.press('Control+c');await p.waitForTimeout(200);expect(requests.length).toBe(0);
   await p.locator('input').focus();await p.keyboard.press('Control');await p.waitForTimeout(200);expect(requests.length).toBe(0);await p.close();
 });
+
+test('paragraph extraction keeps visible prose and excludes hidden metadata and controls',async()=>{
+  const p=await page();
+  await p.locator('#one').evaluate(node=>{
+    node.innerHTML='<span>夏凪の『鼓動』最高過ぎる</span><span hidden>合集</span><span style="display:none">了解细节</span><span style="visibility:hidden">Invisible metadata</span><span inert>Inert controls</span><span role="tooltip">Learn more tooltip</span><span role="button">Reply control</span><span style="display:contents"> with <strong>visible formatting</strong></span><code>const value = 1<span hidden>Hidden code label</span></code>';
+  });
+  await ctrl(p,'#one > span:first-child');
+  await expect(p.locator('#one + [data-obt-translation] [data-obt-result]')).toBeVisible();
+  const sent=requests.flat().join('');
+  expect(sent).toContain('夏凪の『鼓動』最高過ぎる'); expect(sent).toContain('visible formatting');
+  for(const noise of ['合集','了解细节','Invisible metadata','Inert controls','Learn more tooltip','Reply control','Hidden code label']) {
+    expect(sent).not.toContain(noise); expect(await translation(p,'#one')).not.toContain(noise);
+  }
+  await expect(p.locator('#one > [hidden]')).toHaveText('合集');
+  await expect(p.locator('#one + [data-obt-translation] strong')).toHaveText('visible formatting');
+  await expect(p.locator('#one + [data-obt-translation] code')).toHaveText('const value = 1');
+  // These words remain valid when they are part of the actual visible prose.
+  await ctrl(p,'#two'); await ctrl(p,'#two');
+  await p.locator('#two').evaluate(node=>{node.textContent='合集、了解细节 are visible prose here.'});
+  await ctrl(p,'#two'); await expect.poll(()=>translation(p,'#two')).toContain('合集、了解细节');
+  await p.keyboard.press('Alt+d'); await p.waitForTimeout(400);
+  await expect(p.locator('#one + [data-obt-translation] [data-obt-result]')).toBeVisible();
+  await p.keyboard.press('Alt+d'); await expect(p.locator('#one > span:first-child')).toBeVisible();
+  await p.locator('#one code').evaluate(node=>{node.firstChild.nodeValue='const value = 2'});
+  await expect(p.locator('#one + [data-obt-translation] code')).toHaveText('const value = 2');
+  await p.close(); expect(failures).toEqual([]);
+});
+
+test('Google HTML requests contain only readable text and visibility changes refresh translations',async()=>{
+  let p;
+  await worker.evaluate(()=>{
+    globalThis.fixtureOriginalFetch=globalThis.fetch; globalThis.fixtureGoogleInputs=[];
+    globalThis.fetch=async(url,options)=>{
+      if (!String(url).startsWith('https://translate.googleapis.com/translate_a/t')) return fixtureOriginalFetch(url,options);
+      const inputs=new URLSearchParams(options.body).getAll('q'); fixtureGoogleInputs.push(...inputs);
+      return new Response(JSON.stringify(inputs.map(text=>[text.replace('<pre>','<pre>谷歌测试：'),'ja'])),{headers:{'Content-Type':'application/json'}});
+    };
+    twpConfig.set('pageTranslatorService','google');
+  });
+  try {
+    p=await page();
+    await p.locator('#one').evaluate(node=>{node.innerHTML='<span>夏凪の『鼓動』最高過ぎる</span><span id="newVisible" hidden>New visible sentence</span><span role="tooltip">合集 了解细节</span>'});
+    await ctrl(p,'#one > span:first-child');
+    await expect.poll(()=>translation(p,'#one')).toContain('谷歌测试：');
+    let sent=await worker.evaluate(()=>fixtureGoogleInputs.join(''));
+    expect(sent).not.toContain('合集'); expect(sent).not.toContain('了解细节'); expect(sent).not.toContain('New visible sentence');
+    await p.locator('#newVisible').evaluate(node=>{node.hidden=false});
+    await expect.poll(()=>translation(p,'#one')).toContain('New visible sentence');
+    await p.locator('#newVisible').evaluate(node=>{node.style.display='none'});
+    await expect.poll(()=>translation(p,'#one')).not.toContain('New visible sentence');
+    sent=await worker.evaluate(()=>fixtureGoogleInputs.join('')); expect(sent).not.toContain('合集'); expect(sent).not.toContain('了解细节');
+    await expect(p.locator('#one [role=tooltip]')).toHaveText('合集 了解细节');
+  } finally {
+    await p?.close();
+    await worker.evaluate(()=>{globalThis.fetch=fixtureOriginalFetch; delete globalThis.fixtureOriginalFetch; delete globalThis.fixtureGoogleInputs; twpConfig.set('pageTranslatorService','local');});
+  }
+  expect(failures).toEqual([]);
+});
+
+test('YouTube inline comment roots exclude adjacent metadata for Ctrl and whole-page translation',async()=>{
+  const p=await context.newPage();
+  await p.route('https://www.youtube.com/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>body{font:18px/1.6 sans-serif;margin:40px}ytd-comment-thread-renderer{display:block}#body{padding:12px}#content-text{display:inline}</style></head><body><main><ytd-comment-thread-renderer><div id="body"><div id="header">5年前 · Comment author</div><span id="content-text"><span>夏凪の『鼓動』最高過ぎる</span><span hidden>合集</span><tp-yt-paper-tooltip>了解细节</tp-yt-paper-tooltip></span><div id="toolbar"><span>Recommendations outside comment</span><button>Reply</button></div></div></ytd-comment-thread-renderer></main></body></html>'}));
+  await p.goto('https://www.youtube.com/watch?v=comment-fixture');
+  await ctrl(p,'#content-text > span:first-child');
+  await expect(p.locator('#content-text + [data-obt-translation] [data-obt-result]')).toBeVisible();
+  for(const value of ['5年前','Comment author','Recommendations outside comment','合集','了解细节']) expect(requests.flat().join('')).not.toContain(value);
+  await p.reload(); await p.waitForTimeout(350);
+  await p.keyboard.press('Alt+q');
+  await expect(p.locator('#content-text + [data-obt-translation] [data-obt-result]')).toBeVisible();
+  await expect(p.locator('[data-obt-translation]')).toHaveCount(1);
+  const count=requests.length;
+  await p.locator('#content-text [hidden]').evaluate(node=>{node.textContent='Hidden metadata updated'});
+  await p.waitForTimeout(350); expect(requests.length).toBe(count);
+  await p.locator('#content-text > span:first-child').evaluate(node=>{node.textContent+=' 改訂';});
+  await expect.poll(()=>p.locator('#content-text + [data-obt-translation]').textContent()).toContain('改訂');
+  await p.keyboard.press('Alt+q'); await expect(p.locator('[data-obt-translation]')).toHaveCount(0);
+  await expect(p.locator('#header')).toHaveText('5年前 · Comment author');
+  await expect(p.locator('#content-text [hidden]')).toBeHidden(); await p.close(); expect(failures).toEqual([]);
+});
 test('whole page and Ctrl deduplicate; lists/tables and restore preserve grammar',async()=>{
   const p=await page();await ctrl(p,'#one');await expect.poll(()=>translation(p,'#one')).toContain('译：');await p.keyboard.press('Alt+q');
   await expect.poll(()=>translation(p,'#two')).toContain('译：');await expect(p.locator('#one + [data-obt-translation]')).toHaveCount(1);

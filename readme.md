@@ -8,7 +8,7 @@
 
 > 当前源码为 **0.2.0-preview.1**：包含 Ctrl 段落开关、保留原文的段下译文、快捷键配置，以及新版分区界面和播放器字幕菜单。当前重点支持 Chrome；公开稳定 Release 仍为 `v0.1.0`，其下载包不含这些新功能。新能力可从源码构建，或在开发机器加载 `dist/chrome`。字幕适配仍为实验功能，真实验收情况见 [当前状态](docs/memory/STATUS.md)。
 
-预览下载：打开[已通过的 CI 运行](https://github.com/Yvonson/immersive-translate/actions/runs/39033763180)，登录 GitHub 后在 **Artifacts** 下载 `browser-extensions`。解压得到 `chrome.zip`，再解压它；按下面的 Chrome 方法加载直接包含 `manifest.json` 的目录。预览包不是商店安装包，CI 附件可能过期。
+预览下载：打开 [main 的 CI 构建列表](https://github.com/Yvonson/immersive-translate/actions/workflows/ci.yml?query=branch%3Amain)，选择最近一次成功运行（绿色对勾），登录 GitHub 后在 **Artifacts** 下载 `browser-extensions`。解压得到 `chrome.zip`，再解压它；按下面的 Chrome 方法加载直接包含 `manifest.json` 的目录。预览包不是商店安装包，CI 附件可能过期。
 
 ## 目录
 
@@ -307,6 +307,7 @@ API Key 保存在当前浏览器配置文件的扩展本地存储中，不写进
 | 提示 25 秒超时 | 检查网络或本地推理速度；在服务端选择响应更快的模型后重试 |
 | 提示 JSON 译文数组或数量不匹配 | 模型输出不符合要求；尝试更能遵循指令的模型或检查兼容服务，不要把报错当成成功译文 |
 | 只显示译文、不显示原文 | 在网页翻译中开启双语对照，也可检查是否对该网站配置了特殊显示规则 |
+| 评论译文夹杂“合集、了解细节”等界面文字 | 更新至包含正文提取修复的构建，重新加载扩展并刷新网页；版本号暂时冻结，注意构建日期和提交。若仍出现，请提供原视频链接，参见[排查说明](docs/YOUTUBE-TEXT-EXTRACTION.md) |
 | 视频只有原字幕，没有插件译文 | 确认实验字幕开关已开启、视频页已刷新、原字幕已打开，且所选引擎能翻译；字幕可能不在当前可读取范围内 |
 | 浏览器设置页、商店页或特殊页面无法翻译 | 浏览器限制扩展访问部分页面；请先用普通网页测试，本项目不保证内部页面、PDF 阅读器或其他特殊页面可用 |
 

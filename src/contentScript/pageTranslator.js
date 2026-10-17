@@ -2,9 +2,9 @@
 // Shared by page, hover and transcript translation. Original nodes stay in place.
 var pageTranslator = {};
 (() => {
-  const records = new Map(), observers = [], languageObservers = [], transcriptRoots = new WeakSet();
+  const records = new Map(), observers = [], languageObservers = [], transcriptRoots = new WeakSet(), sourceWrappers = new WeakSet();
   const blocks = "p,h1,h2,h3,h4,h5,h6,li,td,th,blockquote,figcaption,dt,dd,pre";
-  const excluded = "[data-obt-ui],[data-obt-translation],script,style,noscript,textarea,input,select,button,video,audio,svg,math,[contenteditable]:not([contenteditable=false]),[translate=no],.notranslate,.ytp-caption-window-container,.vds-captions";
+  const excluded = "[data-obt-ui],[data-obt-translation],script,style,noscript,textarea,input,select,button,video,audio,svg,math,[hidden],[inert],[role=tooltip],[role=button],[role=menu],[role=menuitem],tp-yt-paper-tooltip,.sr-only,.screen-reader-text,.visually-hidden,[contenteditable]:not([contenteditable=false]),[translate=no],.notranslate,.ytp-caption-window-container,.vds-captions";
   const typography = ["font-family","font-size","font-weight","font-style","line-height","letter-spacing","word-spacing","color","text-align","text-transform","text-decoration","direction","white-space"];
   const inline = new Set(["A","B","STRONG","I","EM","U","S","SMALL","SUB","SUP","CODE","KBD","MARK","SPAN","ABBR","CITE","Q"]);
   let ready = false, wholePage = false, language = document.documentElement.lang || "und", target, service, session = "", serial = 0;
@@ -44,10 +44,19 @@ var pageTranslator = {};
     const rect = element.getBoundingClientRect(), style = getComputedStyle(element);
     return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
   }
+  function hidden(element) {
+    const style = getComputedStyle(element);
+    return style.display === "none" || ["hidden","collapse"].includes(style.visibility) || style.contentVisibility === "hidden";
+  }
   function resolve(element) {
     if (!element?.closest || element.closest(excluded) || excludedByRule(element) || readingShortcuts.editable(element) || (twpConfig.get("translateTag_pre") === "no" && element.closest("pre"))) return null;
+    let boundary;
+    try { const selectors = rule()?.selectors; if (selectors?.length) boundary = element.closest(selectors.join(",")); } catch (_) { /* Ignore invalid user selectors. */ }
     let node = element;
     while (node && node !== document.body && node !== document.documentElement) {
+      if (hidden(node)) return null;
+      // Explicit site text selectors are boundaries, including inline comment roots.
+      if (node === boundary) return visible(node) ? node : null;
       if (node.matches(blocks)) return visible(node) ? node : null;
       if (["block","flex","grid","list-item"].includes(getComputedStyle(node).display) && !node.querySelector(blocks) && visible(node)) return node;
       node = node.parentElement || node.getRootNode().host;
@@ -61,10 +70,20 @@ var pageTranslator = {};
   function snapshot(root) {
     const tokens = [], nodes = [];
     let text = "";
-    function mark(kind,node) { text += `⟦OBT${tokens.length}⟧`; tokens.push({kind,node}); }
+    function readable(node) { return !node.matches(excluded) && !excludedByRule(node) && !hidden(node); }
+    function literalText(node) {
+      if (node.nodeType === Node.TEXT_NODE) return node.nodeValue;
+      if (node.nodeType !== Node.ELEMENT_NODE || (!sourceWrappers.has(node) && !readable(node))) return "";
+      return [...node.childNodes].map(literalText).join("");
+    }
+    function mark(kind,node) { text += `⟦OBT${tokens.length}⟧`; tokens.push({kind,node,...(kind === "literal" ? {text:literalText(node)} : {})}); }
     function walk(node) {
       if (node.nodeType === Node.TEXT_NODE) { nodes.push(node); text += node.nodeValue; return; }
-      if (node.nodeType !== Node.ELEMENT_NODE || node.matches(excluded) || excludedByRule(node) || node.matches(blocks)) return;
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      // Our translation-only wrappers hide source text deliberately. Treat them
+      // as transparent so visibility filtering cannot invalidate our own records.
+      if (sourceWrappers.has(node)) { node.childNodes.forEach(walk); return; }
+      if (node.matches(blocks) || !readable(node)) return;
       if (node.tagName === "BR") { mark("break",node); return; }
       if (["CODE","KBD","TIME"].includes(node.tagName) || (transcriptRoots.has(root) && /^\s*(?:\d{1,2}:)?\d{1,2}:\d{2}\s*$/.test(node.textContent))) { mark("literal",node); return; }
       const tagged = inline.has(node.tagName);
@@ -81,7 +100,7 @@ var pageTranslator = {};
         const id = tokens.length; tokens.push({kind:"dictionary",text:replacement || value}); return `⟦OBT${id}⟧`;
       });
     }
-    return {text,tokens,nodes,fingerprint:nodes.map(node => node.nodeValue).join("\u0000")};
+    return {text,tokens,nodes,fingerprint:JSON.stringify([nodes.map(node => node.nodeValue),tokens.filter(token => token.kind === "literal").map(token => token.text)])};
   }
   function cloneInline(node) {
     const element = document.createElement(node.tagName.toLowerCase()); copyStyle(node,element);
@@ -103,7 +122,7 @@ var pageTranslator = {};
       else if (token.kind === "close") { if (opened.pop() !== token.node || stack.length < 2) throw new Error("译文标签顺序不匹配。"); stack.pop(); }
       else if (token.kind === "break") parent.appendChild(document.createElement("br"));
       else if (token.kind === "dictionary") parent.appendChild(document.createTextNode(token.text));
-      else { const literal = cloneInline(token.node); literal.textContent = token.node.textContent; parent.appendChild(literal); }
+      else { const literal = cloneInline(token.node); literal.textContent = token.text; parent.appendChild(literal); }
     }
     if (seen.size !== data.tokens.length || stack.length !== 1) throw new Error("译文格式标记缺失。");
   }
@@ -113,10 +132,11 @@ var pageTranslator = {};
     if (!record.visible || !record.container?.querySelector("[data-obt-result]") || twpConfig.get("isShowDualLanguage") !== "no") return;
     for (const node of record.data.nodes) if (node.isConnected && node.nodeValue.trim()) {
       const wrapper = document.createElement("span"); wrapper.style.setProperty("display","none","important");
+      sourceWrappers.add(wrapper);
       node.before(wrapper); wrapper.appendChild(node); record.wrappers.push(wrapper);
     }
     for (const token of record.data.tokens.filter(token => token.kind === "literal")) if (token.node.isConnected) {
-      const wrapper = document.createElement("span"); wrapper.style.setProperty("display","none","important"); token.node.before(wrapper); wrapper.appendChild(token.node); record.wrappers.push(wrapper);
+      const wrapper = document.createElement("span"); wrapper.style.setProperty("display","none","important"); sourceWrappers.add(wrapper); token.node.before(wrapper); wrapper.appendChild(token.node); record.wrappers.push(wrapper);
     }
   }
   function style(record) {
@@ -193,6 +213,20 @@ var pageTranslator = {};
     for (const root of all) { const record = getRecord(root); if (!record.suppressed && !record.visible) intersection ? intersection.observe(root) : translate(root,"page"); }
   }
   function refreshStyles() { for (const record of records.values()) if (record.container) style(record); }
+  function contentMutation(mutation) {
+    const node = mutation.target.nodeType === Node.ELEMENT_NODE ? mutation.target : mutation.target.parentElement;
+    if (node?.closest("[data-obt-translation],[data-obt-ui]")) return false;
+    if (mutation.type !== "attributes") return true;
+    // Player progress bars and other unrelated style changes must not rescan
+    // every translated paragraph. Watch attributes only in reading content.
+    if ([...records.keys()].some(root => root.contains(node) || node?.contains(root))) return true;
+    if (!wholePage) return false;
+    try {
+      const selectors = rule()?.selectors;
+      if (selectors?.length) return !!(node?.closest(selectors.join(",")) || node?.querySelector(selectors.join(",")));
+    } catch (_) { /* Ignore invalid selectors. */ }
+    return true;
+  }
   pageTranslator.translatePage = code => { if (!ready) return twpConfig.onReady(() => pageTranslator.translatePage(code)); if (code && code !== target) twpConfig.set("targetLanguage",code); wholePage = true; scan(); notify(); };
   pageTranslator.restorePage = () => { wholePage = false; newSession(); for (const record of records.values()) hide(record); records.clear(); intersection?.disconnect(); notify(); };
   pageTranslator.toggleParagraph = root => { const record = getRecord(root); record.visible ? hide(record,true) : translate(root); notify(); };
@@ -253,7 +287,7 @@ var pageTranslator = {};
     try { language = (await message({action:"detectTabLanguage"})) || language; } catch (_) { /* Keep document language. */ }
     languageObservers.forEach(callback => callback(language));
     intersection = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting && wholePage) { intersection.unobserve(entry.target); if (!getRecord(entry.target).suppressed) translate(entry.target,"page"); } }),{rootMargin:"100px"});
-    new MutationObserver(mutations => { if (mutations.every(m => m.target.closest?.("[data-obt-translation],[data-obt-ui]")) || mutationTimer) return; mutationTimer = setTimeout(() => { mutationTimer = null; scan(); },150); }).observe(document.body,{subtree:true,childList:true,characterData:true});
+    new MutationObserver(mutations => { if (mutationTimer || !mutations.some(contentMutation)) return; mutationTimer = setTimeout(() => { mutationTimer = null; scan(); },150); }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["hidden","inert","class","style","role"]});
     const themes = new MutationObserver(refreshStyles);
     themes.observe(document.documentElement,{attributes:true,attributeFilter:["class","style","data-theme"]});
     themes.observe(document.body,{attributes:true,attributeFilter:["class","style","data-theme"]});
