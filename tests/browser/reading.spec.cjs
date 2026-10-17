@@ -97,7 +97,9 @@ async function closedUI(p) {
   return async (predicate,fn) => {
     const {root} = await cdp.send('DOM.getDocument',{depth:-1,pierce:true});
     const node = find(root,predicate); expect(node).toBeTruthy();
-    const {object} = await cdp.send('DOM.resolveNode',{nodeId:node.nodeId});
+    // Fullscreen can invalidate CDP's frontend node IDs between these commands.
+    // Backend IDs identify the DOM node across that document-tree refresh.
+    const {object} = await cdp.send('DOM.resolveNode',{backendNodeId:node.backendNodeId});
     const result = await cdp.send('Runtime.callFunctionOn',{objectId:object.objectId,functionDeclaration:fn,returnByValue:true});
     if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
     return result.result.value;
