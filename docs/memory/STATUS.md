@@ -1,53 +1,54 @@
 # 当前状态
 
-更新日期：2026-10-17。此处为当日已核实的项目快照。
+更新日期：2026-10-17。
 
-## 版本与仓库
+## 源码与交付
 
-- 当前代码版本：`0.1.0`，来源为 [package.json](../../package.json) 及两份扩展 manifest。
-- 独立根提交：`b8d680ad59bdf3a8f211bd1b78dbeccb7cb7b7cb`。
-- `v0.1.0` 对应提交：`a3f814f71e101e95198a439c4b723cf102a24813`，包含字幕关闭时显式隐藏叠加层的修复。
-- GitHub 创建时已通过 API 核实 `fork: false`；首次版本源码已推送到 `main`。
-- [v0.1.0 下载页](https://github.com/Yvonson/immersive-translate/releases/tag/v0.1.0) 已生成 `chrome.zip` 和 `firefox.zip`。
-- 本机的完整上游 Git 历史备份在 `.upstream-git-history/`，已忽略；`.upstream-git-backup/` 是早期备份尝试留下的目录，不应作为完整备份使用，也不进入 Git。
+- 源码版本 `0.2.0`，扩展显示版本 `0.2.0-preview.1`；本机安装目录 `dist/chrome`，预览包 `dist/chrome.zip`。
+- 新功能为预览交付，尚未创建 `v0.2.0` 稳定发布标签。公开稳定下载仍为 [v0.1.0](https://github.com/Yvonson/immersive-translate/releases/tag/v0.1.0)，其中不含本轮升级。
+- 独立根提交 `b8d680ad59bdf3a8f211bd1b78dbeccb7cb7b7cb`；旧稳定标签对应 `a3f814f71e101e95198a439c4b723cf102a24813`。保留独立历史，GitHub 创建时确认 `fork: false`。
+- `.upstream-git-history/` 为完整本地上游历史备份；`.upstream-git-backup/` 为早期不完整备份；两者不进入 Git。
 
-后续文档提交不改变上述版本标签所指的代码。工作区和远程是否干净、同步，应在每次任务开始时实时检查。
+## 本轮已实现
 
-## 用户文档
+| 能力 | 实现及状态 |
+| --- | --- |
+| Ctrl 段落 | 单按开关，组合键/输入框不触发，其他段落不变；整页共享记录 |
+| 双语排版 | 原节点保留，段下译文；行内格式、链接、代码、列表/表格；损坏标记用同一引擎分片重试 |
+| 快捷键 | 插件内网页键录入；显示 Chrome 实际绑定及原生入口；显式双语模式切换 |
+| 调度 | 并发 2，预取最多 1 槽；会话取消、配置失效和内存缓存；新路径不使用磁盘译文缓存 |
+| 字幕入口 | 按播放器菜单、当前页面开关、站点自动开关、样式及轨道选择 |
+| 字幕适配 | 原生 TextTrack、YouTube 实际响应/当前 DOM、DeepLearning.AI VTT / Vidstack；实验性质 |
+| 课程文字稿 | 可见文字稿与逐句入口，保留时间戳；登录后真实 DOM 待验收 |
+| 初始化修复 | 新版 Chromium 的 browser 别名不再误触 Firefox theme API；启动异常不阻塞配置 Promise |
 
-- 2026-10-17：按用户要求重写 [README](../../readme.md)，明确浏览器插件形态，补全发布包安装、Google/Yandex、DeepSeek、兼容云 API、Ollama/LM Studio、字幕、费用隐私、故障排查及更新备份流程。
-- 操作名称和配置行为已对照源码核查；外部软件启动与安装步骤参考所链接的官方文档。这次仅修改文档，不增加真实 API 或网站验收记录。
+代码和内部消息以 [升级说明](../READING-UPGRADE.md) 为准。README 已更新安装、Ctrl、快捷键、字幕模式与边界。
 
-## 已实现
+## 验证证据
 
-| 能力 | 当前范围 | 实现入口 |
+2026-10-17 本地验证：
+
+- `npm test`：12 项通过，包含模型接口、VTT/JSON3/XML、队列优先级/取消、隐私缓存隔离及字幕 URL 限制。
+- `npm run test:browser`：9 项通过，使用 Playwright 1.64.1 配套 Chromium 156、临时配置及本地模拟模型。覆盖实际 DOM、文本节点/事件、格式、快捷键、列表表格、动态内容、慢响应、Shadow DOM/iframe、字幕及设置。字幕播放时钟可控，不是完整网站实播测试。
+- `npm run build`、`npm run check`：两个浏览器构建、引用、语法和 ZIP 检查通过；Firefox 只保证这些构建检查，未进行功能验收。
+- 浏览器截图在忽略目录 `.local/`，仅用于本地视觉检查；不提交网页截图或课程材料。
+
+真实联网检查（独立 Chromium，无登录、无个人 Chrome 配置）：
+
+| 对象 | 已取得证据 | 尚未通过 |
 | --- | --- | --- |
-| 网页翻译 | 继承正文识别、段落双语、动态内容和网站规则 | `src/contentScript/pageTranslator.js` |
-| 传统引擎 | 保留 Google / Yandex 接入 | `src/background/translationService.js` |
-| AI 翻译 | DeepSeek、本地模型和自定义兼容接口；配置及连接测试 | `src/background/aiProviders.js`、`src/options/ai-options.js` |
-| 字幕翻译 | 实验性 HTML5 字幕轨、YouTube 显示中的字幕；过期响应丢弃 | `src/contentScript/subtitleTranslator.js` |
-| 打包 | Chrome / Edge MV3，Firefox MV2 开发包 | `gulpfile.js`、两份 manifest |
-| 自动化 | Push/PR 测试与构建、手动预览、`v*` 标签发布 | `.github/workflows/` |
+| Google | 实际接口将 Hello world 返回为“你好世界” | 多站点长文/模型质量全面回归 |
+| YouTube 官方示例 | 视频实播至约 6 秒，readyState 4；播放器按钮显示、开启状态正确，无页面 JS 错误 | 原生 CC 开启，但实际 timedtext 返回 HTTP 200/空正文，原生字幕 DOM 也为空；没有字幕端到端成功证据 |
+| DeepLearning.AI 公开课时 | 页面及播放器入口正常；公开数据可读取英文 VTT 119 条、时间轴及其他语言轨 | 实播遇到 Log In to Continue；登录后播放、换课、文字稿和全屏仍未验收 |
 
-接口、缓存、超时、密钥处理及手工验收步骤以 [开发文档](../DEVELOPMENT.md) 为准。
+参考样本：[YouTube](https://www.youtube.com/watch?v=EWX0bbGAd0k)、[课程 Introduction](https://learn.deeplearning.ai/courses/chatgpt-prompt-eng/lesson/dfbds/introduction)。不将网页“有入口”写成翻译成功。
 
-## 验证记录
+## 发布前待验收
 
-| 日期 | 验证 | 结果与证据 |
-| --- | --- | --- |
-| 2026-10-17 | `npm test` | 8 项通过；覆盖请求格式、批处理、并发、缓存、异常结果和字幕状态，使用模拟服务/DOM |
-| 2026-10-17 | `npm run build` | Chrome 与 Firefox 目录及 ZIP 成功生成 |
-| 2026-10-17 | `npm run check` | 两个构建的 manifest 引用、JavaScript 语法和 ZIP 产物检查通过 |
-| 2026-10-17 | 最新版本 CI | [提交 a3f814f 的构建](https://github.com/Yvonson/immersive-translate/actions/runs/39014176752) 成功 |
-| 2026-10-17 | 发布工作流 | [v0.1.0 发布](https://github.com/Yvonson/immersive-translate/actions/runs/39014214905) 成功，已核实两个附件存在 |
+- 用户正常 Chrome 的加载、实际快捷键冲突、网页布局及视频全屏。
+- 真实 DeepSeek、本地 Ollama/LM Studio；本轮未提供真实 Key/模型服务，模拟测试不替代。
+- YouTube 可读字幕环境、人工/自动字幕、跳转、广告及换视频。
+- 登录后的 DeepLearning.AI、课程文字稿真实 DOM、换课、全屏。
+- 商业参考插件 2026 版的实际逐屏对照；官方帮助截图包含旧 1.16.5，不能用其证明现版一致。
 
-## 未验证与已知边界
-
-- 尚未使用真实 DeepSeek API Key、本地模型服务或真实视频网站完成端到端验收。
-- 字幕测试使用模拟 DOM，不能证明视频站点兼容性、全屏展示或模型速度满足实时观看要求。
-- 不含无字幕视频的语音识别、烧录字幕 OCR、DRM 字幕提取、独立桌面端或 Safari 支持。
-- Firefox 为开发包，尚未使用维护者自己的账号进行正式签名或商店分发。
-- 上游网站规则和 Google/Yandex 旧接口可能失效，需要逐项验证。
-- 继承的构建依赖存在弃用及旧 Browserslist 数据提示；配置中的旧浏览器版本不代表已经实测支持。
-
-待办和建议完成标准见 [ROADMAP.md](ROADMAP.md)。
+不含 ASR、字幕 OCR、DRM/登录绕过、标准画中画、Safari 或桌面端。依赖仍有继承的 Browserslist/弃用提示，未将本轮变更扩展成构建依赖全面升级。

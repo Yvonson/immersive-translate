@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/w3css/4/w3.css">
     <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="reading-options.css">
 </head>
 
 <body class="w3-content" style="max-width:1200px;">
@@ -214,7 +215,7 @@
                 <p><label for="subtitleTranslation"><b>实时双语字幕（实验功能）</b></label></p>
                 <select id="subtitleTranslation" class="w3-select w3-margin-bottom">
                     <option value="no">关闭</option>
-                    <option value="yes">开启：HTML5 字幕轨 / YouTube 已显示字幕</option>
+                    <option value="yes">全局自动开启：HTML5 / YouTube / DeepLearning.AI 文本字幕</option>
                 </select>
                 <p><small>需先打开视频原字幕；仅翻译已有文本，不含语音识别。字幕会发送到所选引擎。设置后刷新视频页生效，模型速度可能造成延迟。</small></p>
                 <br>
@@ -340,8 +341,10 @@
     <script src="/lib/config.js"></script>
     <script src="/lib/platformInfo.js"></script>
     <script src="/lib/i18n.js"></script>
+    <script src="/lib/readingShortcuts.js"></script>
     <script src="options.js"></script>
     <script src="ai-options.js"></script>
+    <script src="reading-options.js"></script>
 </body>
 
 </html>

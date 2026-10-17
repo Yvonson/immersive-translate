@@ -7,12 +7,14 @@
 - `src/contentScript/pageTranslator.js`：原网页内容识别、按段落翻译及动态内容处理。
 - `src/background/translationService.js`：翻译消息与引擎路由。
 - `src/background/aiProviders.js`：DeepSeek 和兼容接口；分批、最多两路请求、25 秒超时、内存缓存及输出校验。
-- `src/contentScript/subtitleTranslator.js`：实验性视频字幕叠加层；读取 HTML5 TextTrack 和 YouTube 显示中的字幕，丢弃过期译文。
+- `src/contentScript/subtitleTranslator.js`：按播放器管理字幕入口、时间轴、预取及叠加层；配合 YouTube / Vidstack 站点桥接。
 - `src/options/ai-options.js`：API 地址、模型、密钥和连接测试。
 - `src/chrome_manifest.json`：Chrome / Edge Manifest V3。
 - `src/manifest.json`：Firefox Manifest V2，独立扩展 ID。
 - `gulpfile.js`：生成 `dist/chrome`、`dist/firefox` 及两个 ZIP 包。
-- `tests/`：使用模拟接口验证核心逻辑，无需付费 API Key。
+- `tests/`：单元测试和真实 Chromium DOM / 扩展测试；默认使用本地模拟接口，无需付费 Key。
+
+新消息、配置、渲染约定及验收步骤见 [阅读与字幕升级](READING-UPGRADE.md)。
 
 ## 日常开发
 
@@ -23,6 +25,8 @@ npm ci --ignore-scripts
 npm test
 npm run build
 npm run check
+npx playwright install chromium
+npm run test:browser
 ```
 
 修改源码后重新构建，在扩展管理页点击重新加载，再刷新测试网页。不要直接修改 `dist/`。
@@ -48,7 +52,7 @@ Firefox 正式分发签名、商店上架、Safari 或独立桌面端需要另�
 
 ## 手工验收
 
-1. 在 Chrome / Edge 加载 `dist/chrome`，检查设置页、弹窗和网页双语显示。
+1. 本轮在 Chrome 加载 `dist/chrome`，检查设置页、弹窗和网页双语显示。
 2. 配置实际 API Key，点击“保存并测试连接”，再用正文、链接及动态加载页面验证模型翻译。
 3. 启动本地模型服务，使用真实已安装模型名，验证不带 API Key 的翻译。
 4. 开启字幕功能，刷新含原字幕的视频页，测试播放、暂停、跳转、换集和全屏。

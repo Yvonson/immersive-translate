@@ -6,7 +6,9 @@ Legacy providers include Google and Yandex; inherited translation code also cont
 
 AI API credentials and settings are stored in chrome.storage.local in the browser profile. They are not included in normal configuration exports and are not intentionally injected into the web page. Browser extension storage is not an OS-encrypted credential vault. Restoring default settings removes the saved AI profiles.
 
-The inherited Google/Yandex translation cache can persist translations locally. AI translations use a bounded in-memory cache; incognito AI requests bypass that shared cache. Use browser profile controls to remove local extension data.
+New page/paragraph and subtitle translation paths use bounded in-memory caches, with no disk translation-cache reads or writes. Incognito requests bypass shared reading and AI caches. Inherited tools may still use the legacy Google/Yandex persistent cache. Use browser profile controls to remove local extension data.
+
+When subtitle translation is enabled, the extension can read existing captions, observe YouTube's own caption responses, and load course WebVTT tracks from video.deeplearning.ai. Site-specific page-world bridges only transfer caption metadata/text and cannot access extension credentials. A readable timeline permits limited advance translation; this can send upcoming caption text to the selected provider before it is displayed. The extension does not capture audio or bypass course login requirements.
 
 Provider privacy policies, network access and API charges depend on the provider you select. Links to external translation, documentation or original-author support sites are governed by those sites' policies.
 

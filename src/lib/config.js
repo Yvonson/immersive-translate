@@ -12,6 +12,11 @@ const twpConfig = (function () {
     pageTranslatorService: "google", // google yandex
     textTranslatorService: "google", // google yandex bing deepl
     subtitleTranslation: "no",
+    paragraphTranslation: "yes",
+    paragraphTrigger: "Control",
+    pageShortcuts: { "hotkey-toggle-translation": "Alt+Shift+T", "hotkey-toggle-dual": "Alt+Shift+D" },
+    subtitleAutoSites: [],
+    subtitleStyle: { mode: "dual", order: "source-first", size: 22, color: "#ffffff", opacity: 0.75, offset: 12 },
     ttsSpeed: 1.0,
     enableDeepL: "yes",
     isTranslateTitle: "no",
@@ -58,9 +63,11 @@ const twpConfig = (function () {
    */
   function readyConfig() {
     configIsReady = true;
-    onReadyObservers.forEach((callback) => callback());
+    const callbacks = onReadyObservers;
     onReadyObservers = [];
     onReadyResolvePromise();
+    // One failing startup consumer must not leave every translation awaiting forever.
+    callbacks.forEach(callback => { try { callback(); } catch (error) { console.error(error); } });
   }
 
   const twpConfig = {};
@@ -145,7 +152,7 @@ const twpConfig = (function () {
 
     if (
       typeof browser !== "undefined" &&
-      typeof browser.commands !== "undefined"
+      typeof browser.commands?.update === "function"
     ) {
       for (const name in config.hotkeys) {
         browser.commands.update({
@@ -165,7 +172,7 @@ const twpConfig = (function () {
     // try to reset the keyboard shortcuts
     if (
       typeof browser !== "undefined" &&
-      typeof browser.commands !== "undefined"
+      typeof browser.commands?.update === "function"
     ) {
       for (const name of Object.keys(
         chrome.runtime.getManifest().commands || {}

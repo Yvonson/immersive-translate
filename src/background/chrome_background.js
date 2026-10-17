@@ -368,7 +368,7 @@ twpConfig.onReady(() => {
             }
         })
 
-        if (chrome.action && typeof browser !== "undefined") {
+        if (chrome.action && typeof browser !== "undefined" && browser.theme && typeof browser.theme.getCurrent === "function") {
             let pageLanguageState = "original"
 
             let themeColorPopupText = null
@@ -499,28 +499,7 @@ if (typeof chrome.commands !== "undefined") {
                 }, checkedLastError)
             })
         } else if (command === "hotkey-toggle-dual") {
-            if (twpConfig.get("isShowDualLanguage") === "yes") {
-                twpConfig.set("isShowDualLanguage", "no")
-            } else {
-                twpConfig.set("isShowDualLanguage", "yes")
-            }
-            chrome.tabs.query({
-                currentWindow: true,
-                active: true
-            }, tabs => {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    action: "toggle-translation"
-                }, checkedLastError)
-                chrome.tabs.query({
-                    currentWindow: true,
-                    active: true
-                }, tabs => {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        action: "toggle-translation"
-                    }, checkedLastError)
-                })
-            })
-        
+            twpConfig.set("isShowDualLanguage", twpConfig.get("isShowDualLanguage") === "yes" ? "no" : "yes");
         }else if (command === "hotkey-swap-page-translation-service") {
             chrome.tabs.query({
                 active: true,

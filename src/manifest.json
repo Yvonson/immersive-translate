@@ -3,7 +3,7 @@
   "default_locale": "en",
   "name": "Open Bilingual Translate",
   "description": "Independent bilingual web and subtitle translator with Google, DeepSeek and local model support.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage_url": "https://github.com/Yvonson/immersive-translate",
   "browser_specific_settings": {
     "gecko": {
@@ -99,6 +99,7 @@
         "/contentScript/showOriginal.js",
         "/lib/specialRules.js",
         "/contentScript/enhance.js",
+        "/lib/readingShortcuts.js",
         "/contentScript/pageTranslator.js"
       ]
     },
@@ -119,6 +120,7 @@
       "run_at": "document_idle",
       "all_frames": true,
       "js": [
+        "/lib/captionFormats.js",
         "/contentScript/subtitleTranslator.js"
       ]
     }
@@ -133,7 +135,9 @@
       "/background/translationCache.js",
       "/background/aiProviders.js",
       "/background/translationService.js",
+      "/background/readingService.js",
       "/background/background.js"
     ]
-  }
+  },
+  "version_name": "0.2.0-preview.1"
 }

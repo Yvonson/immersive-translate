@@ -1,6 +1,6 @@
 {
   "name": "open-bilingual-translate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "browserslist": [
     "firefox 63",
     "chrome 70"
@@ -10,11 +10,13 @@
     "firefox": "npx gulp firefox-build ",
     "chrome": "npx gulp chrome-build ",
     "test": "node --test tests/*.test.cjs",
-    "check": "node scripts/check-build.cjs"
+    "check": "node scripts/check-build.cjs",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
     "@babel/preset-env": "^7.19.3",
+    "@playwright/test": "^1.64.1",
     "@types/chrome": "^0.0.197",
     "@types/firefox-webext-browser": "^94.0.1",
     "gulp": "^4.0.2",

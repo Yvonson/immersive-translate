@@ -468,7 +468,7 @@ const translationService = (function () {
           this.translationsInProgress.set(requestHash, progressInfo);
 
           //cast
-          const cacheEntry = await translationCache.get(
+          const cacheEntry = this.memoryOnly ? null : await translationCache.get(
             this.serviceName,
             sourceLanguage,
             targetLanguage,
@@ -520,6 +520,7 @@ const translationService = (function () {
         method: this.xhrMethod,
         headers
       }
+      if (this.memoryOnly) params.signal = AbortSignal.timeout(25000);
       params.body = this.cbGetExtraParameters
             ? this.cbGetRequestBody(sourceLanguage, targetLanguage, requests)
             : undefined
@@ -535,7 +536,7 @@ const translationService = (function () {
       if(response.ok){
         return response.json()
       }else{
-        throw new Error(response.statusText)
+        throw new Error(`翻译接口 HTTP ${response.status}`)
       }
 
     }
@@ -595,6 +596,7 @@ const translationService = (function () {
             .catch((e) => {
               console.error(e);
               for (const transInfo of request) {
+                transInfo.error = e;
                 transInfo.status = "error";
                 //this.translationsInProgress.delete([sourceLanguage, targetLanguage, transInfo.originalText])
               }
@@ -604,6 +606,10 @@ const translationService = (function () {
       await Promise.all(
         currentTranslationsInProgress.map((transInfo) => transInfo.waitTranlate)
       );
+      if (this.memoryOnly) {
+        const failed = currentTranslationsInProgress.find(info => info.error);
+        if (failed) throw failed.error;
+      }
       return currentTranslationsInProgress.map((transInfo) =>
         this.cbTransformResponse(transInfo.translatedText, dontSortResults)
       );
@@ -1163,6 +1169,21 @@ const translationService = (function () {
         dontSaveInPersistentCache
       )
     )[0][0];
+  };
+
+  // New reading paths never silently select another provider or use disk cache.
+  translationService.translateExact = async (serviceName, targetLanguage, texts, privateMode) => {
+    let values;
+    if (["deepseek", "local", "custom"].includes(serviceName)) {
+      values = (await aiProviders.translate(serviceName, "auto", targetLanguage, [texts], privateMode))[0];
+    } else {
+      const service = serviceList.get(serviceName);
+      if (!service || !["google", "yandex"].includes(serviceName)) throw new Error("请选择已配置的 Google、Yandex 或 AI 翻译引擎。");
+      const isolated = Object.assign(Object.create(service), { translationsInProgress: new Map(), memoryOnly: true });
+      values = (await isolated.translate("auto", targetLanguage, [texts], true, false))[0];
+    }
+    if (!Array.isArray(values) || values.length !== texts.length || values.some((value, i) => typeof value !== "string" || (texts[i].trim() && !value.trim()))) throw new Error("翻译服务返回了空结果或数量不匹配。");
+    return values;
   };
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
