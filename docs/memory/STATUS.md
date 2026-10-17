@@ -31,6 +31,7 @@
 - `npm test`：12 项通过，包含模型接口、VTT/JSON3/XML、队列优先级/取消、隐私缓存隔离及字幕 URL 限制。
 - `npm run test:browser`：9 项通过，使用 Playwright 1.64.1 配套 Chromium 156、临时配置及本地模拟模型。覆盖实际 DOM、文本节点/事件、格式、快捷键、列表表格、动态内容、慢响应、Shadow DOM/iframe、字幕及设置。字幕播放时钟可控，不是完整网站实播测试。
 - `npm run build`、`npm run check`：两个浏览器构建、引用、语法和 ZIP 检查通过；Firefox 只保证这些构建检查，未进行功能验收。
+- 提交 `db6ec41708c21506cf7d6e6bcff112fd860c98a5` 已推送 `main`；[远程 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39020093378) 成功，包含单元测试、构建检查和 Linux Chromium 浏览器回归，并上传扩展包 artifact。
 - 浏览器截图在忽略目录 `.local/`，仅用于本地视觉检查；不提交网页截图或课程材料。
 
 真实联网检查（独立 Chromium，无登录、无个人 Chrome 配置）：
@@ -46,7 +47,7 @@
 ## 发布前待验收
 
 - 用户正常 Chrome 的加载、实际快捷键冲突、网页布局及视频全屏。
-- 真实 DeepSeek、本地 Ollama/LM Studio；本轮未提供真实 Key/模型服务，模拟测试不替代。
+- 真实 DeepSeek、本地 Ollama/LM Studio；本轮未提供真实 Key。默认本地端口 `11434`、`1234` 探测不可达，模拟测试不替代真实模型。
 - YouTube 可读字幕环境、人工/自动字幕、跳转、广告及换视频。
 - 登录后的 DeepLearning.AI、课程文字稿真实 DOM、换课、全屏。
 - 商业参考插件 2026 版的实际逐屏对照；官方帮助截图包含旧 1.16.5，不能用其证明现版一致。

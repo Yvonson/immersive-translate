@@ -8,6 +8,8 @@
 
 > 当前源码为 **0.2.0-preview.1**：新增 Ctrl 段落开关、保留原文的段下译文、快捷键配置与播放器字幕菜单。当前重点支持 Chrome；公开稳定 Release 仍为 `v0.1.0`，其下载包不含这些新功能。新能力可从源码构建，或在开发机器加载 `dist/chrome`。字幕适配仍为实验功能，真实验收情况见 [当前状态](docs/memory/STATUS.md)。
 
+预览下载：打开[已通过的 CI 运行](https://github.com/Yvonson/immersive-translate/actions/runs/39020093378)，登录 GitHub 后在 **Artifacts** 下载 `browser-extensions`。解压得到 `chrome.zip`，再解压它；按下面的 Chrome 方法加载直接包含 `manifest.json` 的目录。预览包不是商店安装包，CI 附件可能过期。
+
 ## 目录
 
 - [能做什么](#能做什么)
