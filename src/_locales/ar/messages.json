@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "فتح في مترجم جوجل"
   },
-  "btnDonate": {
-    "message": "تبرع"
-  },
   "btnNeverTranslate": {
     "message": "لا تترجم هذا الموقع ابدًا"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "لا تترجم هذا الموقع ابدًا"
-  },
-  "btnMobileDonate": {
-    "message": "تبرع"
   },
   "optionsNeverTranslate": {
     "message": "لا تترجم هذه المواقع أبدًا"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "المزيد من الخيارات"
-  },
-  "lblPlsDonate": {
-    "message": "مساعدة المطور بالتبرع"
   },
   "msgTranslateFor": {
     "message": "ترجم إلى $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "ترجمة هذه المواقع دائمًا"
   },
-  "msgDonateWithPaypal": {
-    "message": "تبرع بواسطة PayPal"
-  },
   "lblDarkMode": {
     "message": "الوضع المظلم"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "مفاتيح التشغيل السريع"
   },
-  "lblMakeDonation": {
-    "message": "التبرع"
-  },
   "lblReleaseNotes": {
     "message": "ملاحظات الإصدار"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "لترجمة الموقع"
-  },
-  "msgThanksForUseExtension": {
-    "message": "شكرا لك على استخدام هذا الامتداد."
-  },
-  "msgIWillBeGrateful": {
-    "message": "سأكون ممتنًا إذا أمكنك التبرع."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "دائما ترجمة هذه اللغة"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "احسب"
-  },
-  "donatewithpaypal": {
-    "message": "تبرع بواسطة PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "ترجمة تلقائية عند النقر على رابط يأخذك إلى نفس النطاق مثل الموقع الحالي"

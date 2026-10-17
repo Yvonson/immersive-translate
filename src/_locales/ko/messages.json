@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Google 번역에서 열기"
   },
-  "btnDonate": {
-    "message": "기부"
-  },
   "btnNeverTranslate": {
     "message": "이 사이트 번역 안 함"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "이 사이트 번역 안 함"
-  },
-  "btnMobileDonate": {
-    "message": "기부"
   },
   "optionsNeverTranslate": {
     "message": "번역하지 않을 사이트 목록"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "추가 옵션"
-  },
-  "lblPlsDonate": {
-    "message": "기부하여 개발자 돕기"
   },
   "msgTranslateFor": {
     "message": "$LANGUAGE_NAME$ 언어로 번역",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "항상 자동으로 번역할 사이트 목록"
   },
-  "msgDonateWithPaypal": {
-    "message": "PayPal로 기부"
-  },
   "lblDarkMode": {
     "message": "야간 모드"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "단축키"
   },
-  "lblMakeDonation": {
-    "message": "기부하기"
-  },
   "lblReleaseNotes": {
     "message": "릴리스 정보"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "사이트 번역"
-  },
-  "msgThanksForUseExtension": {
-    "message": "이 확장 기능을 사용해주셔서 감사합니다."
-  },
-  "msgIWillBeGrateful": {
-    "message": "기부해 주시면 감사하겠습니다."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "이 언어 항상 번역"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "계산"
-  },
-  "donatewithpaypal": {
-    "message": "PayPal로 기부"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "현재 사이트와 동일한 도메인으로 연결되는 링크를 클릭하면 자동으로 번역"

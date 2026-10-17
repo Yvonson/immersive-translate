@@ -1,350 +1,618 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="zh-CN">
 <head>
-    <title>Open Bilingual Translate</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/w3css/4/w3.css">
-    <link rel="stylesheet" href="options.css">
-    <link rel="stylesheet" href="reading-options.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>
+   设置 · 开放双语翻译
+  </title>
+<link href="/ui/theme.css" rel="stylesheet"/>
+<link href="options.css" rel="stylesheet"/>
+<link href="reading-options.css" rel="stylesheet"/>
 </head>
-
-<body class="w3-content" style="max-width:1200px;">
-    <nav class="w3-sidebar w3-bar-block w3-collapse w3-top" style="z-index:3; width:300px" id="sideBar">
-        <div class="w3-container w3-display-container w3-padding-16">
-            <h3 class="w3-wide"><b>Open Bilingual Translate</b></h3>
-            <p>__IMMERSIVE_TRANSLATE_VERSION__</p>
-        </div>
-        <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
-            <a href="#main" class="w3-bar-item w3-button" data-i18n="msgCommon">Common</a>
-            <a href="#translations" class="w3-bar-item w3-button" data-i18n="msgTranslations">Translations</a>
-            <a href="#hotkeys" class="w3-bar-item w3-button desktopOnly" data-i18n="msgHotkeys">Hotkeys</a>
-            <a href="#storage" class="w3-bar-item w3-button" data-i18n="msgStorage">Storage</a>
-            <a href="#others" class="w3-bar-item w3-button" data-i18n="lblOthers">Others</a>
-        </div>
-        <b><a href="#donation" class="w3-bar-item w3-button w3-padding"><span data-i18n="lblMakeDonation">Make a donation</span> &#10084;</a></b>
-        <a href="https://github.com/Yvonson/immersive-translate/blob/main/CHANGELOG.md" class="w3-bar-item w3-button w3-padding" data-i18n="lblReleaseNotes">Release Notes</a>
-        <a href="https://github.com/Yvonson/immersive-translate/issues" target="blank"
-            class="w3-bar-item w3-button w3-padding" data-i18n="lblReport">Report a problem</a>
-        <a href="https://t.me/+rq848Z09nehlOTgx" target="blank"
-            class="w3-bar-item w3-button w3-padding" data-i18n="lblTelegram">Telegram Group</a>
-        <a href="https://github.com/Yvonson/immersive-translate" target="blank"
-            class="w3-bar-item w3-button w3-padding" >Github</a>
-        <!-- <a href="https://crowdin.com/project/translate-web-pages" target="blank" class="w3-bar-item w3-button w3-padding" data-i18n="lblTranslateInterface">Translate the interface</a> -->
-    </nav>
-
-    <header class="w3-bar w3-top w3-black w3-hide-large w3-xlarge" id="header">
-        <div class="w3-bar-item w3-padding-20 w3-wide">TR</div>
-        <a class="w3-bar-item w3-button w3-padding-24 w3-right" id="btnOpenMenu">
-            <div class="menu-container" id="menuContainer">
-                <div class="bar1"></div>
-                <div class="bar2"></div>
-                <div class="bar3"></div>
-                <div class="bar4"></div>
-                <div class="bar5"></div>
-            </div>
-        </a>
-    </header>
-
-    <div class="w3-main" style="margin-left: 300px">
-        <div class="w3-hide-large" style="margin-top:83px"></div>
-
-        <header class="w3-container w3-xlarge">
-            <p id="itemSelectedName" data-i18n="lblSettings" style="float: left;">Settings</p>
-            <p style="float: right; display: none;" id="btnPatreon"><a href="https://www.patreon.com/theowenyoung" target="blank"><img src="/icons/patreon.png" style="height: 40px;"></a></p>
-        </header>
-
-        <div>
-            <div id="main" class="w3-container">
-              <div class="w3-display-container w3-padding w3-margin-top">
-                  <div class="w3-display-left">
-                      <p><b data-i18n="lblTargetLanguage" data-i18n-ph-value="">Target language (Your native language)</b>
-                <br><small data-i18n="lblTargetLanguageHelp" style="color:#999;">Set the translated language, which is your native language</small>
-              </p>
-                  </div>
-                  <div class="w3-display-right">
-                      <div style="position: relative;">
-                        <select id="targetLanguage1" class="w3-margin-right w3-select w3-border w3-round"></select>
-                      </div>
-                  </div>
-              </div>
-              <br>
-                <div class="w3-display-container w3-padding w3-margin-top">
-                    <div class="w3-display-left">
-                        <p><b data-i18n="lblNeverTranslateLangs">Never translate these languages</b></p>
-                    </div>
-                    <div class="w3-display-right">
-                        <div style="position: relative;">
-                            <button class="w3-button w3-blue w3-round  add"
-                                data-i18n="lblAdd">Add</button>
-                            <select id="addToNeverTranslateLangs" class="add">
-                                <option value="" selected disabled hidden></option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <ul id="neverTranslateLangs" style="margin-right:0 !important;" class="w3-ul w3-card-4 w3-margin w3-round list"></ul>
-                <br>
-                <div class="">
-                    <div class="w3-display-container w3-padding w3-margin-top">
-                        <div class="w3-display-left">
-                            <p><b data-i18n="optionsAlwaysTranslate">Always translate these languages</b></p>
-                        </div>
-                        <div class="w3-display-right">
-                            <div style="position: relative;">
-                                <button class="w3-button w3-blue w3-round  add"
-                                    data-i18n="lblAdd">Add</button>
-                                <select id="addToAlwaysTranslateLangs" class="add">
-                                    <option value="" selected disabled hidden></option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <ul id="alwaysTranslateLangs" class="w3-ul w3-card-4 w3-margin w3-round list" style="margin-right:0 !important;"></ul>
-                </div>
-                <br>
-                <div class="">
-                    <div class="w3-display-container w3-padding w3-margin-top">
-                        <div class="w3-display-left">
-                            <p><b data-i18n="lblAlwaysTranslateSites">Always translate these sites</b></p>
-                        </div>
-                        <div class="w3-display-right">
-                            <button id="addToAlwaysTranslateSites" class="w3-button w3-blue w3-round  add"
-                                data-i18n="lblAdd">Add</button>
-                        </div>
-                    </div>
-                    <ul id="alwaysTranslateSites" class="w3-ul w3-card-4 w3-margin w3-round list" style="margin-right:0 !important;"></ul>
-                </div>
-                <br>
-                <div class="w3-display-container w3-padding w3-margin-top">
-                    <div class="w3-display-left">
-                        <p><b data-i18n="optionsNeverTranslate">Never translate these sites</b></p>
-                    </div>
-                    <div class="w3-display-right">
-                        <button id="addToNeverTranslateSites" class="w3-button w3-blue w3-round  add"
-                            data-i18n="lblAdd">Add</button>
-                    </div>
-                </div>
-                <ul style="margin-right:0 !important;" id="neverTranslateSites" class="w3-ul w3-card-4 w3-margin w3-round list"></ul>
-                <br>
-                <p><b data-i18n="lblDarkMode">Dark mode</b></p>
-                <select id="darkMode" class="w3-select w3-margin">
-                  <option value="auto" data-i18n="msgAutomatic">Automatic</option>
-                  <option value="yes" data-i18n="msgYes">Yes</option>
-                  <option value="no" data-i18n="msgNo">No</option>
-                </select>
-                <div class="w3-display-container w3-padding w3-margin-top">
-                  <div class="w3-display-left">
-                    <p><b data-i18n="msgIsShowDualLanguage">Show dual language?</b></p>
-                  </div>
-                  <div class="w3-display-right">
-                      <div style="position: relative;" class="w3-margin-right">
-                        <select id="isShowDualLanguage" class="w3-select w3-margin ">
-                            <option value="yes" data-i18n="msgYes">Yes</option>
-                            <option value="no" data-i18n="msgNo">No</option>
-                        </select>
-                    </div>
-                 </div>
-                </div>
-                <br>
-
-                <div class="w3-display-container w3-padding w3-margin-top">
-                  <div class="w3-display-left">
-                    <p><b data-i18n="msgDualTranslationStyle">Bilingual display effect theme options</b></p>
-                  </div>
-                  <div class="w3-display-right">
-                      <div style="position: relative;" class="w3-margin-right">
-                        <select id="dualStyle" class="w3-select w3-margin">
-                            <option value="none" data-i18n="msgNone">Without Any Style</option>
-                            <option value="underline" data-i18n="msgUnderline">Underline</option>
-                            <option value="weakening" data-i18n="msgWeakening" >Weakening</option>
-                            <option value="mask" data-i18n="msgMask" >Mask</option>
-                            <option value="highlight" data-i18n="msgHighlight">Highlight</option>
-                        </select>
-                      </div>
-                  </div>
-                </div>
-          <br>
-
-              <p><b data-i18n="msgCustomTranslationStyle">Custom bilingual display CSS style (advanced, will override the default theme)</b></p>
-                <input id="customDualStyle" class="w3-margin" type="text" />&nbsp;&nbsp;<button id="saveCustomDualStyle" data-i18n="msgSave">Save</button>
-                <br>
-          <div style="color:#999;" class="w3-margin">Exmaple:&nbsp;&nbsp;<code>border-bottom: 2px solid #72ECE9;</code></div>
-
-                <div class="w3-display-container w3-padding w3-margin-top w3-margin-bottom">
-                    <div class="w3-display-left">
-                        <p><b data-i18n="optionsSpecialRules">Special Rules (Advanced)</b></p>
-                    </div>
-                </div>
-          <p data-i18n-html="optionsSpecialRulesNotes" style="color:#999;">This is an advanced option, please make sure you know what you are doing before editing. The priority of the rules added here is higher than that of the <a href="https://github.com/Yvonson/immersive-translate/blob/main/src/lib/specialRules.js">rules built into the extension</a><br>It's actually not very complicated, it's essentially some css selectors, and here's a <a href="https://github.com/Yvonson/immersive-translate/wiki/Special-Rules-Tutorial">tutorial </a> to help you.<br>The ultimate goal is to make the default rules for this extension better, so please consider contributing your rules to the <a href="https://github.com/Yvonson/immersive-translate/blob/main/src/lib/specialRules.js">project</a></p>
-          <textarea rows="5" class="w3-margin-bottom" id="specialRule" placeholder='{"hostname":"twitter.com","selectors":["[data-testid=tweetText]"]}' style="width:100%"></textarea>
-                <button id="addToSpecialRules" class="w3-button w3-blue w3-round w3-margin-right add"
-                            data-i18n="lblAdd">Add</button>
-                <ul id="specialRules" class="w3-ul w3-card-4 w3-margin w3-round list"></ul>
-            </div>
-
-            <div id="translations" class="w3-container">
-                <p><b data-i18n="lblPageTranslationService">Page translation service</b></p>
-                <select id="pageTranslatorService" class="w3-select w3-margin">
-                    <option value="google">Google</option>
-                    <option value="yandex">Yandex</option>
-                    <option value="deepseek">DeepSeek API</option>
-                    <option value="local">本地模型（Ollama / LM Studio）</option>
-                    <option value="custom">自定义兼容接口</option>
-                </select>
-                <fieldset class="w3-padding w3-border w3-round">
-                    <legend>AI 翻译配置</legend>
-                    <p>配置所选服务后，在上方切换网页翻译引擎。模型需要能够按指令输出 JSON。</p>
-                    <label for="aiProfile">配置服务</label>
-                    <select id="aiProfile" class="w3-select w3-margin-bottom">
-                        <option value="deepseek">DeepSeek</option>
-                        <option value="local">本地模型</option>
-                        <option value="custom">自定义兼容接口</option>
-                    </select>
-                    <label for="ai-baseUrl">API 地址（基础地址或完整 chat/completions 地址）</label>
-                    <input id="ai-baseUrl" type="url" class="w3-input w3-margin-bottom" autocomplete="off">
-                    <label for="ai-model">模型名称</label>
-                    <input id="ai-model" type="text" class="w3-input w3-margin-bottom" autocomplete="off">
-                    <label for="ai-apiKey">API Key（本地服务可留空）</label>
-                    <input id="ai-apiKey" type="password" class="w3-input w3-margin-bottom" autocomplete="off">
-                    <button id="aiSave" class="w3-button w3-blue w3-round">保存配置</button>
-                    <button id="aiTest" class="w3-button w3-border w3-round">保存并测试连接</button>
-                    <p id="aiStatus" role="status" aria-live="polite"></p>
-                    <small>密钥仅保存在本机扩展存储中，不包含在普通配置导出中。翻译内容将发送到你选择的接口。测试连接可能产生少量 API 费用。</small>
-                </fieldset>
-                <p><label for="subtitleTranslation"><b>实时双语字幕（实验功能）</b></label></p>
-                <select id="subtitleTranslation" class="w3-select w3-margin-bottom">
-                    <option value="no">关闭</option>
-                    <option value="yes">全局自动开启：HTML5 / YouTube / DeepLearning.AI 文本字幕</option>
-                </select>
-                <p><small>需先打开视频原字幕；仅翻译已有文本，不含语音识别。字幕会发送到所选引擎。设置后刷新视频页生效，模型速度可能造成延迟。</small></p>
-                <br>
-                <p><b data-i18n="lblTranslateDynamicallyCreatedContent">Translate dynamically created content</b></p>
-                <select id="translateDynamicallyCreatedContent" class="w3-select w3-margin">
-                    <option value="no" data-i18n="msgNo">No</option>
-                    <option value="yes" data-i18n="msgYes">Yes</option>
-                </select>
-                <br>
-                <div class="desktopOnly">
-                    <br>
-                    <div class="w3-display-container w3-padding w3-margin-top">
-                        <div class="w3-display-left">
-                            <p><b data-i18n="optionsAddToCustomDictionary">add to custom dictionary (This allows you to skip certain words during web page translation)</b></p>
-                        </div>
-                        <div class="w3-display-right">
-                            <button id="addToCustomDictionary"
-                                    class="w3-button w3-blue w3-round  add" data-i18n="lblAdd">Add
-                            </button>
-                        </div>
-                    </div>
-                    <ul style="margin-right:0 !important;" id="customDictionary" class="w3-ul w3-card-4 w3-margin w3-round list"></ul>
-                </div>
-                <p><b data-i18n="lblAutoTranslateWhenClickingALink">Automatically translate when clicking on a link that takes you to the same domain as the current site</b></p>
-                <select id="autoTranslateWhenClickingALink" class="w3-select w3-margin">
-                    <option value="no" data-i18n="msgNo">No</option>
-                    <option value="yes" data-i18n="msgYes">Yes</option>
-                </select>
-                <br>
-                <p><b data-i18n="lblDontSortResults">Do not sort the google translate results</b></p>
-                <select id="dontSortResults" class="w3-select w3-margin">
-                    <option value="no" data-i18n="msgNo">No</option>
-                    <option value="yes" data-i18n="msgYes">Yes</option>
-                </select>
-                <br>
-                <p><b data-i18n="lblTranslateTag_pre">Enable translation for the tag &lt;PRE&gt;</b></p>
-                <select id="translateTag_pre" class="w3-select w3-margin">
-                    <option value="yes" data-i18n="msgYes">Yes</option>
-                    <option value="no" data-i18n="msgNo">No</option>
-                </select>
-            </div>
-
-            <div id="hotkeys" class="w3-container desktopOnly">
-                <button data-i18n="openNativeShortcutManager" id="openNativeShortcutManager" class="w3-btn w3-light-grey w3-round w3-border w3-margin" style="width: 60%; max-width: 650px;">Open native shortcut key manager</button>
-                <p><b data-i18n="lblKeyboardShortcuts">Keyboard shortcuts</b></p>
-                <ul id="KeyboardShortcuts" class="w3-container" style="max-width: 680px;"></ul>
-            </div>
-
-            <div id="storage" class="w3-container">
-                <b data-i18n="lblTranslationCache">Translation cache</b>
-                <div class="w3-container">
-                    <span data-i18n="lblStorageUsed">Storage used:</span> <button id="btnCalculateStorage" data-i18n="calculateStorage" style="font-size: 12px;">Calculate</button><i id="storageUsed">0 KB</i>
-                    <br><br>
-                    <button class="w3-button w3-light-grey w3-round" data-i18n="deleteTranslationCache" id="deleteTranslationCache">Delete translation cache</button>
-                </div>
-                <br>
-                <b data-i18n="lblPersonalSettings">Personal settings</b>
-                <div class="w3-container">
-                    <button class="w3-button w3-light-grey w3-round w3-margin-top" data-i18n="backupToFile" id="backupToFile">Backup to file</button><br>
-                    <button class="w3-button w3-light-grey w3-round w3-margin-top" data-i18n="restoreFromFile" id="restoreFromFile">Restore from file</button><br>
-                    <button class="w3-button w3-light-grey w3-round w3-margin-top" data-i18n="resetToDefault" id="resetToDefault">Reset settings to default</button><br>
-                </div>
-            </div>
-
-            <div id="others" class="w3-container">
-                <p><b data-i18n="optionPopupConfig">Show the mobile popup</b></p>
-                <select id="showPopupMobile" class="w3-select w3-margin">
-                    <option value="yes" data-i18n="msgYes">Yes</option>
-                    <option value="no" data-i18n="msgNo">No</option>
-                    <option value="threeFingersOnTheScreen" data-i18n="optionPopupThreeFingers">When I touch three
-                        fingers on the screen</option>
-                </select>
-
-                <br>
-
-                <p><b data-i18n="optionIsTranslateTitle">Translate Page Title?</b></p>
-                <select id="isTranslateTitle" class="w3-select w3-margin">
-                    <option value="yes" data-i18n="msgYes">Yes</option>
-                    <option value="no" data-i18n="msgNo">No</option>
-                </select>
-                
-                <div class="desktopOnly">
-                    <br>
-                    <p><b data-i18n="lblButtonInTheAddressBar">Show button in the address bar</b></p>
-                    <select id="showButtonInTheAddressBar" class="w3-select w3-margin">
-                        <option value="yes" data-i18n="msgYes">Yes</option>
-                        <option value="no" data-i18n="msgNo">No</option>
-                    </select>
-                    <br>
-                    <p><b data-i18n="lblShowContextMenu">Show the option to translate the page in the context menu</b></p>
-                    <select id="showTranslatePageContextMenu" class="w3-select w3-margin">
-                        <option value="yes" data-i18n="msgYes">Yes</option>
-                        <option value="no" data-i18n="msgNo">No</option>
-                    </select>
-                    <br>
-                    
-                    <p><b data-i18n="translateClickingOnce">Translate the page by clicking once on the button in the address bar. (To see the popup, right-click)</b></p>
-                    <select id="translateClickingOnce" class="w3-select w3-margin">
-                        <option value="no" data-i18n="msgNo">No</option>
-                        <option value="yes" data-i18n="msgYes">Yes</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <div id="donation" class="w3-container">
-                <div class="w3-light-blue w3-padding w3-round">
-                    <p data-i18n="msgThanksForUseExtension">Thank you for using this extension.</p>
-                    <p data-i18n="msgIWillBeGrateful">I will be grateful if you can make a donation.</p>
-                    <a href="https://www.patreon.com/theowenyoung" target="blank"><img src="/icons/patreon.png"
-                            alt="Become a patreon" width="200px"></a>
-                    <p>
-                     <span>ETH:</span> <code>0xe8Da964A97B609E691AAe4ec3e038d40959C3715</code>
-                    </p>
-                    <p>                      <img src="/icons/eth.png" alt="ETH" width="200px"></p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-    <script src="/lib/languages.js"></script>
-    <script src="/lib/config.js"></script>
-    <script src="/lib/platformInfo.js"></script>
-    <script src="/lib/i18n.js"></script>
-    <script src="/lib/readingShortcuts.js"></script>
-    <script src="options.js"></script>
-    <script src="ai-options.js"></script>
-    <script src="reading-options.js"></script>
+<body>
+<aside id="sideBar">
+<div class="brand">
+<img alt="" src="/icons/icon-32.png"/>
+<div>
+<strong>
+      开放双语翻译
+     </strong>
+<small>
+      Open Bilingual Translate
+     </small>
+</div>
+</div>
+<p class="sidebar-caption">
+    阅读，保持专注
+   </p>
+<nav aria-label="设置导航">
+<a href="#main">
+<span aria-hidden="true" class="nav-number">
+      01
+     </span>
+     基础设置
+    </a>
+<a href="#translations">
+<span aria-hidden="true" class="nav-number">
+      02
+     </span>
+     翻译服务
+    </a>
+<a href="#webpage">
+<span aria-hidden="true" class="nav-number">
+      03
+     </span>
+     网页翻译
+    </a>
+<a href="#subtitles">
+<span aria-hidden="true" class="nav-number">
+      04
+     </span>
+     视频字幕
+    </a>
+<a href="#hotkeys">
+<span aria-hidden="true" class="nav-number">
+      05
+     </span>
+     快捷键
+    </a>
+<a href="#storage">
+<span aria-hidden="true" class="nav-number">
+      06
+     </span>
+     数据与高级
+    </a>
+</nav>
+<div class="sidebar-footer">
+<a href="https://github.com/Yvonson/immersive-translate/blob/main/readme.md" rel="noopener noreferrer" target="_blank">
+     使用说明 ↗
+    </a>
+<a href="https://github.com/Yvonson/immersive-translate/issues" rel="noopener noreferrer" target="_blank">
+     问题反馈 ↗
+    </a>
+<a href="https://github.com/Yvonson/immersive-translate" rel="noopener noreferrer" target="_blank">
+     项目源码 ↗
+    </a>
+<a href="https://github.com/Yvonson/immersive-translate/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">
+     开源许可证 ↗
+    </a>
+<small>
+     v__IMMERSIVE_TRANSLATE_VERSION__
+    </small>
+</div>
+</aside>
+<main class="settings-main">
+<header class="page-header">
+<div>
+<span class="eyebrow">
+      YOUR READING SPACE
+     </span>
+<h1 id="itemSelectedName">
+      基础设置
+     </h1>
+</div>
+<button aria-expanded="false" aria-label="展开设置导航" id="btnOpenMenu">
+     ☰
+    </button>
+</header>
+<section aria-label="基础设置" class="settings-section" hidden="" id="main">
+<p class="section-intro">
+     从熟悉的语言开始，让双语阅读更顺手。
+    </p>
+<section class="card">
+<h2>
+      阅读偏好
+     </h2>
+<div class="setting-row">
+<label for="targetLanguage1">
+       目标语言
+       <small>
+        网页与字幕共用此目标语言
+       </small>
+</label>
+<select id="targetLanguage1">
+</select>
+</div>
+<div class="setting-row">
+<label for="darkMode">
+       界面主题
+      </label>
+<select id="darkMode">
+<option value="auto">跟随系统</option>
+<option value="yes">深色</option>
+<option value="no">浅色</option>
+</select>
+</div>
+</section>
+<section class="card">
+<h2>
+      网站与语言规则
+     </h2>
+<p class="help">
+      为常用网站设置自动翻译，或排除不需要翻译的语言。
+     </p>
+<div class="rule-group">
+<label for="addToAlwaysTranslateLangs">
+       自动翻译的语言
+      </label>
+<div class="list-actions">
+<select id="addToAlwaysTranslateLangs">
+<option disabled="" hidden="" selected="" value="">
+</option>
+</select>
+</div>
+<ul id="alwaysTranslateLangs">
+</ul>
+</div>
+<div class="rule-group">
+<label for="addToNeverTranslateLangs">
+       不翻译的语言
+      </label>
+<div class="list-actions">
+<select id="addToNeverTranslateLangs">
+<option disabled="" hidden="" selected="" value="">
+</option>
+</select>
+</div>
+<ul id="neverTranslateLangs">
+</ul>
+</div>
+<div class="rule-group">
+<label for="addToAlwaysTranslateSites">
+       自动翻译的网站
+      </label>
+<div class="list-actions">
+<button data-i18n="lblAdd" id="addToAlwaysTranslateSites">
+        Add
+       </button>
+</div>
+<ul id="alwaysTranslateSites">
+</ul>
+</div>
+<div class="rule-group">
+<label for="addToNeverTranslateSites">
+       不翻译的网站
+      </label>
+<div class="list-actions">
+<button data-i18n="lblAdd" id="addToNeverTranslateSites">
+        Add
+       </button>
+</div>
+<ul id="neverTranslateSites">
+</ul>
+</div>
+</section>
+</section>
+<section aria-label="翻译服务" class="settings-section" hidden="" id="translations">
+<p class="section-intro">
+     连接你信任的翻译引擎与模型。
+    </p>
+<section class="card">
+<h2>
+      选择翻译服务
+     </h2>
+<div class="setting-row">
+<label for="pageTranslatorService">
+       当前使用的服务
+       <small>
+        网页与字幕发送到你选择的服务，不会自动切换其他服务。
+       </small>
+</label>
+<select id="pageTranslatorService">
+<option value="google">
+        Google
+       </option>
+<option value="yandex">
+        Yandex
+       </option>
+<option value="deepseek">
+        DeepSeek API
+       </option>
+<option value="local">
+        本地模型（Ollama / LM Studio）
+       </option>
+<option value="custom">
+        自定义兼容接口
+       </option>
+</select>
+</div>
+</section>
+<section class="card">
+<h2>
+      AI 与本地模型
+     </h2>
+<p class="help">
+      Google / Yandex 无需在此配置。使用模型时，先保存对应配置，再在上方选择该服务。
+     </p>
+<div class="setting-row">
+<label for="aiProfile">
+       配置服务
+      </label>
+<select id="aiProfile">
+<option value="deepseek">
+        DeepSeek
+       </option>
+<option value="local">
+        本地模型
+       </option>
+<option value="custom">
+        自定义兼容接口
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="ai-baseUrl">
+       API 地址
+       <small>
+        基础地址或完整 chat/completions 地址
+       </small>
+</label>
+<input autocomplete="off" id="ai-baseUrl" type="url"/>
+</div>
+<div class="setting-row">
+<label for="ai-model">
+       模型名称
+      </label>
+<input autocomplete="off" id="ai-model" type="text"/>
+</div>
+<div class="setting-row">
+<label for="ai-apiKey">
+       API Key
+       <small>
+        本地服务可留空；普通配置导出不包含密钥。
+       </small>
+</label>
+<input autocomplete="off" id="ai-apiKey" type="password"/>
+</div>
+<div class="actions">
+<button id="aiSave">
+       保存配置
+      </button>
+<button id="aiTest">
+       保存并测试连接
+      </button>
+</div>
+<p aria-live="polite" id="aiStatus" role="status">
+</p>
+<p class="help">
+      测试连接会发送一句示例文本到所选接口，可能产生少量 API 费用。
+     </p>
+</section>
+</section>
+<section aria-label="网页翻译" class="settings-section" hidden="" id="webpage">
+<p class="section-intro">
+     让译文顺着原文的排版自然呈现。
+    </p>
+<section class="card">
+<h2>
+      双语呈现
+     </h2>
+<div class="setting-row">
+<label for="isShowDualLanguage">
+       显示双语对照
+      </label>
+<select id="isShowDualLanguage">
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="dualStyle">
+       译文样式
+      </label>
+<select id="dualStyle">
+<option data-i18n="msgNone" value="none">
+        Without Any Style
+       </option>
+<option data-i18n="msgUnderline" value="underline">
+        Underline
+       </option>
+<option data-i18n="msgWeakening" value="weakening">
+        Weakening
+       </option>
+<option data-i18n="msgMask" value="mask">
+        Mask
+       </option>
+<option data-i18n="msgHighlight" value="highlight">
+        Highlight
+       </option>
+</select>
+</div>
+<label for="customDualStyle">
+      自定义译文 CSS
+     </label>
+<div class="actions">
+<input id="customDualStyle" type="text"/>
+<button data-i18n="msgSave" id="saveCustomDualStyle">
+       Save
+      </button>
+</div>
+<p class="help">
+      例如：border-bottom: 2px solid #e85a85; 留空时沿用默认样式。
+     </p>
+</section>
+<section class="card">
+<h2>
+      翻译行为
+     </h2>
+<div class="setting-row">
+<label for="translateDynamicallyCreatedContent">
+       翻译动态加载内容
+      </label>
+<select id="translateDynamicallyCreatedContent">
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="autoTranslateWhenClickingALink">
+       站内跳转后自动翻译
+      </label>
+<select id="autoTranslateWhenClickingALink">
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="dontSortResults">
+       保留 Google 返回顺序
+      </label>
+<select id="dontSortResults">
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="translateTag_pre">
+       翻译 PRE 标签
+      </label>
+<select id="translateTag_pre">
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+</select>
+</div>
+</section>
+<section class="card">
+<h2>
+      自定义词典
+     </h2>
+<div class="list-actions">
+<button data-i18n="lblAdd" id="addToCustomDictionary">
+       Add
+      </button>
+</div>
+<ul id="customDictionary">
+</ul>
+</section>
+<section class="card">
+<h2>
+      高级网站规则
+     </h2>
+<p class="help">
+      自定义规则优先于内置规则。每次添加一条 JSON 规则。
+     </p>
+<textarea id="specialRule" placeholder='{"hostname":"twitter.com","selectors":["[data-testid=tweetText]"]}' rows="5"></textarea>
+<div class="actions">
+<button data-i18n="lblAdd" id="addToSpecialRules">
+       Add
+      </button>
+</div>
+<ul id="specialRules">
+</ul>
+<a href="https://github.com/Yvonson/immersive-translate/blob/main/docs/DEVELOPMENT.md" rel="noopener noreferrer" target="_blank">
+      开发说明 →
+     </a>
+</section>
+</section>
+<section aria-label="视频字幕" class="settings-section" hidden="" id="subtitles">
+<p class="section-intro">
+     边看边读，保留原字幕的上下文。
+    </p>
+<section class="card">
+<h2>
+      自动开启字幕
+     </h2>
+<div class="setting-row">
+<label for="subtitleTranslation">
+       全局自动开启
+      </label>
+<select id="subtitleTranslation">
+<option value="no">
+        关闭
+       </option>
+<option value="yes">
+        全局自动开启：HTML5 / YouTube / DeepLearning.AI 文本字幕
+       </option>
+</select>
+</div>
+<p class="help">
+      只翻译已有文本字幕。当前页面和本站开关可在播放器的双语字幕菜单中调整。视频使用上方所选翻译引擎与语言。
+     </p>
+</section>
+<section class="card" id="subtitleAppearance">
+<h2>
+      字幕样式
+     </h2>
+<p class="help">
+      这些默认样式也可在播放器中调整，保存后自动同步。
+     </p>
+</section>
+</section>
+<section aria-label="快捷键" class="settings-section" hidden="" id="hotkeys">
+<p class="section-intro">
+     把常用操作放在指尖。
+    </p>
+<section class="card">
+<h2>
+      快捷键管理
+     </h2>
+<div id="KeyboardShortcuts">
+</div>
+<div class="actions">
+<button data-i18n="openNativeShortcutManager" id="openNativeShortcutManager">
+       Open native shortcut key manager
+      </button>
+</div>
+</section>
+</section>
+<section aria-label="数据与高级" class="settings-section" hidden="" id="storage">
+<p class="section-intro">
+     管理本机设置、缓存和高级行为。
+    </p>
+<section class="card">
+<h2>
+      个人设置
+     </h2>
+<p class="help">
+      备份不包含 API 密钥。恢复默认设置会清除本机模型配置，请谨慎操作。
+     </p>
+<div class="actions">
+<button data-i18n="backupToFile" id="backupToFile">
+       Backup to file
+      </button>
+<button data-i18n="restoreFromFile" id="restoreFromFile">
+       Restore from file
+      </button>
+<button data-i18n="resetToDefault" id="resetToDefault">
+       Reset settings to default
+      </button>
+</div>
+</section>
+<section class="card">
+<h2>
+      传统翻译缓存
+     </h2>
+<p class="help">
+      新版段落与字幕仅使用内存缓存。这里管理旧翻译路径的本机缓存。
+     </p>
+<div class="actions">
+<button data-i18n="calculateStorage" id="btnCalculateStorage">
+       Calculate
+      </button>
+<i id="storageUsed">
+       0 KB
+      </i>
+<button data-i18n="deleteTranslationCache" id="deleteTranslationCache">
+       Delete translation cache
+      </button>
+</div>
+</section>
+<section class="card">
+<h2>
+      界面与高级选项
+     </h2>
+<div class="setting-row">
+<label for="showPopupMobile">
+       移动端翻译浮层
+      </label>
+<select id="showPopupMobile">
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+<option data-i18n="optionPopupThreeFingers" value="threeFingersOnTheScreen">
+        When I touch three
+                        fingers on the screen
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="isTranslateTitle">
+       翻译网页标题
+      </label>
+<select id="isTranslateTitle">
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="showButtonInTheAddressBar">
+       地址栏按钮
+      </label>
+<select id="showButtonInTheAddressBar">
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="showTranslatePageContextMenu">
+       右键菜单翻译入口
+      </label>
+<select id="showTranslatePageContextMenu">
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+</select>
+</div>
+<div class="setting-row">
+<label for="translateClickingOnce">
+       单击扩展图标直接翻译
+      </label>
+<select id="translateClickingOnce">
+<option data-i18n="msgNo" value="no">
+        No
+       </option>
+<option data-i18n="msgYes" value="yes">
+        Yes
+       </option>
+</select>
+</div>
+</section>
+</section>
+</main>
+<script src="/lib/languages.js">
+</script>
+<script src="/lib/config.js">
+</script>
+<script src="/lib/platformInfo.js">
+</script>
+<script src="/lib/i18n.js">
+</script>
+<script src="/lib/readingShortcuts.js">
+</script>
+<script src="/ui/theme.js">
+</script>
+<script src="options.js">
+</script>
+<script src="ai-options.js">
+</script>
+<script src="reading-options.js">
+</script>
+<script src="subtitle-options.js"></script>
 </body>
-
 </html>

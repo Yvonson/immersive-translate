@@ -30,7 +30,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()])
                     <a id="btnNeverTranslate" data-i18n="btnNeverTranslate">Never translate this site</a>
                     <a id="neverTranslateThisLanguage" data-i18n="btnNeverTranslateThisLanguage" display="none">Never translate this language</a>
                     <a id="btnMoreOptions" data-i18n="btnMoreOptions">More options</a>
-                    <a id="btnDonate" data-i18n="btnDonate" href="https://www.patreon.com/theowenyoung" target="_blank" rel="noopener noreferrer">Donate</a>
                 </div>
             </div>
             <div class="dropup">
@@ -94,7 +93,7 @@ Promise.all([twpConfig.onReady(), getTabHostName()])
               getElemById("menuSelectLanguage").style.display = "none"
               getElemById("menu").style.display = "none"
               getElemById("btnOriginal").style.color = null
-              getElemById("btnTranslate").style.color = "#2196F3"
+              getElemById("btnTranslate").style.color = "var(--obt-accent)"
             }catch(e){
               // ignore
             }
@@ -119,66 +118,20 @@ Promise.all([twpConfig.onReady(), getTabHostName()])
 
         chrome.i18n.translateDocument(shadowRoot)
 
-        function enableDarkMode() {
-            if (!shadowRoot.getElementById("darkModeElement")) {
-                const el = document.createElement("style")
-                el.setAttribute("id", "darkModeElement")
-                el.setAttribute("rel", "stylesheet")
-                el.textContent = `
-                div, button, select, option {
-                    color: rgb(231, 230, 228);
-                    background-color: #181a1b !important;
-                }
-            
-                a {
-                    color: rgb(231, 230, 228) !important;
-                    background-color: #181a1b;
-                }
-            
-                .dropup-content a:hover {
-                    background-color: #454a4d;
-                }
-            
-                .menuDot {
-                    background-color: rgb(231, 230, 228) !important;
-                }
-                `
-                shadowRoot.appendChild(el)
-            }
-        }
-
-        function disableDarkMode() {
-            if (shadowRoot.getElementById("#darkModeElement")) {
-                shadowRoot.getElementById("#darkModeElement").remove()
-            }
-        }
-
-        switch (twpConfig.get("darkMode")) {
-            case "auto":
-                if (matchMedia("(prefers-color-scheme: dark)").matches) {
-                    enableDarkMode()
-                } else {
-                    disableDarkMode()
-                }
-                break
-            case "yes":
-                enableDarkMode()
-                break
-            case "no":
-                disableDarkMode()
-                break
-            default:
-                break
-        }
+        const mode = twpConfig.get("darkMode");
+        const dark = mode === "yes" || (mode === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+        const theme = document.createElement("style");
+        theme.textContent = dark ? ':host{--obt-surface:#23242c;--obt-ink:#f0f0f5;--obt-line:#3a3b46;--obt-accent:#ff91b5}' : ':host{--obt-surface:#fff;--obt-ink:#252632;--obt-line:#e8e9ef;--obt-accent:#c72e65}';
+        shadowRoot.appendChild(theme);
 
         getElemById = shadowRoot.getElementById.bind(shadowRoot)
 
         if (pageLanguageState === "original") {
-            getElemById("btnOriginal").style.color = "#2196F3"
+            getElemById("btnOriginal").style.color = "var(--obt-accent)"
             getElemById("btnTranslate").style.color = null
         } else {
             getElemById("btnOriginal").style.color = null
-            getElemById("btnTranslate").style.color = "#2196F3"
+            getElemById("btnTranslate").style.color = "var(--obt-accent)"
         }
 
         function translatePage(targetLanguage = currentTargetLanguage) {
@@ -191,7 +144,7 @@ Promise.all([twpConfig.onReady(), getTabHostName()])
             pageTranslator.translatePage(targetLanguage)
 
             getElemById("btnOriginal").style.color = null
-            getElemById("btnTranslate").style.color = "#2196F3"
+            getElemById("btnTranslate").style.color = "var(--obt-accent)"
         }
 
         // fill language list
@@ -254,7 +207,7 @@ Promise.all([twpConfig.onReady(), getTabHostName()])
             pageTranslator.restorePage()
             if (!getElemById) return;
 
-            getElemById("btnOriginal").style.color = "#2196F3"
+            getElemById("btnOriginal").style.color = "var(--obt-accent)"
             getElemById("btnTranslate").style.color = null
         }
 
@@ -301,18 +254,11 @@ Promise.all([twpConfig.onReady(), getTabHostName()])
             })
         }
 
-        getElemById("btnDonate").onclick = e => {
-            e.preventDefault()
-            chrome.runtime.sendMessage({
-                action: "openDonationPage"
-            })
-        }
 
         document.addEventListener("blur", hideMenu)
         document.addEventListener("click", hideMenu)
 
 
-        getElemById("btnDonate").innerHTML += " &#10084;"
     }
 
     popupMobile.hide = function () {

@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "بازکردن در مترجم گوگل"
   },
-  "btnDonate": {
-    "message": "حمایت مالی"
-  },
   "btnNeverTranslate": {
     "message": "هرگز این سایت ترجمه نشود"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "هرگز این سایت ترجمه نشود"
-  },
-  "btnMobileDonate": {
-    "message": "حمایت مالی"
   },
   "optionsNeverTranslate": {
     "message": "هرگز این سایت ها ترجمه نشود"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "گزینه‌های بیشتر"
-  },
-  "lblPlsDonate": {
-    "message": "کمک مالی به برنامه نویس"
   },
   "msgTranslateFor": {
     "message": "ترجمه به زبان $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "این سایت ها را همیشه ترجمه کن"
   },
-  "msgDonateWithPaypal": {
-    "message": "کمک مالی با پی پال (حساب خارجی)"
-  },
   "lblDarkMode": {
     "message": "حالت تاریک"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "کلیدهای میانبر"
   },
-  "lblMakeDonation": {
-    "message": "کمک مالی کنید"
-  },
   "lblReleaseNotes": {
     "message": "یادداشت های انتشار"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "برای ترجمه سایت"
-  },
-  "msgThanksForUseExtension": {
-    "message": "از شما برای استفاده از این افزونه متشکریم."
-  },
-  "msgIWillBeGrateful": {
-    "message": "اگر بتوانید کمک مالی بکنید سپاسگزار خواهم بود."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "همیشه این زبان را ترجمه کن"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "محاسبه"
-  },
-  "donatewithpaypal": {
-    "message": "کمک مالی با پی پال"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "با کلیک بر روی پیوندی که شما را به همان دامنه سایت فعلی می برد، به صورت خودکار ترجمه کنید"

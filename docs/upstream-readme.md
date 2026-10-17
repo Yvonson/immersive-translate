@@ -2,9 +2,9 @@
 # Immersive Translate - 沉浸式翻译扩展(双语对照）
 
 
-说明：新版的沉浸式翻译扩展已经迁移到[这里](https://github.com/immersive-translate/immersive-translate)，新版全新架构，性能更好，支持更多的翻译引擎和浏览器平台（包括iOS Safari），以及拥有更好的pdf翻译体验，欢迎移步[新版](https://github.com/immersive-translate/immersive-translate)。旧版代码将存档。
+说明：这是导入源码的历史文档；当前项目安装与使用请查看 [项目 README](../readme.md)。
 
-以下为原简介：
+以下为原简介（已移除旧推广和联系入口，保留来源与许可证相关内容）：
 
 ---
 
@@ -19,7 +19,7 @@ Let's experience immersive web translation, with bilingual simultaneous display 
 
 - 双语显示，按照段落分割
 - 只翻译网页里的内容区域，而不是把网页中的所有元素都翻译，这极大的增强了翻译后的网页阅读体验。类似浏览器的阅读模式，所以该扩展被重新命名为“沉浸式翻译”
-- 为常用网站做了定制优化，比如Twitter，Reddit，Discord, Telegram, Youtube, Hacker News等。我希望这个扩展足够通用，不需要为绝大多数网站做定制，但是往往有一些网站由于不规范，或者非内容类网站，这些网站在单独优化后体验更好，所以我们会对这类网站做单独适配，同时坏处就是可能随时因网站的更新而失效，所以这里我会持续优化。如果有常用的网站翻译显示不佳，欢迎在[Isuee](https://github.com/immersive-translate/immersive-translate/issues)或[Telegram群组](https://t.me/+rq848Z09nehlOTgx)中提出。
+- 为常用网站做了定制优化，比如Twitter，Reddit，Discord, Telegram, Youtube, Hacker News等。我希望这个扩展足够通用，不需要为绝大多数网站做定制，但是往往有一些网站由于不规范，或者非内容类网站，这些网站在单独优化后体验更好，所以我们会对这类网站做单独适配，同时坏处就是可能随时因网站的更新而失效，所以这里我会持续优化。
 - 支持PDF文件双语对照翻译（pdf文件翻译需要点击浏览器右上角的该扩展图标，弹出提示框后按提示框操作）
 - 配合epub在线阅读网站<https://1paragraph.app/> 即可实现双语阅读国外电子书
 
@@ -83,7 +83,6 @@ Google翻译会调用该接口： `https://translate.googleapis.com/translate_a/
 
 ## 项目状态
 
-目前依然处于Alpha阶段，但在常用的内容网站上使用已经没有问题，同时在[Telegram 沉浸式翻译扩展讨论组](https://t.me/+rq848Z09nehlOTgx)中经常得到很多有用的反馈，如果你有反馈，也可以在[群里](https://t.me/+rq848Z09nehlOTgx)提出。
 
 在[Release页面](https://github.com/immersive-translate/immersive-translate/releases)会有一个nightly版本被频繁的构建，建议喜欢体验最新版/或者想帮忙测试的同学，可以手动安装nightly版本，firefox的扩展包已签名，可以直接下载后作为扩展文件安装。
 
@@ -119,12 +118,12 @@ Google翻译会调用该接口： `https://translate.googleapis.com/translate_a/
 
 默认的双语显示没有添加任何样式，但是我们提供了内置的几种样式可供选择，你可以从 `配置->常用配置->双语显示主题配置` 来更改样式，比如下划线样式：
 
-![twitter](assets/twitter.png)
+![twitter](../assets/twitter.png)
 
 
 模糊效果样式：
 
-![Twitter mask](assets/twitter-mask.png)
+![Twitter mask](../assets/twitter-mask.png)
 
 
 如果你想对不同的页面应用不同的样式，那需要在 `插件配置页面->网站->特殊页面翻译规则` 来配置`style`，比如我想让 discord 的翻译添加下划线样式，只需要添加一条这样的配置即可：
@@ -145,22 +144,22 @@ Google翻译会调用该接口： `https://translate.googleapis.com/translate_a/
 
 ### Reddit
 
-![reddit](assets/reddit.png)
+![reddit](../assets/reddit.png)
 
 ### PDF文件
 
-![pdf](assets/pdf.png)
+![pdf](../assets/pdf.png)
 
 
 ### Epub文件
 
-![epub](assets/epub.jpg)
+![epub](../assets/epub.jpg)
 
 > 配合epub在线阅读网站<https://1paragraph.app/> 即可实现如图的通过双语阅读国外电子书
 
 ### Hacker News
 
-![hackernews](assets/hn-details.png)
+![hackernews](../assets/hn-details.png)
 
 
 你可以在本项目的[Wiki页面](https://github.com/immersive-translate/immersive-translate/wiki)查看更多文档以及常见问题。
@@ -185,7 +184,7 @@ This extension Forks from the [TWP](https://github.com/FilipePS/Traduzir-paginas
 
 - Bilingual display, split by paragraph
 - Translation of only the content area of the page, which greatly enhances the reading experience of the translation, instead of the previous one where all elements of the page are translated, similar to the browser reading mode, so the plugin was renamed "Immersive Translation"
-- I hope this plugin is universal enough that it does not need to be customized for most websites, but there are often some websites that are not standardized, or non-content websites, and these websites are better after separate optimization, so we will do separate adaptations for such websites, and the downside is that the website may not work at any time. The bad thing is that the website may fail at any time with the update of the website, so here I will continue to optimize. If you have a commonly used website that does not translate well, please feel free to ask in [Isuee](https://github.com/immersive-translate/immersive-translate/issues) or [Telegram group](https://t.me/+rq848Z09nehlOTgx ).
+- I hope this plugin is universal enough that it does not need to be customized for most websites, but there are often some websites that are not standardized, or non-content websites, and these websites are better after separate optimization, so we will do separate adaptations for such websites, and the downside is that the website may not work at any time. The bad thing is that the website may fail at any time with the update of the website, so here I will continue to optimize.
 - Support bilingual translation of PDF files
 - Cooperate with epub online reading website <https://1paragraph.app/> to realize bilingual reading of foreign e-books
 

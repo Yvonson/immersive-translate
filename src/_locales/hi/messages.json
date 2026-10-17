@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Google अनुवादक में खोलें"
   },
-  "btnDonate": {
-    "message": "दान करना"
-  },
   "btnNeverTranslate": {
     "message": "इस साइट का अनुवाद कभी मत करो"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "इस साइट का अनुवाद कभी मत करो"
-  },
-  "btnMobileDonate": {
-    "message": "दान करना"
   },
   "optionsNeverTranslate": {
     "message": "इन साइटों का अनुवाद कभी न करें"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "अधिक विकल्प"
-  },
-  "lblPlsDonate": {
-    "message": "एक दान के साथ डेवलपर की मदद करें"
   },
   "msgTranslateFor": {
     "message": "Translate to $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "हमेशा इस साइट का अनुवाद करें"
   },
-  "msgDonateWithPaypal": {
-    "message": "पेपैल के साथ दान करें"
-  },
   "lblDarkMode": {
     "message": "अंधेरा मोड"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "हॉटकी"
   },
-  "lblMakeDonation": {
-    "message": "एक दान करें"
-  },
   "lblReleaseNotes": {
     "message": "रिलीज नोट्स"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "साइट का अनुवाद करने के लिए"
-  },
-  "msgThanksForUseExtension": {
-    "message": "इस एक्सटेंशन का उपयोग करने के लिए धन्यवाद।"
-  },
-  "msgIWillBeGrateful": {
-    "message": "यदि आप दान कर सकते हैं तो मैं आभारी रहूंगा।"
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "हमेशा इस भाषा का अनुवाद करें"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Calculate"
-  },
-  "donatewithpaypal": {
-    "message": "Donate With PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automatically translate when clicking on a link that takes you to the same domain as the current site"

@@ -83,10 +83,95 @@ test('subtitle VTT timeline, seeking and disable work in a real DOM',async()=>{
   await expect.poll(()=>requests.flat().includes('Hello caption')).toBe(true);await p.waitForTimeout(300);
   await cdp.send('Runtime.evaluate',{contextId:contentWorld,expression:"fixtureTime=4;document.querySelector('video').dispatchEvent(new Event('seeking'))"});await expect.poll(()=>requests.flat().includes('Next caption')).toBe(true);
   await cdp.send('Runtime.callFunctionOn',{objectId:check.object.objectId,functionDeclaration:'function(){this.click()}'});await p.waitForTimeout(100);
-  expect(await p.locator('[data-obt-ui]').evaluateAll(nodes=>nodes.filter(node=>node.tagName==='DIV').every(node=>getComputedStyle(node).display==='none'))).toBe(true);await p.close();expect(failures).toEqual([]);
+  expect(await p.locator('[data-obt-subtitle-overlay]').evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).display==='none'))).toBe(true);await p.close();expect(failures).toEqual([]);
 });
 test('options exposes editable page keys and actual native bindings',async()=>{
   const extensionId=new URL(worker.url()).host;const p=await context.newPage();await p.goto(`chrome-extension://${extensionId}/options/options.html#hotkeys`);
   const input=p.getByRole('textbox',{name:'翻译 / 恢复原文',exact:true});await expect(input).toBeEnabled();await input.focus();await p.keyboard.press('Alt+e');await expect(input).toHaveValue('Alt+E');
   await expect(p.locator('#obt-native-keys')).toContainText('翻译 / 恢复原文');await p.close();
+});
+
+async function closedUI(p) {
+  const cdp = await context.newCDPSession(p);
+  function find(node,predicate) { if (predicate(node)) return node; for (const child of [...(node.children || []),...(node.shadowRoots || [])]) { const value = find(child,predicate); if (value) return value; } }
+  return async (predicate,fn) => {
+    const {root} = await cdp.send('DOM.getDocument',{depth:-1,pierce:true});
+    const node = find(root,predicate); expect(node).toBeTruthy();
+    const {object} = await cdp.send('DOM.resolveNode',{nodeId:node.nodeId});
+    const result = await cdp.send('Runtime.callFunctionOn',{objectId:object.objectId,functionDeclaration:fn,returnByValue:true});
+    if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+    return result.result.value;
+  };
+}
+
+test('settings regrouping, themes and subtitle appearance preserve private model settings',async()=>{
+  const id = new URL(worker.url()).host, p = await context.newPage();
+  const saved = await worker.evaluate(async()=> (await chrome.storage.local.get('aiProviderSettings')).aiProviderSettings);
+  await p.goto(`chrome-extension://${id}/options/options.html#subtitles`);
+  await expect(p.locator('#itemSelectedName')).toHaveText('视频字幕');
+  await p.locator('#subtitle-size').fill('28');
+  await expect.poll(()=>worker.evaluate(()=>twpConfig.get('subtitleStyle').size)).toBe(28);
+  await p.locator('#subtitle-mode').selectOption('translation');
+  await expect(p.getByText('A new way to read the world.',{exact:true})).toBeHidden();
+  await p.locator('a[href="#main"]').click(); await p.locator('#darkMode').selectOption('yes');
+  await expect(p.locator('html')).toHaveAttribute('data-theme','dark');
+  await p.screenshot({path:'.local/settings-dark.png',fullPage:true});
+  await p.locator('#darkMode').selectOption('no');
+  await p.locator('a[href="#translations"]').click();
+  await p.screenshot({path:'.local/settings-services.png',fullPage:true});
+  await p.evaluate(()=>location.hash='#removed-section');
+  await expect(p.locator('#main')).toBeVisible(); await expect(p.locator('#itemSelectedName')).toHaveText('基础设置');
+  expect(await worker.evaluate(async()=> (await chrome.storage.local.get('aiProviderSettings')).aiProviderSettings)).toEqual(saved);
+  await p.setViewportSize({width:390,height:844}); await expect(p.locator('#btnOpenMenu')).toBeVisible(); await p.locator('#btnOpenMenu').click(); await expect(p.locator('#sideBar')).toBeVisible();
+  await p.locator('a[href="#hotkeys"]').click(); await expect(p.locator('#hotkeys')).toBeVisible(); await expect(p.locator('#sideBar')).toBeHidden();
+  await worker.evaluate(()=>twpConfig.set('subtitleStyle',{mode:'dual',order:'source-first',size:22,color:'#ffffff',opacity:.75,offset:12}));
+  await p.close(); expect(failures).toEqual([]);
+});
+
+test('popup selects all engines and translates/restores the original tab',async()=>{
+  const content = await page(); const p = await context.newPage(); await content.bringToFront();
+  const id = new URL(worker.url()).host;
+  await worker.evaluate(()=>twpConfig.set('paragraphTrigger','Shift'));
+  await p.goto(`chrome-extension://${id}/popup/old-popup.html`);
+  await expect(p.locator('#hoverLabel')).toContainText('Shift');
+  await expect(p.locator('#selectService option')).toHaveCount(5);
+  await p.locator('#selectService').selectOption('deepseek');
+  await expect(p.locator('#configureService')).toBeVisible();
+  await expect.poll(()=>worker.evaluate(()=>twpConfig.get('pageTranslatorService'))).toBe('deepseek');
+  await p.locator('#selectService').selectOption('local');
+  await p.screenshot({path:'.local/popup-redesign.png'});
+  await p.locator('#btnTranslate').click();
+  await expect.poll(()=>translation(content,'#one')).toContain('译：Hello');
+  await p.locator('#btnRestore').click(); await expect(content.locator('[data-obt-translation]')).toHaveCount(0);
+  await worker.evaluate(()=>twpConfig.set('paragraphTrigger','Control'));
+  await p.close(); await content.close(); expect(failures).toEqual([]);
+});
+
+test('YouTube-style controls anchor the menu inside normal, theater, zoom and fullscreen players',async()=>{
+  const p=await context.newPage(); await p.setViewportSize({width:1280,height:900});
+  await p.route('https://www.youtube.com/**',route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="en"><head><meta charset="utf-8"><style>body{background:#111;color:#fff;margin:20px}.html5-video-player{position:relative;width:960px;height:540px;background:linear-gradient(140deg,#28233b,#101b2a);margin-top:60px}.html5-video-player:fullscreen{width:100vw!important;height:100vh!important;zoom:1!important;margin:0}video{width:100%;height:100%}.ytp-chrome-bottom{position:absolute;bottom:0;left:0;right:0;height:48px;background:#0007}.ytp-right-controls{float:right;height:48px;display:flex}.ytp-button{border:0;background:transparent;color:white;width:48px;height:48px;font-size:22px}.ytp-settings-menu{position:absolute;right:12px;bottom:60px;background:#333;padding:25px}.title{position:absolute;top:30px;left:30px;font:28px Georgia}</style></head><body><div class="html5-video-player"><video></video><span class="title">Bilingual reading, in motion.</span><div class="ytp-chrome-bottom"><div class="ytp-right-controls"><button class="ytp-subtitles-button ytp-button" aria-pressed="true">▤</button><button class="ytp-settings-button ytp-button" aria-expanded="false">⚙</button><button class="ytp-fullscreen-button ytp-button">⛶</button></div></div><div class="ytp-settings-menu" hidden>Native settings</div></div><script>const gear=document.querySelector('.ytp-settings-button');gear.onclick=()=>{gear.setAttribute('aria-expanded',String(gear.getAttribute('aria-expanded')!=='true'));document.querySelector('.ytp-settings-menu').hidden=gear.getAttribute('aria-expanded')!=='true'};document.querySelector('.ytp-fullscreen-button').onclick=()=>document.querySelector('.html5-video-player').requestFullscreen();</script></body></html>`}));
+  await p.goto('https://www.youtube.com/watch?v=layout-fixture');
+  await expect(p.locator('.obt-subtitle-control')).toHaveCount(1);
+  expect(await p.locator('.ytp-subtitles-button').evaluate(node=>node.nextElementSibling.matches('.obt-subtitle-control'))).toBe(true);
+  const ui=await closedUI(p), button=node=>node.nodeName==='BUTTON'&&node.attributes?.includes('双语字幕设置'), menu=node=>node.nodeName==='SECTION'&&node.attributes?.includes('menu');
+  const click=()=>ui(button,'function(){this.click()}');
+  async function bounds() {
+    const value=await ui(menu,'function(){const r=this.getBoundingClientRect(),p=this.getRootNode().host.parentElement.getBoundingClientRect(),b=p.bottom;return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,pl:Math.max(p.left,0),pr:Math.min(p.right,innerWidth),pt:Math.max(p.top,0),pb:Math.min(b,innerHeight)}}');
+    expect(value.left).toBeGreaterThanOrEqual(value.pl); expect(value.right).toBeLessThanOrEqual(value.pr); expect(value.top).toBeGreaterThanOrEqual(value.pt); expect(value.bottom).toBeLessThanOrEqual(value.pb);
+    const rect=await p.locator('.obt-subtitle-control').boundingBox(); expect(value.bottom).toBeLessThanOrEqual(rect.y);
+  }
+  await p.locator('.ytp-settings-button').click(); await click(); await expect(p.locator('.ytp-settings-button')).toHaveAttribute('aria-expanded','false'); await bounds();
+  await p.screenshot({path:'.local/youtube-menu-redesign.png'});
+  await ui(node=>node.nodeName==='BUTTON'&&node.attributes?.includes('字幕样式'),'function(){this.click()}');
+  await p.keyboard.press('Escape'); expect(await ui(menu,'function(){return this.hidden}')).toBe(false);
+  await p.keyboard.press('Escape'); expect(await ui(menu,'function(){return this.hidden}')).toBe(true);
+  await click(); await p.locator('.ytp-settings-button').click(); expect(await ui(menu,'function(){return this.hidden}')).toBe(true);
+  for(const style of [{width:'1120px',height:'630px',zoom:'1'},{width:'360px',height:'203px',zoom:'1'},{width:'440px',height:'248px',zoom:'2'}]) {
+    await p.locator('.html5-video-player').evaluate((node,style)=>Object.assign(node.style,style),style); await click(); await p.waitForTimeout(300); await bounds(); await click();
+  }
+  await p.locator('.html5-video-player').evaluate(node=>Object.assign(node.style,{width:'960px',height:'540px',zoom:'1'}));
+  await p.locator('.ytp-fullscreen-button').click(); await expect.poll(()=>p.evaluate(()=>!!document.fullscreenElement)).toBe(true); await click(); await bounds();
+  await p.screenshot({path:'.local/youtube-menu-fullscreen.png'}); await p.evaluate(()=>document.exitFullscreen());
+  await p.locator('.ytp-right-controls').evaluate(node=>node.replaceWith(node.cloneNode(true))); await expect(p.locator('.ytp-right-controls .obt-subtitle-control')).toHaveCount(1);
+  await p.close(); expect(failures).toEqual([]);
 });

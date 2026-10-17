@@ -62,9 +62,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "在 Google 翻译中打开"
   },
-  "btnDonate": {
-    "message": "捐助支持"
-  },
   "btnNeverTranslate": {
     "message": "永不翻译此网站"
   },
@@ -79,9 +76,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "永不翻译此网站"
-  },
-  "btnMobileDonate": {
-    "message": "捐助支持"
   },
   "optionsNeverTranslate": {
     "message": "永不翻译这些网站"
@@ -109,9 +103,6 @@
   },
   "btnMoreOptions": {
     "message": "更多选项"
-  },
-  "lblPlsDonate": {
-    "message": "通过捐款帮助开发者"
   },
   "msgTranslateFor": {
     "message": "翻译为 $LANGUAGE_NAME$",
@@ -158,9 +149,6 @@
   "lblAlwaysTranslateSites": {
     "message": "总是翻译这些网站"
   },
-  "msgDonateWithPaypal": {
-    "message": "PayPal 捐款"
-  },
   "lblDarkMode": {
     "message": "深色模式"
   },
@@ -203,9 +191,6 @@
   "msgHotkeys": {
     "message": "热键"
   },
-  "lblMakeDonation": {
-    "message": "捐助支持"
-  },
   "lblReleaseNotes": {
     "message": "发行说明"
   },
@@ -226,12 +211,6 @@
   },
   "msgToTranslateSites": {
     "message": "翻译该网站"
-  },
-  "msgThanksForUseExtension": {
-    "message": "感谢您使用此扩展。"
-  },
-  "msgIWillBeGrateful": {
-    "message": "若您能够提供捐助，我将不胜感激。"
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "总是翻译此语言"
@@ -396,9 +375,6 @@
   },
   "calculatestorage": {
     "message": "计算"
-  },
-  "donatewithpaypal": {
-    "message": "PayPal 捐款"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "若点击链接所访问的网站与当前域名相同，则自动翻译"

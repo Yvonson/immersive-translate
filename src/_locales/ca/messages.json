@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Obre al traductor de Google"
   },
-  "btnDonate": {
-    "message": "Feu un donatiu"
-  },
   "btnNeverTranslate": {
     "message": "No tradueixis mai aquest lloc"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "No tradueixis mai aquest lloc"
-  },
-  "btnMobileDonate": {
-    "message": "Feu un donatiu"
   },
   "optionsNeverTranslate": {
     "message": "No tradueixis mai aquests llocs"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Més opcions"
-  },
-  "lblPlsDonate": {
-    "message": "Ajudeu al desenvolupador amb un donatiu"
   },
   "msgTranslateFor": {
     "message": "Tradueix en $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Tradueix sempre aquests llocs"
   },
-  "msgDonateWithPaypal": {
-    "message": "Fes un donatiu amb PayPal"
-  },
   "lblDarkMode": {
     "message": "Mode fosc"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Dreceres del teclat"
   },
-  "lblMakeDonation": {
-    "message": "Fes una donació"
-  },
   "lblReleaseNotes": {
     "message": "Notes de la versió"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Per traduir el lloc"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Gràcies per utilitzar aquesta extensió."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Us agrairé si podeu fer un donatiu."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Tradueix sempre aquest idioma"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Calcula"
-  },
-  "donatewithpaypal": {
-    "message": "Fes un donatiu amb PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Tradueix automàticament en fer clic a un enllaç que porta al mateix domini del lloc actual"

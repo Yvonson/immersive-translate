@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Otvori u Google prevoditelju"
   },
-  "btnDonate": {
-    "message": "Doniraj"
-  },
   "btnNeverTranslate": {
     "message": "Nikada ne prevoditi ovu web stranicu"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Nikada ne prevoditi ovu web stranicu"
-  },
-  "btnMobileDonate": {
-    "message": "Doniraj"
   },
   "optionsNeverTranslate": {
     "message": "Nikada ne prevoditi ove web stranice"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Više mogućnosti"
-  },
-  "lblPlsDonate": {
-    "message": "Pomozite programeru donacijom"
   },
   "msgTranslateFor": {
     "message": "Translate to $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Uvijek prevodi ove stranice"
   },
-  "msgDonateWithPaypal": {
-    "message": "Donirajte putem PayPala"
-  },
   "lblDarkMode": {
     "message": "Tamni način"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Prečaci"
   },
-  "lblMakeDonation": {
-    "message": "Doniraj"
-  },
   "lblReleaseNotes": {
     "message": "Napomene o izdanju"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Za prijevod stranice"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Zahvaljujemo na korištenju ovog proširenja."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Bit ću vam zahvalan ako možete dati donaciju."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Uvijek prevedi ovaj jezik"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Calculate"
-  },
-  "donatewithpaypal": {
-    "message": "Donate With PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automatically translate when clicking on a link that takes you to the same domain as the current site"

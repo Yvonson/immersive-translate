@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Opna í Google Þýðingar"
   },
-  "btnDonate": {
-    "message": "Styrkja"
-  },
   "btnNeverTranslate": {
     "message": "Aldrei þýða þessa síðu"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Aldrei þýða þessa síðu"
-  },
-  "btnMobileDonate": {
-    "message": "Styrkja"
   },
   "optionsNeverTranslate": {
     "message": "Aldrei þýða þessa síðu"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Fleiri valkostir"
-  },
-  "lblPlsDonate": {
-    "message": "Hjálpa hönnuðinum með því að styrkja"
   },
   "msgTranslateFor": {
     "message": "Þýða yfir á $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Alltaf þýða þessar síður"
   },
-  "msgDonateWithPaypal": {
-    "message": "Styrkja með PayPal"
-  },
   "lblDarkMode": {
     "message": "Dökkur hamur"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Flýtilyklar"
   },
-  "lblMakeDonation": {
-    "message": "Styrkja verkefnið"
-  },
   "lblReleaseNotes": {
     "message": "Útgáfuupplýsingar"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Til að þýða síðuna"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Þakka þér fyrir að nota þessa viðbót."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Ég mun vera þakklát(ur) ef þú getur styrkjað mig."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Alltaf þýða þetta tungumál"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Reikna"
-  },
-  "donatewithpaypal": {
-    "message": "Styrkja með PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Þýða sjálfkrafa þegar smellt er á tengil sem færir þig á sama lén og núverandi síða"

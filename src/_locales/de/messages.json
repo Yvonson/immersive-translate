@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "In Google Übersetzer öffnen"
   },
-  "btnDonate": {
-    "message": "Spenden"
-  },
   "btnNeverTranslate": {
     "message": "Diese Seite nie übersetzen"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Diese Seite nie übersetzen"
-  },
-  "btnMobileDonate": {
-    "message": "Spenden"
   },
   "optionsNeverTranslate": {
     "message": "Diese Seiten nie übersetzen"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Weitere Optionen"
-  },
-  "lblPlsDonate": {
-    "message": "Helfen Sie dem Entwickler mit einer Spende"
   },
   "msgTranslateFor": {
     "message": "Nach $LANGUAGE_NAME$ übersetzen",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Diese Seiten immer übersetzen"
   },
-  "msgDonateWithPaypal": {
-    "message": "Spenden mit PayPal"
-  },
   "lblDarkMode": {
     "message": "Dunkler Modus"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Tastenkürzel"
   },
-  "lblMakeDonation": {
-    "message": "Spenden"
-  },
   "lblReleaseNotes": {
     "message": "Versionshinweise"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Um die Seite zu übersetzen"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Vielen Dank, dass Sie diese Erweiterung verwenden."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Für eine Spende wäre ich Ihnen dankbar."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Diese Sprache immer übersetzen"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Berechne"
-  },
-  "donatewithpaypal": {
-    "message": "Mit PayPal spenden"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automatisch übersetzen, wenn Sie auf einen Link klicken, der Sie auf die gleiche Domain bringt wie die aktuelle Seite"

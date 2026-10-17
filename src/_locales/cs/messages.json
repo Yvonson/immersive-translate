@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Otevřít v Překladači Google"
   },
-  "btnDonate": {
-    "message": "Přispět"
-  },
   "btnNeverTranslate": {
     "message": "Nikdy nepřekládat tento web"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Nikdy nepřekládat tento web"
-  },
-  "btnMobileDonate": {
-    "message": "Přispět"
   },
   "optionsNeverTranslate": {
     "message": "Nikdy tyto stránky nepřekládat"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Více možností"
-  },
-  "lblPlsDonate": {
-    "message": "Pomozte vývojáři darem"
   },
   "msgTranslateFor": {
     "message": "Přeložit do $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Tyto stránky vždy překládejte"
   },
-  "msgDonateWithPaypal": {
-    "message": "Podpořit přes PayPal"
-  },
   "lblDarkMode": {
     "message": "Tmavý režim"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Klávesové zkratky"
   },
-  "lblMakeDonation": {
-    "message": "Přispět"
-  },
   "lblReleaseNotes": {
     "message": "Poznámky k vydání"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Přeložit web"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Děkujeme, že používáte toto rozšíření."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Budu vděčný, pokud můžete poskytnout dar."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Tento jazyk vždy překládejte"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Spočítat"
-  },
-  "donatewithpaypal": {
-    "message": "Podpořit přes PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automaticky přeložit při kliknutí na odkaz, který vás přesune na stejnou doménu jako aktuální web"

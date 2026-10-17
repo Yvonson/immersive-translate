@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Atvērt Google tulkotājā"
   },
-  "btnDonate": {
-    "message": "Ziedot"
-  },
   "btnNeverTranslate": {
     "message": "Nekad netulkot šo vietni"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Nekad netulkot šo vietni"
-  },
-  "btnMobileDonate": {
-    "message": "Ziedot"
   },
   "optionsNeverTranslate": {
     "message": "Nekad netulkot šīs vietnes"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Vairāk iespēju"
-  },
-  "lblPlsDonate": {
-    "message": "Atbalstīt izstrādātāju ar ziedojumu"
   },
   "msgTranslateFor": {
     "message": "Tulkot uz $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Vienmēr tulkot šīs vietnes"
   },
-  "msgDonateWithPaypal": {
-    "message": "Ziedot izmantojot PayPal"
-  },
   "lblDarkMode": {
     "message": "Tumšais režīms"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Īsinājumtaustiņi"
   },
-  "lblMakeDonation": {
-    "message": "Ziedot"
-  },
   "lblReleaseNotes": {
     "message": "Izmaiņu žurnāls"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Tulkot vietni"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Paldies, ka izmantojāt šo paplašinājumu."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Būšu pateicīgs, ja ziedosiet."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Vienmēr tulkot šo valodu"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Aprēķināt"
-  },
-  "donatewithpaypal": {
-    "message": "Ziedot izmantojot PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automātiski tulkot, noklikšķinot uz saiti, kas novirza uz to pašu domēnu, kurā atrodas pašreizējā vietne"

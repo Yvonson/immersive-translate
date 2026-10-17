@@ -9,6 +9,8 @@ twpConfig.onReady(async () => {
   const result = await new Promise(resolve => chrome.storage.local.get("aiProviderSettings", resolve));
   const settings = result.aiProviderSettings || {};
   const profile = document.querySelector("#aiProfile");
+  const activeService = twpConfig.get("pageTranslatorService");
+  if (["deepseek", "local", "custom"].includes(activeService)) profile.value = activeService;
   const status = document.querySelector("#aiStatus");
   const fields = ["baseUrl", "model", "apiKey"];
   function load() {

@@ -24,7 +24,7 @@
   }
   function mark(node) { node.setAttribute("data-obt-ui",""); node.setAttribute("translate","no"); node.classList.add("notranslate"); return node; }
   function element(tag,text) { const node = document.createElement(tag); if (text) node.textContent = text; return node; }
-  const css = `:host{all:initial;color-scheme:dark;font:14px/1.5 "Segoe UI",sans-serif}*{box-sizing:border-box}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #75d8b0;outline-offset:3px}.toggle{background:#172d2a;color:#effff6;border:1px solid #75d8b0;border-radius:5px;padding:5px 10px;white-space:nowrap;font-weight:600}.toggle[aria-pressed=true]{background:#27755c}.menu{position:absolute;right:0;bottom:42px;width:282px;max-height:65vh;overflow:auto;background:#14201f;color:#edf5f2;border:1px solid #52655d;border-radius:8px;box-shadow:0 10px 35px #0008;padding:16px;text-align:left;z-index:10}.menu[hidden]{display:none}.menu h2{font-size:16px;margin:0 0 12px}.menu label{display:block;margin:10px 0}.menu select{display:block;width:100%;background:#253632;color:#fff;border:1px solid #52655d;padding:5px;border-radius:3px}.menu input[type=range]{width:100%}.menu input[type=color]{float:right}.menu .status{border-top:1px solid #52655d;padding-top:10px;font-size:12px;color:#c6d7d0;white-space:normal;overflow-wrap:anywhere}.menu .switch{display:flex;justify-content:space-between}.lines{max-width:94%;margin:auto;display:inline-block;white-space:pre-line;text-align:center;padding:4px 10px;border-radius:3px;overflow-wrap:anywhere;font-family:"Segoe UI",sans-serif;line-height:1.45;text-shadow:0 1px 3px #000}.source,.translation{display:block}.source{font-size:.85em}.translation{font-weight:500}`;
+  const css = `:host{all:initial;color-scheme:dark;font:13px/1.5 "Segoe UI","Microsoft YaHei UI",sans-serif}*{box-sizing:border-box}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #ff91b5;outline-offset:-2px}[hidden]{display:none!important}.toggle{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:0;background:transparent;color:#fff;border:0;position:relative;opacity:.9}.toggle:hover,.toggle:focus-visible{opacity:1}.toggle svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7}.toggle[aria-pressed=true]:after{content:"";position:absolute;bottom:8%;left:25%;right:25%;height:3px;border-radius:2px;background:#ff6c99}.tooltip{display:none;position:absolute;bottom:calc(100% + 8px);right:0;white-space:nowrap;background:#242424e8;color:white;border-radius:4px;font-size:12px;padding:5px 8px;pointer-events:none}.toggle:hover .tooltip,.toggle:focus-visible .tooltip{display:block}.menu{position:absolute;width:300px;overflow:auto;overscroll-behavior:contain;background:rgba(28,28,28,.96);color:#eee;border:1px solid #ffffff12;border-radius:12px;box-shadow:0 8px 28px #0005;padding:7px 0;text-align:left;pointer-events:auto}.menu h2{font-size:14px;font-weight:600;margin:0;padding:10px 16px;border-bottom:1px solid #ffffff24}.menu label,.menu .menu-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:10px 16px;min-height:42px;font-weight:400}.menu label:hover,.menu .menu-row:hover{background:#ffffff14}.menu select{max-width:56%;min-width:0;background:transparent;color:#eee;border:0;padding:4px 0;font-size:12px;text-align:right;cursor:pointer}.menu option{color:#eee;background:#282828}.menu input{accent-color:#ff91b5}.menu input[type=checkbox]{width:16px;height:16px;margin:0}.menu input[type=range]{width:48%;min-width:65px}.menu input[type=color]{width:36px;height:25px;padding:0;border:0;background:transparent}.menu .menu-row{width:100%;border:0;background:transparent;color:inherit;text-align:left}.menu .chevron{font-size:22px;color:#bbb}.menu .menu-heading{font-weight:600;border-bottom:1px solid #ffffff24}.menu .status{border-top:1px solid #ffffff24;margin:4px 0 0;padding:10px 16px;font-size:11px;color:#bbb;white-space:normal;overflow-wrap:anywhere}.menu .retry{color:#ffb2cc}.lines{max-width:94%;margin:auto;display:inline-block;white-space:pre-line;text-align:center;padding:4px 10px;border-radius:3px;overflow-wrap:anywhere;font-family:"Segoe UI","Microsoft YaHei UI",sans-serif;line-height:1.45;text-shadow:0 1px 3px #000}.source,.translation{display:block}.source{font-size:.85em}.translation{font-weight:500}`;
   class Player {
     constructor(video) {
       this.video = video; this.id = identity(); this.version = 0; this.enabled = false; this.cues = []; this.translations = new Map(); this.pending = new Set(); this.retryAt = 0; this.failures = 0;
@@ -51,62 +51,107 @@
       this.restoreNative(); this.overlay.style.display = "none";
     }
     createUI() {
-      this.host = mark(element("span")); this.host.style.cssText = "display:inline-block;position:relative;z-index:2147483646;";
+      this.host = mark(element("span")); this.host.classList.add("obt-subtitle-control");
       this.shadow = this.host.attachShadow({mode:"closed"}); this.shadow.appendChild(element("style",css));
-      this.button = element("button","双语字幕"); this.button.className = "toggle"; this.button.type = "button"; this.button.setAttribute("aria-pressed","false"); this.button.setAttribute("aria-expanded","false"); this.button.setAttribute("aria-label","双语字幕设置");
-      this.menu = element("section"); this.menu.className = "menu"; this.menu.hidden = true; this.menu.setAttribute("aria-label","双语字幕设置"); this.menu.appendChild(element("h2","双语字幕"));
-      const switchLabel = element("label","翻译当前视频"); switchLabel.className = "switch"; this.switch = element("input"); this.switch.type = "checkbox"; switchLabel.appendChild(this.switch); this.menu.appendChild(switchLabel);
+      this.button = element("button"); this.button.className = "toggle"; this.button.type = "button";
+      this.button.innerHTML = '<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="5" width="22" height="18" rx="3"/><path d="M7 10h7m-4-2v2m-2 0c0 4 4 6 6 7m-1-7c0 4-3 6-6 7m10-5 4 8m-6 0 4-8m-3 6h6"/></svg><span class="tooltip">双语字幕</span>';
+      this.button.setAttribute("aria-pressed","false"); this.button.setAttribute("aria-expanded","false"); this.button.setAttribute("aria-label","双语字幕设置"); this.button.setAttribute("aria-haspopup","dialog"); this.shadow.appendChild(this.button);
+      // A sibling of the control bar avoids YouTube's overflow and transform contexts.
+      this.panelHost = mark(element("div")); this.panelHost.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:100;";
+      this.panelShadow = this.panelHost.attachShadow({mode:"closed"}); this.panelShadow.appendChild(element("style",css));
+      this.menu = element("section"); this.menu.id = "obt-subtitle-menu"; this.menu.className = "menu"; this.menu.setAttribute("role","dialog"); this.menu.hidden = true; this.menu.setAttribute("aria-label","双语字幕设置");
+      this.home = element("div"); this.styles = element("div"); this.styles.hidden = true; this.menu.append(this.home,this.styles); this.panelShadow.appendChild(this.menu);
+      this.home.appendChild(element("h2","双语字幕"));
+      const switchLabel = element("label","翻译当前视频"); switchLabel.className = "switch"; this.switch = element("input"); this.switch.type = "checkbox"; switchLabel.appendChild(this.switch); this.home.appendChild(switchLabel);
       this.switch.addEventListener("change",() => this.setEnabled(this.switch.checked));
-      const autoLabel = element("label","本站自动开启"); autoLabel.className = "switch"; const auto = element("input"); auto.type = "checkbox"; auto.checked = (twpConfig.get("subtitleAutoSites") || []).includes(location.hostname); autoLabel.appendChild(auto); this.menu.appendChild(autoLabel);
-      auto.addEventListener("change",() => { const sites = new Set(twpConfig.get("subtitleAutoSites") || []); auto.checked ? sites.add(location.hostname) : sites.delete(location.hostname); twpConfig.set("subtitleAutoSites",[...sites]); });
-      this.trackSelect = this.select("源字幕",[["native","跟随播放器"]],value => { this.selectedTrack = value; this.reset(); if (youtube && value !== "native") window.postMessage({type:"obt-caption-select",id:value},location.origin); this.update(); });
-      this.select("显示",[["dual","原文 + 译文"],["translation","仅译文"]],value => { this.settings.mode = value; this.save(); },this.settings.mode);
-      this.select("顺序",[["source-first","原文在上"],["translation-first","译文在上"]],value => { this.settings.order = value; this.save(); },this.settings.order);
-      this.range("字号",14,40,1,this.settings.size,value => { this.settings.size = value; this.save(); });
-      this.range("背景透明度",0,1,.05,this.settings.opacity,value => { this.settings.opacity = value; this.save(); });
-      this.range("距底部 (%)",3,60,1,this.settings.offset,value => { this.settings.offset = value; this.save(); });
-      const colorLabel = element("label","译文颜色"); const color = element("input"); color.type = "color"; color.value = this.settings.color; colorLabel.appendChild(color); this.menu.appendChild(colorLabel); color.addEventListener("input",() => { this.settings.color = color.value; this.save(); });
+      const autoLabel = element("label","本站自动开启"); autoLabel.className = "switch"; this.auto = element("input"); this.auto.type = "checkbox"; this.auto.checked = (twpConfig.get("subtitleAutoSites") || []).includes(location.hostname); autoLabel.appendChild(this.auto); this.home.appendChild(autoLabel);
+      this.auto.addEventListener("change",() => { const sites = new Set(twpConfig.get("subtitleAutoSites") || []); this.auto.checked ? sites.add(location.hostname) : sites.delete(location.hostname); twpConfig.set("subtitleAutoSites",[...sites]); });
+      this.trackSelect = this.select("源字幕",[["native","跟随播放器"]],value => { this.selectedTrack = value; this.reset(); if (youtube && value !== "native") window.postMessage({type:"obt-caption-select",id:value},location.origin); this.update(); },"native",this.home);
+      this.styleControls = new Map();
+      this.styleControls.set("mode",this.select("显示模式",[["dual","原文 + 译文"],["translation","仅译文"]],value => { this.settings.mode = value; this.save(); },this.settings.mode,this.home));
+      this.styleButton = element("button"); this.styleButton.className = "menu-row"; this.styleButton.setAttribute("aria-label","字幕样式"); this.styleButton.innerHTML = '<span>字幕样式</span><span class="chevron" aria-hidden="true">›</span>'; this.home.appendChild(this.styleButton);
+      this.back = element("button","‹　字幕样式"); this.back.className = "menu-row menu-heading"; this.styles.appendChild(this.back);
+      this.styleButton.onclick = () => this.showStyles(true); this.back.onclick = () => this.showStyles(false);
+      this.styleControls.set("order",this.select("上下顺序",[["source-first","原文在上"],["translation-first","译文在上"]],value => { this.settings.order = value; this.save(); },this.settings.order,this.styles));
+      for (const [key,title,min,max,step] of [["size","字号",14,40,1],["opacity","背景不透明度",0,1,.05],["offset","距底部 (%)",3,60,1]]) {
+        this.styleControls.set(key,this.range(title,min,max,step,this.settings[key],value => { this.settings[key] = value; this.save(); }));
+      }
+      const colorLabel = element("label","译文颜色"), color = element("input"); color.type = "color"; color.value = this.settings.color; colorLabel.appendChild(color); this.styles.appendChild(colorLabel); this.styleControls.set("color",color); color.addEventListener("input",() => { this.settings.color = color.value; this.save(); });
       this.status = element("p","开启后读取已有字幕，翻译服务跟随网页设置。"); this.status.className = "status"; this.status.setAttribute("role","status"); this.menu.appendChild(this.status);
-      const retry = element("button","重新读取 / 重试"); retry.className = "toggle"; retry.addEventListener("click",() => { this.reset(); this.update(); }); this.menu.appendChild(retry);
-      this.button.addEventListener("click",() => { this.menu.hidden = !this.menu.hidden; this.button.setAttribute("aria-expanded",String(!this.menu.hidden)); if (!this.menu.hidden) { this.placeMenu(); this.switch.focus(); } });
-      document.addEventListener("pointerdown",event => { if (!event.composedPath().includes(this.host)) { this.menu.hidden = true; this.button.setAttribute("aria-expanded","false"); } },{signal:this.abort.signal});
-      this.shadow.addEventListener("keydown",event => { event.stopPropagation(); if (event.key === "Escape") { this.menu.hidden = true; this.button.setAttribute("aria-expanded","false"); this.button.focus(); } });
-      this.shadow.append(this.button,this.menu);
-      this.overlay = mark(element("div")); this.overlay.style.cssText = "position:absolute;left:0;right:0;pointer-events:none;text-align:center;z-index:2147483645;display:none;";
+      const retry = element("button","重新读取 / 重试"); retry.className = "menu-row retry"; retry.onclick = () => { this.reset(); this.update(); }; this.menu.appendChild(retry);
+      this.button.onclick = () => this.setMenuOpen(this.menu.hidden);
+      document.addEventListener("pointerdown",event => { const path = event.composedPath(); if (!path.includes(this.host) && !path.includes(this.panelHost)) this.setMenuOpen(false); },{signal:this.abort.signal});
+      const keydown = event => {
+        if (this.menu.hidden) return;
+        event.stopPropagation();
+        if (event.key === "Escape") { event.preventDefault(); this.styles.hidden ? this.setMenuOpen(false,true) : this.showStyles(false); }
+        if (["ArrowDown","ArrowUp"].includes(event.key) && !["SELECT","INPUT"].includes(event.target.tagName)) {
+          event.preventDefault(); const nodes = this.menuItems(); const index = nodes.indexOf(this.panelShadow.activeElement); nodes[(index + (event.key === "ArrowDown" ? 1 : nodes.length - 1)) % nodes.length]?.focus();
+        }
+        if (event.key === "Tab") { const nodes = this.menuItems(), index = nodes.indexOf(this.panelShadow.activeElement); if ((event.shiftKey && index <= 0) || (!event.shiftKey && index === nodes.length - 1)) { event.preventDefault(); nodes[event.shiftKey ? nodes.length - 1 : 0]?.focus(); } }
+      };
+      this.panelShadow.addEventListener("keydown",keydown); this.shadow.addEventListener("keydown",keydown);
+      this.panelShadow.addEventListener("keyup",event => event.stopPropagation());
+      this.overlay = mark(element("div")); this.overlay.setAttribute("data-obt-subtitle-overlay",""); this.overlay.style.cssText = "position:absolute;left:0;right:0;pointer-events:none;text-align:center;z-index:35;display:none;";
       const shadow = this.overlay.attachShadow({mode:"closed"}); shadow.appendChild(element("style",css)); this.lines = element("div"); this.lines.className = "lines"; this.source = element("span"); this.source.className = "source"; this.translation = element("span"); this.translation.className = "translation"; this.lines.append(this.source,this.translation); shadow.appendChild(this.lines);
       this.attach(); this.layout();
     }
-    select(title,options,onChange,value) {
-      const label = element("label",title), select = element("select"); options.forEach(([id,text]) => { const option = element("option",text); option.value = id; select.appendChild(option); }); label.appendChild(select); this.menu.appendChild(label); select.value = value || options[0][0]; select.addEventListener("change",() => onChange(select.value)); return select;
+    menuItems() { return [...this.menu.querySelectorAll("button,input,select")].filter(node => node.getClientRects().length && !node.disabled); }
+    showStyles(value) { this.home.hidden = value; this.styles.hidden = !value; this.placeMenu(); (value ? this.back : this.styleButton).focus(); }
+    setMenuOpen(value,focus = false) {
+      const changed = this.menu.hidden === value;
+      this.menu.hidden = !value; this.button.setAttribute("aria-expanded",String(value));
+      if (youtube) {
+        // Keep the controls visible only while our own menu is open.
+        if (value && !this.keepControls) { this.keepControls = element("style",`.html5-video-player.obt-menu-open .ytp-chrome-bottom{opacity:1!important;visibility:visible!important}`); this.container.appendChild(this.keepControls); }
+        this.container.classList.toggle("obt-menu-open",value);
+        if (value) { const gear = this.container.querySelector('.ytp-settings-button[aria-expanded="true"]'); gear?.click(); }
+      }
+      if (value) { this.home.hidden = false; this.styles.hidden = true; this.placeMenu(); if (changed) this.switch.focus(); }
+      else if (focus) this.button.focus();
+    }
+    select(title,options,onChange,value,parent = this.home) {
+      const label = element("label",title), select = element("select"); options.forEach(([id,text]) => { const option = element("option",text); option.value = id; select.appendChild(option); }); label.appendChild(select); parent.appendChild(label); select.value = value || options[0][0]; select.addEventListener("change",() => onChange(select.value)); return select;
     }
     range(title,min,max,step,value,onChange) {
-      const label = element("label",title), input = element("input"); input.type = "range"; input.min = min; input.max = max; input.step = step; input.value = value; input.setAttribute("aria-label",title); label.appendChild(input); this.menu.appendChild(label); input.addEventListener("input",() => onChange(Number(input.value)));
+      const label = element("label",title), input = element("input"); input.type = "range"; input.min = min; input.max = max; input.step = step; input.value = value; input.setAttribute("aria-label",title); label.appendChild(input); this.styles.appendChild(label); input.addEventListener("input",() => onChange(Number(input.value))); return input;
     }
     save() { twpConfig.set("subtitleStyle",this.settings); this.layout(); this.update(); }
     placeMenu() {
       if (this.menu.hidden) return;
-      const rect = this.button.getBoundingClientRect();
-      this.menu.style.position = "fixed"; this.menu.style.right = "auto"; this.menu.style.bottom = "auto";
-      this.menu.style.width = `${Math.min(282,innerWidth - 24)}px`; this.menu.style.maxHeight = `${Math.min(480,innerHeight - 24)}px`;
-      this.menu.style.left = `${Math.max(12,Math.min(rect.right - this.menu.offsetWidth,innerWidth - this.menu.offsetWidth - 12))}px`;
-      this.menu.style.top = `${Math.max(12,Math.min(rect.bottom + 8,innerHeight - this.menu.offsetHeight - 12))}px`;
+      const parent = this.container.getBoundingClientRect(), button = this.button.getBoundingClientRect();
+      // CSS coordinates may be scaled in theater mode, page zoom or embedded players.
+      const scaleX = parent.width / this.container.offsetWidth || 1, scaleY = parent.height / this.container.offsetHeight || 1;
+      const left = Math.max(parent.left,0) + 8, right = Math.min(parent.right,innerWidth) - 8;
+      const top = Math.max(parent.top,0) + 8, bottom = Math.min(parent.bottom,innerHeight) - 8;
+      const anchor = this.inControls ? Math.min(button.top - 8,bottom) : Math.max(button.bottom + 8,top);
+      this.menu.style.width = `${Math.max(0,Math.min(300,(right - left) / scaleX))}px`;
+      this.menu.style.maxHeight = `${Math.max(0,(this.inControls ? anchor - top : bottom - anchor) / scaleY)}px`;
+      const x = this.inControls ? right - this.menu.offsetWidth * scaleX : Math.min(button.right,right) - this.menu.offsetWidth * scaleX;
+      const y = this.inControls ? anchor - this.menu.offsetHeight * scaleY : anchor;
+      this.menu.style.left = `${(Math.max(left,x) - parent.left) / scaleX}px`;
+      this.menu.style.top = `${(Math.max(top,y) - parent.top) / scaleY}px`;
     }
     layout() {
       const rect = this.video.getBoundingClientRect(), parent = this.container.getBoundingClientRect();
       this.overlay.style.left = `${rect.left - parent.left}px`; this.overlay.style.right = "auto"; this.overlay.style.width = `${rect.width}px`;
       this.overlay.style.top = `${rect.bottom - parent.top - rect.height * this.settings.offset / 100}px`; this.overlay.style.bottom = "auto"; this.overlay.style.transform = "translateY(-100%)";
-      if (!this.inControls) { this.host.style.left = `${Math.max(0,rect.right - parent.left - 120)}px`; this.host.style.right = "auto"; this.host.style.top = `${rect.top - parent.top + 12}px`; }
+      if (!this.inControls) { this.host.style.left = `${Math.max(0,rect.right - parent.left - 52)}px`; this.host.style.top = `${rect.top - parent.top + 10}px`; }
+      else if (youtube) { const native = this.host.parentElement.querySelector(".ytp-settings-button,.ytp-subtitles-button"); if (native) { this.host.style.width = `${native.offsetWidth || 48}px`; this.host.style.height = `${native.offsetHeight || 48}px`; } }
       this.lines.style.fontSize = `${this.settings.size}px`; this.lines.style.backgroundColor = `rgba(0,0,0,${this.settings.opacity})`; this.translation.style.color = this.settings.color; this.source.style.color = "#ffffff";
       this.placeMenu();
     }
     attach() {
       const controls = youtube ? this.container.querySelector(".ytp-right-controls") : this.container.querySelector(".vds-controls-group:last-child");
-      const parent = document.fullscreenElement;
-      if (parent === this.video) { this.restoreNative(); this.status.textContent = "此原生全屏模式无法叠加字幕，请使用播放器全屏按钮。"; return; }
-      this.container.appendChild(this.overlay);
-      this.inControls = !!controls;
-      if (controls) { controls.prepend(this.host); this.host.style.cssText = "display:inline-block;position:relative;z-index:2147483646"; this.menu.style.bottom = "42px"; this.menu.style.top = "auto"; }
-      else { this.container.appendChild(this.host); this.host.style.cssText = "position:absolute;z-index:2147483646;"; this.menu.style.bottom = "auto"; this.menu.style.top = "38px"; }
+      if (document.fullscreenElement === this.video) { this.setMenuOpen(false); this.restoreNative(); this.status.textContent = "此原生全屏模式无法叠加字幕，请使用播放器全屏按钮。"; return; }
+      this.container.append(this.overlay,this.panelHost); this.controls = controls; this.inControls = !!controls;
+      if (controls) {
+        for (const node of controls.querySelectorAll(".obt-subtitle-control")) if (node !== this.host && ![...players.values()].some(player => player.host === node)) node.remove();
+        const cc = controls.querySelector(".ytp-subtitles-button"), gear = controls.querySelector(".ytp-settings-button");
+        if (youtube && cc) cc.after(this.host); else if (youtube && gear) gear.before(this.host); else controls.prepend(this.host);
+        this.host.style.cssText = "display:inline-block;position:relative;vertical-align:top;width:40px;height:40px;flex-shrink:0;";
+        if (youtube) this.host.classList.add("ytp-button");
+      } else { this.container.appendChild(this.host); this.host.style.cssText = "position:absolute;width:36px;height:36px;z-index:40;background:#202020c9;border-radius:6px;"; }
       this.layout();
     }
     setEnabled(value) {
@@ -182,7 +227,8 @@
     }
     update() {
       if (identity() !== this.id) { this.id = identity(); this.selectedTrack = "native"; tracksCourse = []; this.reset(); if (youtube) window.postMessage({type:"obt-caption-request"},location.origin); if (course) window.postMessage({type:"obt-course-request"},location.origin); }
-      if (!this.host.isConnected || !this.overlay.isConnected) this.attach();
+      const controls = this.container.querySelector(youtube ? ".ytp-right-controls" : ".vds-controls-group:last-child");
+      if (controls !== this.controls || !this.host.isConnected || !this.overlay.isConnected || !this.panelHost.isConnected) this.attach();
       this.layout();
       if (!this.enabled || document.hidden || this.video.ended || document.fullscreenElement === this.video) { this.overlay.style.display = "none"; this.restoreNative(); return; }
       if (course && Date.now() >= this.retryAt) this.loadCourse();
@@ -213,7 +259,7 @@
         setTimeout(() => { this.prefetching = false; },1000);
       }
     }
-    destroy() { this.reset(); clearInterval(this.timer); this.abort.abort(); this.resize.disconnect(); this.host.remove(); this.overlay.remove(); if (this.changedPosition && this.container.style.position === "relative") this.container.style.position = this.position; }
+    destroy() { this.reset(); clearInterval(this.timer); this.abort.abort(); this.resize.disconnect(); this.host.remove(); this.panelHost.remove(); this.keepControls?.remove(); this.container.classList.remove("obt-menu-open"); this.overlay.remove(); if (this.changedPosition && this.container.style.position === "relative") this.container.style.position = this.position; }
   }
   window.addEventListener("message",event => {
     if (course && event.source === window && event.origin === location.origin && event.data?.type === "obt-course-data" && event.data.path === location.pathname && Array.isArray(event.data.tracks) && event.data.tracks.length <= 100) {
@@ -246,7 +292,7 @@
     const rows = new Set([...timedRows,...panels.flatMap(panel => [...panel.querySelectorAll("p,[data-start],li")])]);
     for (const row of rows) {
       if (sentenceButtons.get(row)?.isConnected || !row.getBoundingClientRect().height) continue;
-      const button = mark(element("button","翻译本句")); button.type = "button"; button.setAttribute("data-obt-sentence",""); button.style.cssText = "font:12px/1.5 sans-serif;border:1px solid #8da497;color:#205b43;background:#edf5f0;border-radius:3px;padding:2px 7px;margin:3px;cursor:pointer";
+      const button = mark(element("button","翻译本句")); button.type = "button"; button.setAttribute("data-obt-sentence",""); button.style.cssText = "font:12px/1.5 sans-serif;border:1px solid #f0b8cb;color:#a92756;background:#fff0f5;border-radius:3px;padding:2px 7px;margin:3px;cursor:pointer";
       button.addEventListener("click",event => { event.preventDefault(); event.stopPropagation(); pageTranslator.translateTranscript(row); }); row.after(button); sentenceButtons.set(row,button);
     }
     for (const button of document.querySelectorAll('button[aria-label="Show transcript panel"]')) {
@@ -266,7 +312,7 @@
   });
   twpConfig.onChanged(name => {
     if (["pageTranslatorService","targetLanguage","subtitleTranslation"].includes(name)) for (const player of players.values()) { player.reset(); if (name === "subtitleTranslation") player.setEnabled(twpConfig.get(name) === "yes"); else player.update(); }
-    if (name === "subtitleStyle") for (const player of players.values()) { player.settings = {...player.settings,...twpConfig.get("subtitleStyle")}; player.layout(); }
+    if (name === "subtitleStyle") for (const player of players.values()) { player.settings = {...player.settings,...twpConfig.get("subtitleStyle")}; for (const [key,input] of player.styleControls) input.value = player.settings[key]; player.layout(); player.update(); }
   });
   // aiProviderSettings is deliberately excluded from twpConfig (contains secrets).
   chrome.storage.onChanged.addListener(changes => { if (changes.aiProviderSettings) for (const player of players.values()) { player.reset(); player.update(); } });

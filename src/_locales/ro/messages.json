@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Deschide în Google Translator"
   },
-  "btnDonate": {
-    "message": "Donează"
-  },
   "btnNeverTranslate": {
     "message": "Nu traduce niciodată acest sit"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Nu traduce niciodată acest sit"
-  },
-  "btnMobileDonate": {
-    "message": "Donează"
   },
   "optionsNeverTranslate": {
     "message": "Nu traduce niciodată aceste situri"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Alte opțiuni"
-  },
-  "lblPlsDonate": {
-    "message": "Ajută programatorul cu o donație"
   },
   "msgTranslateFor": {
     "message": "Tradu în $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Tradu mereu aceste situri"
   },
-  "msgDonateWithPaypal": {
-    "message": "Donează cu PayPal"
-  },
   "lblDarkMode": {
     "message": "Fond negru"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Taste rapide"
   },
-  "lblMakeDonation": {
-    "message": "Fă o donație"
-  },
   "lblReleaseNotes": {
     "message": "Note despre versiune"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Pentru a traduce situl"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Vă mulțumim pentru utilizarea acestei extensii."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Voi fi recunoscător dacă poți face o donație."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Tradu mereu această limbă"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Calculează"
-  },
-  "donatewithpaypal": {
-    "message": "Donează cu PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Tradu automat dacă se face clic pe o legătură care duce la același domeniu ca al sitului actual"

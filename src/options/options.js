@@ -9,51 +9,24 @@ twpConfig.onReady(function () {
         document.head.appendChild(style)
     }
 
-    let sideBarIsVisible = false
-    $("#btnOpenMenu").onclick = e => {
-        $("#menuContainer").classList.toggle("change")
-
-        if (sideBarIsVisible) {
-            $("#sideBar").style.display = "none"
-            sideBarIsVisible = false
-        } else {
-            $("#sideBar").style.display = "block"
-            sideBarIsVisible = true
-        }
-    }
-
+    const sidebar = $("#sideBar"), menuButton = $("#btnOpenMenu");
+    menuButton.onclick = () => {
+        const open = sidebar.classList.toggle("is-open");
+        menuButton.setAttribute("aria-expanded",String(open));
+    };
     function hashchange() {
-        const hash = location.hash || "#main"
-        const divs = [$("#main"),  $("#translations"),  $("#hotkeys"), $("#storage"), $("#others"), $("#donation"), ]
-        divs.forEach(element => {
-            element.style.display = "none"
-        })
-
-        document.querySelectorAll("nav a").forEach(a => {
-            a.classList.remove("w3-light-grey")
-        })
-
-        $(hash).style.display = "block"
-        $('a[href="' + hash + '"]').classList.add("w3-light-grey")
-
-        let text
-        if (hash === "#donation") {
-            text = chrome.i18n.getMessage("lblMakeDonation")
-        }else {
-            text = chrome.i18n.getMessage("lblSettings")
-        }
-        $("#itemSelectedName").textContent = text
-
-        if (sideBarIsVisible) {
-            $("#menuContainer").classList.toggle("change")
-            $("#sideBar").style.display = "none"
-            sideBarIsVisible = false
-        }
-
-        $("#btnPatreon").style.display = "block"
+        const aliases = {"#others":"#storage"};
+        const requested = aliases[location.hash] || location.hash || "#main";
+        const section = [...document.querySelectorAll(".settings-section")].find(node => `#${node.id}` === requested) || $("#main");
+        document.querySelectorAll(".settings-section").forEach(node => { node.hidden = node !== section; });
+        document.querySelectorAll("nav a").forEach(link => {
+            const current = link.hash === `#${section.id}`;
+            if (current) link.setAttribute("aria-current","page"); else link.removeAttribute("aria-current");
+        });
+        $("#itemSelectedName").textContent = section.getAttribute("aria-label");
+        sidebar.classList.remove("is-open"); menuButton.setAttribute("aria-expanded","false");
     }
-    hashchange()
-    window.addEventListener("hashchange", hashchange)
+    hashchange(); window.addEventListener("hashchange",hashchange);
 
     function fillLanguageList(select) {
         let langs = twpLang.getLanguageList()
@@ -89,66 +62,8 @@ twpConfig.onReady(function () {
     fillLanguageList($("#addToNeverTranslateLangs"))
     fillLanguageList($("#addToAlwaysTranslateLangs"))
 
-  $("#darkMode").onchange = (e) => {
-    twpConfig.set("darkMode", e.target.value);
-    updateDarkMode();
-  };
-  $("#darkMode").value = twpConfig.get("darkMode");
-    function enableDarkMode() {
-        if (!$("#darkModeElement")) {
-            const el = document.createElement("style")
-            el.setAttribute("id", "darkModeElement")
-            el.setAttribute("rel", "stylesheet")
-            el.textContent = `
-            * {
-                scrollbar-color: #202324 #454a4d;
-            }
-
-            #donation * {
-                background-color: #87CEEB !important;
-            }
-
-            #donation select {
-                color: black !important;
-                background-color: rgb(231, 230, 228) !important;
-            }
-
-            html *, nav, #header {
-                color: rgb(231, 230, 228) !important;
-                background-color: #181a1b !important;
-            }
-            `
-            document.head.appendChild(el)
-        }
-    }
-
-    function disableDarkMode() {
-        if ($("#darkModeElement")) {
-            $("#darkModeElement").remove()
-        }
-    }
-
-    function updateDarkMode() {
-        switch (twpConfig.get("darkMode")) {
-            case "auto":
-                if (matchMedia("(prefers-color-scheme: dark)").matches) {
-                    enableDarkMode()
-                } else {
-                    disableDarkMode()
-                }
-                break
-            case "yes":
-                enableDarkMode()
-                break
-            case "no":
-                disableDarkMode()
-                break
-            default:
-                break
-        }
-    }
-    updateDarkMode()
-
+    $("#darkMode").onchange = event => twpConfig.set("darkMode",event.target.value);
+    $("#darkMode").value = twpConfig.get("darkMode");
 
     // target languages
 
@@ -598,23 +513,7 @@ twpConfig.onReady(function () {
         })
     }
 
-    // if (navigator.language === "pt-BR") {
-    //     $("#currency").value = "BRL"
-    //     $("#donateInUSD").style.display = "none"
-    // } else {
-    //     $("#currency").value = "USD"
-    //     $("#donateInBRL").style.display = "none"
-    // }
 
-    // $("#currency").onchange = e => {
-    //     if (e.target.value === "BRL") {
-    //         $("#donateInUSD").style.display = "none"
-    //         $("#donateInBRL").style.display = "block"
-    //     } else {
-    //         $("#donateInUSD").style.display = "block"
-    //         $("#donateInBRL").style.display = "none"
-    //     }
-    // }
 })
 
 window.scrollTo({

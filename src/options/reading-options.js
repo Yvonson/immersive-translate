@@ -1,11 +1,11 @@
 "use strict";
 twpConfig.onReady(() => {
-  const host = document.createElement("section"); host.className = "obt-reading-settings";
-  host.innerHTML = `<h2>阅读与字幕</h2><p>原文保留，译文显示在对应段落下方。视频使用相同的翻译引擎与目标语言。</p>
+  const host = document.createElement("section"); host.className = "card obt-reading-settings";
+  host.innerHTML = `<h2>悬停段落翻译</h2><p>原文保留，译文显示在对应段落下方。视频使用相同的翻译引擎与目标语言。</p>
     <label>鼠标悬停段落翻译 <select id="obt-paragraph"><option value="yes">开启</option><option value="no">关闭</option></select></label>
     <label>单按切换本段 <select id="obt-trigger"><option value="Control">Ctrl</option><option value="Shift">Shift</option><option value="Alt">Alt</option></select></label>
     <p class="obt-help">单按后译文保留，再按关闭。输入框和 Ctrl+C 等组合操作不会触发。视频内的“双语字幕”菜单可选择字幕和调整显示。</p>`;
-  document.querySelector("#main").prepend(host);
+  document.querySelector("#webpage").insertBefore(host, document.querySelector("#webpage .card"));
   for (const [id,key] of [["obt-paragraph","paragraphTranslation"],["obt-trigger","paragraphTrigger"]]) {
     const select = document.getElementById(id); select.value = twpConfig.get(key); select.addEventListener("change",() => twpConfig.set(key,select.value));
   }

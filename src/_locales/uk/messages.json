@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Відкрити в Google Перекладачі"
   },
-  "btnDonate": {
-    "message": "Пожертвувати"
-  },
   "btnNeverTranslate": {
     "message": "Ніколи не перекладати цей сайт"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Ніколи не перекладати цей сайт"
-  },
-  "btnMobileDonate": {
-    "message": "Пожертвувати"
   },
   "optionsNeverTranslate": {
     "message": "Ніколи не перекладати цей сайт"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Більше опцій"
-  },
-  "lblPlsDonate": {
-    "message": "Матеріально подякувати розробнику"
   },
   "msgTranslateFor": {
     "message": "Перекласти на $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Завжди перекладати ці сайти"
   },
-  "msgDonateWithPaypal": {
-    "message": "Зробити пожертву через PayPal"
-  },
   "lblDarkMode": {
     "message": "Темний режим"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Гарячі клавіші"
   },
-  "lblMakeDonation": {
-    "message": "Пожертвувати"
-  },
   "lblReleaseNotes": {
     "message": "Примітки до випуску"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Перекласти сайт"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Дякуємо, що використовуєте це розширення."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Буду вдячний, якщо зробите пожертву."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Завжди перекладайте цю мову"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Підрахувати"
-  },
-  "donatewithpaypal": {
-    "message": "Зробити пожертву через PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Автоматично перекладати при натисканні на посилання, яке веде на той самий домен, що й поточний сайт"

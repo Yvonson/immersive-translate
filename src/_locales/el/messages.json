@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Άνοιγμα στο μεταφραστή της Google"
   },
-  "btnDonate": {
-    "message": "Δωρεά"
-  },
   "btnNeverTranslate": {
     "message": "Μη μεταφράζετε ποτέ αυτόν τον ιστότοπο"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Μη μεταφράζετε ποτέ αυτόν τον ιστότοπο"
-  },
-  "btnMobileDonate": {
-    "message": "Δωρεά"
   },
   "optionsNeverTranslate": {
     "message": "Μη μεταφράζονται ποτέ αυτοί οι ιστότοποι"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Περισσότερες επιλογές"
-  },
-  "lblPlsDonate": {
-    "message": "Βοηθήστε τον προγραμματιστή με μια δωρεά"
   },
   "msgTranslateFor": {
     "message": "Μετάφραση σε $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Πάντα μετάφραση αυτών τών ιστοσελίδών"
   },
-  "msgDonateWithPaypal": {
-    "message": "Δωρεά μέσω PayPal"
-  },
   "lblDarkMode": {
     "message": "Σκοτεινή Λειτουργία"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Πλήκτρα συντόμευσης"
   },
-  "lblMakeDonation": {
-    "message": "Κάντε μια δωρεά"
-  },
   "lblReleaseNotes": {
     "message": "Σημειώσεις έκδοσης"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Για μετάφραση την ιστοσελίδα"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Σας ευχαριστούμε που χρησιμοποιείτε αυτήν την επέκταση."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Θα είμαι ευγνώμων αν μπορείτε να κάνετε μια δωρεά."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Πάντα μετάφραση αυτής της γλώσσας"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Υπολογισμός"
-  },
-  "donatewithpaypal": {
-    "message": "Δωρεά με PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Αυτόματη μετάφραση με κλικ σε σύνδεσμο θα μεταφέρει στον ίδιο τομέα με τον τρέχοντα ιστότοπο"

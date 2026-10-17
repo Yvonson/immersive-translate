@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Megnyitás a Google Fordítóban"
   },
-  "btnDonate": {
-    "message": "Adományozás"
-  },
   "btnNeverTranslate": {
     "message": "Soha ne fordítsa le ezt az oldalt"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Soha ne fordítsa le ezt az oldalt"
-  },
-  "btnMobileDonate": {
-    "message": "Adományozás"
   },
   "optionsNeverTranslate": {
     "message": "Soha ne fordítsa le ezeket az oldalakat"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "További beállítások"
-  },
-  "lblPlsDonate": {
-    "message": "Segítse a fejlesztőt egy adománnyal"
   },
   "msgTranslateFor": {
     "message": "Fordítás $LANGUAGE_NAME$ nyelvre",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Mindig fordítsa le ezeket az oldalakat"
   },
-  "msgDonateWithPaypal": {
-    "message": "Adományozás PayPal-lal"
-  },
   "lblDarkMode": {
     "message": "Sötét mód"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Gyorsbillentyűk"
   },
-  "lblMakeDonation": {
-    "message": "Adományozás"
-  },
   "lblReleaseNotes": {
     "message": "Kibocsátási megjegyzések"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Az oldal fordításához"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Köszönjük, hogy ezt a bővítményt használja."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Örök hálám az adományokért."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Mindig fordítsa le ezt a nyelvet"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Kalkulálás"
-  },
-  "donatewithpaypal": {
-    "message": "Adományozás PayPal-lal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Ha domainen belülre visz a megnyitott link, akkor ugyanúgy fordítsa az oldalt"

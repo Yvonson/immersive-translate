@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Открыть в Google Переводчике"
   },
-  "btnDonate": {
-    "message": "Пожертвовать"
-  },
   "btnNeverTranslate": {
     "message": "Никогда не переводить этот сайт"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Никогда не переводить этот сайт"
-  },
-  "btnMobileDonate": {
-    "message": "Пожертвовать"
   },
   "optionsNeverTranslate": {
     "message": "Никогда не переводить эти сайты"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Дополнительные настройки"
-  },
-  "lblPlsDonate": {
-    "message": "Пожертвовать разработчику"
   },
   "msgTranslateFor": {
     "message": "Перевести на $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Всегда переводить эти сайты"
   },
-  "msgDonateWithPaypal": {
-    "message": "Сделать пожертвование через PayPal"
-  },
   "lblDarkMode": {
     "message": "Тёмный режим"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Горячие клавиши"
   },
-  "lblMakeDonation": {
-    "message": "Пожертвовать"
-  },
   "lblReleaseNotes": {
     "message": "Примечания к выпуску"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Перевести сайт"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Спасибо, что используете это расширение."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Буду признателен, если сделаете пожертвование."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Всегда переводить с этого языка"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Вычислить"
-  },
-  "donatewithpaypal": {
-    "message": "Пожертвовать через PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Автоматически переводить при нажатии на ссылку, которая ведет на тот же домен, что и текущий сайт"

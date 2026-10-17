@@ -16,10 +16,24 @@ for (const browser of ['chrome', 'firefox']) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const file = path.join(dir, entry.name);
       if (entry.isDirectory()) check(file);
-      else if (entry.name.endsWith('.js')) new vm.Script(fs.readFileSync(file, 'utf8'), { filename: file });
+      else {
+        assert.ok(!/patreon|donat|coinpayments|^eth\./i.test(entry.name), `${browser}: legacy funding asset ${entry.name}`);
+        if (/\.(js|json|html|css|map)$/.test(entry.name)) {
+          const text = fs.readFileSync(file, 'utf8');
+          assert.ok(!/patreon\.com|paypal\.com|coinpayments|t\.me\/\+|0x[a-f0-9]{40}|openDonationPage|btnDonate|lblMakeDonation/i.test(text), `${browser}: legacy funding/contact content in ${file}`);
+          if (entry.name.endsWith('.js')) new vm.Script(text, { filename: file });
+          if (entry.name.endsWith('.json')) JSON.parse(text);
+          if (entry.name.endsWith('.html')) for (const match of text.matchAll(/(?:src|href)=["']([^"']+)["']/g)) {
+            const value = match[1];
+            if (/^(?:[a-z]+:|#|\/\/)/i.test(value)) continue;
+            const target = value.split(/[?#]/)[0];
+            assert.ok(fs.existsSync(target.startsWith('/') ? path.join(root,target) : path.resolve(path.dirname(file),target)), `${browser}: missing UI resource ${value}`);
+          }
+        }
+      }
     }
   }
   check(root);
   assert.ok(fs.statSync(`dist/${browser}.zip`).size > 1000);
-  console.log(`${browser}: manifest references, JavaScript syntax and archive OK`);
+  console.log(`${browser}: manifest/UI references, syntax, JSON, funding cleanup and archive OK`);
 }

@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Avaa Google kääntäjässä"
   },
-  "btnDonate": {
-    "message": "Lahjoita"
-  },
   "btnNeverTranslate": {
     "message": "Älä käännä tätä sivua"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Älä käännä tätä sivua"
-  },
-  "btnMobileDonate": {
-    "message": "Lahjoita"
   },
   "optionsNeverTranslate": {
     "message": "Älä käännä näitä sivuja"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Lisää asetuksia"
-  },
-  "lblPlsDonate": {
-    "message": "Auta kehittäjää tekemällä lahjoitus"
   },
   "msgTranslateFor": {
     "message": "Käännä kielelle $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Käännä nämä sivustot aina"
   },
-  "msgDonateWithPaypal": {
-    "message": "Lahjoita PayPalin kautta"
-  },
   "lblDarkMode": {
     "message": "Tumma tila"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Pikanäppäimet"
   },
-  "lblMakeDonation": {
-    "message": "Tee lahjoitus"
-  },
   "lblReleaseNotes": {
     "message": "Julkaisutiedot"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Sivuston kääntäminen"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Kiitos, että käytät tätä laajennusta."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Olen kiitollinen, jos voit tehdä lahjoituksen."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Käännä tämä kieli aina"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Calculate"
-  },
-  "donatewithpaypal": {
-    "message": "Donate With PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automatically translate when clicking on a link that takes you to the same domain as the current site"

@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Apri in Google Traduttore"
   },
-  "btnDonate": {
-    "message": "Donare"
-  },
   "btnNeverTranslate": {
     "message": "Non tradurre mai questo sito"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Non tradurre mai questo sito"
-  },
-  "btnMobileDonate": {
-    "message": "Donare"
   },
   "optionsNeverTranslate": {
     "message": "Non tradurre mai questi siti"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Più opzioni"
-  },
-  "lblPlsDonate": {
-    "message": "Aiuta lo sviluppatore con una donazione"
   },
   "msgTranslateFor": {
     "message": "Traduci in $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Traduci sempre questi siti"
   },
-  "msgDonateWithPaypal": {
-    "message": "Dona con PayPal"
-  },
   "lblDarkMode": {
     "message": "Modalità scura"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Scorciatoie"
   },
-  "lblMakeDonation": {
-    "message": "Fai una donazione"
-  },
   "lblReleaseNotes": {
     "message": "Note di Rilascio"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Per tradurre il sito"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Grazie per aver scelto questa estensione."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Ti sarò grato se potrai fare una donazione."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Traduci sempre questa lingua"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Calcola"
-  },
-  "donatewithpaypal": {
-    "message": "Dona con PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Traduci automaticamente quando fai clic su un link che ti porta allo stesso dominio del sito corrente"

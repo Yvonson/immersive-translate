@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Åbn i Google Translator"
   },
-  "btnDonate": {
-    "message": "Donér"
-  },
   "btnNeverTranslate": {
     "message": "Oversæt aldrig denne hjemmeside"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Oversæt aldrig denne hjemmeside"
-  },
-  "btnMobileDonate": {
-    "message": "Donér"
   },
   "optionsNeverTranslate": {
     "message": "Oversæt aldrig disse hjemmesider"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Flere indstillinger"
-  },
-  "lblPlsDonate": {
-    "message": "Hjælp udvikleren med en donation"
   },
   "msgTranslateFor": {
     "message": "Oversæt til $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Oversæt altid disse hjemmesider"
   },
-  "msgDonateWithPaypal": {
-    "message": "Doner med PayPal"
-  },
   "lblDarkMode": {
     "message": "Mørk tilstand"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Genvejstaster"
   },
-  "lblMakeDonation": {
-    "message": "Lav en donation"
-  },
   "lblReleaseNotes": {
     "message": "Udgivelsesnoter"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Til oversættelse af hjemmeside"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Tak for din brug af denne udvidelse."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Jeg vil være taknemmelig, hvis du kan donere."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Oversæt altid dette sprog"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Beregn"
-  },
-  "donatewithpaypal": {
-    "message": "Doner med PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Oversæt automatisk, når du klikker på et link, der tager dig til det samme domæne som det aktuelle websted"

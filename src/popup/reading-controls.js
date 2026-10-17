@@ -1,14 +1,18 @@
 "use strict";
 twpConfig.onReady(() => {
-  const section = document.createElement("section"); section.style.cssText = "padding:12px 0;border-top:1px solid #9ab4a5;margin-top:12px;font-size:13px";
-  const hoverLabel = document.createElement("label"); hoverLabel.style.cssText = "display:flex;justify-content:space-between;margin-bottom:10px"; hoverLabel.textContent = "Ctrl 翻译 / 还原悬停段落";
-  const hover = document.createElement("input"); hover.type = "checkbox"; hover.checked = twpConfig.get("paragraphTranslation") !== "no"; hover.addEventListener("change",() => twpConfig.set("paragraphTranslation",hover.checked ? "yes" : "no")); hoverLabel.appendChild(hover); section.appendChild(hoverLabel);
-  const label = document.createElement("label"); label.style.cssText = "display:flex;justify-content:space-between"; label.textContent = "当前页面双语字幕";
-  const toggle = document.createElement("input"); toggle.type = "checkbox"; label.appendChild(toggle); section.appendChild(label);
-  const status = document.createElement("p"); status.style.cssText = "font-size:12px;opacity:.8;margin:5px 0 0"; status.textContent = "也可在播放器的“双语字幕”菜单中开启。"; section.appendChild(status); document.querySelector("main").appendChild(section);
+  const host = document.getElementById("readingControls");
+  host.innerHTML = '<label class="switch-row"><span id="hoverLabel"></span><input id="paragraphToggle" type="checkbox"></label><label class="switch-row"><span>当前页面双语字幕</span><input id="subtitleToggle" type="checkbox"></label><p class="help" id="subtitleStatus" role="status">也可通过播放器中的双语字幕图标设置。</p>';
+  const hover = document.getElementById("paragraphToggle"), toggle = document.getElementById("subtitleToggle"), status = document.getElementById("subtitleStatus");
+  function refresh() { document.getElementById("hoverLabel").textContent = `${({Control:"Ctrl",Shift:"Shift",Alt:"Alt"})[twpConfig.get("paragraphTrigger")] || "Ctrl"} 悬停段落翻译`; hover.checked = twpConfig.get("paragraphTranslation") !== "no"; }
+  refresh(); twpConfig.onChanged(name => { if (["paragraphTrigger","paragraphTranslation"].includes(name)) refresh(); });
+  hover.onchange = () => twpConfig.set("paragraphTranslation",hover.checked ? "yes" : "no");
   chrome.tabs.query({active:true,currentWindow:true},tabs => {
     const id = tabs[0]?.id; if (!id) return;
-    chrome.runtime.sendMessage({action:"getTabReadingState",tabId:id},response => { if (chrome.runtime.lastError) { status.textContent = "请刷新普通网页后使用。"; return; } toggle.checked = !!response?.enabled; });
-    toggle.addEventListener("change",() => chrome.tabs.sendMessage(id,{action:"setTabSubtitleState",enabled:toggle.checked},() => { if (chrome.runtime.lastError) status.textContent = "请刷新网页后再开启。"; }));
+    chrome.runtime.sendMessage({action:"getTabReadingState",tabId:id},response => {
+      if (chrome.runtime.lastError) { status.textContent = "请刷新普通网页后使用。"; return; }
+      toggle.checked = !!response?.enabled;
+      if (!response?.players) status.textContent = "开启后，将翻译此页面播放器中的已有字幕。";
+    });
+    toggle.onchange = () => chrome.tabs.sendMessage(id,{action:"setTabSubtitleState",enabled:toggle.checked},() => { if (chrome.runtime.lastError) { toggle.checked = false; status.textContent = "请刷新网页后再开启。"; } });
   });
 });

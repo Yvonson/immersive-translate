@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "פתח בגוגל תרגום"
   },
-  "btnDonate": {
-    "message": "תרומה"
-  },
   "btnNeverTranslate": {
     "message": "לעולם אל תתרגם דף זה"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "לעולם אל תתרגם דף זה"
-  },
-  "btnMobileDonate": {
-    "message": "תרומה"
   },
   "optionsNeverTranslate": {
     "message": "לעולם אל תתרגם דפים אלו"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "אפשרויות נוספות"
-  },
-  "lblPlsDonate": {
-    "message": "תרמו ועזרו למפתח"
   },
   "msgTranslateFor": {
     "message": "תרגם ל: $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "תרגם תמיד אתרים אלה"
   },
-  "msgDonateWithPaypal": {
-    "message": "תרום באמצעות PayPal"
-  },
   "lblDarkMode": {
     "message": "מצב כהה"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "מקשי קיצור"
   },
-  "lblMakeDonation": {
-    "message": "לתרום"
-  },
   "lblReleaseNotes": {
     "message": "מכתבי שחרור"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "לתרגום האתר"
-  },
-  "msgThanksForUseExtension": {
-    "message": "תודה על השימוש בתוסף זה."
-  },
-  "msgIWillBeGrateful": {
-    "message": "אני אהיה אסיר תודה אם תוכל להתרום."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "תרגם תמיד את השפה הזו"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "חשב"
-  },
-  "donatewithpaypal": {
-    "message": "תרומה דרך PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "תרגם באופן אוטומטי ברגע שאתה לוחץ על קישור ונפתח לך דף זהה"

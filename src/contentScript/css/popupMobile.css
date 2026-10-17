@@ -175,3 +175,9 @@
     width: 40px;
     max-width: 40px;
 }
+/* Match the extension's reading controls without loading remote resources. */
+:host{--obt-surface:#fff;--obt-ink:#252632;--obt-line:#e8e9ef;--obt-accent:#c72e65}
+#element{background:var(--obt-surface);border-top:1px solid var(--obt-line);box-shadow:0 -4px 24px #26233812}
+.item,.item2{font-family:"Segoe UI","Microsoft YaHei UI",sans-serif;font-size:15px;background:var(--obt-surface);color:var(--obt-ink)}
+#btnTranslate{color:var(--obt-accent)}.dropup-content{background:var(--obt-surface);border:1px solid var(--obt-line);border-radius:10px;padding:6px;box-shadow:0 8px 30px #0002}.dropup-content a{color:var(--obt-ink);font:14px/1.6 "Segoe UI","Microsoft YaHei UI",sans-serif;border-radius:6px;padding:10px}.dropup-content a:hover{background:#fff0f5;color:var(--obt-accent)}.loader{border-top-color:var(--obt-accent)}
+@media(prefers-color-scheme:dark){:host{--obt-surface:#23242c;--obt-ink:#f0f0f5;--obt-line:#3a3b46;--obt-accent:#ff91b5}.dropup-content a:hover{background:#402936}}

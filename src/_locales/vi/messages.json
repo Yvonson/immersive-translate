@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Mở trong Google Translate"
   },
-  "btnDonate": {
-    "message": "Ủng hộ"
-  },
   "btnNeverTranslate": {
     "message": "Không bao giờ dịch trang này"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Không bao giờ dịch trang này"
-  },
-  "btnMobileDonate": {
-    "message": "Ủng hộ"
   },
   "optionsNeverTranslate": {
     "message": "Không bao giờ dịch các trang này"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Tùy chọn khác"
-  },
-  "lblPlsDonate": {
-    "message": "Giúp đỡ nhà phát triển bằng cách ủng hộ"
   },
   "msgTranslateFor": {
     "message": "Dịch từ $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Luôn dịch những trang này"
   },
-  "msgDonateWithPaypal": {
-    "message": "Ủng hộ qua PayPal"
-  },
   "lblDarkMode": {
     "message": "Chế độ tối"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Phím tắt"
   },
-  "lblMakeDonation": {
-    "message": "Ủng hộ"
-  },
   "lblReleaseNotes": {
     "message": "Ghi chú phát hành"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Để dịch trang web"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Cảm ơn bạn đã sử dụng tiện ích này."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Tôi sẽ biết ơn nếu bạn có thể đóng góp."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Luôn dịch trang web này"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Tính toán"
-  },
-  "donatewithpaypal": {
-    "message": "Ủng hộ qua PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Tự động dịch khi nhấp vào liên kết đến cùng một tên miền với trang web hiện tại"

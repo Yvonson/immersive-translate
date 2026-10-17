@@ -56,9 +56,6 @@
   "btnOpenOnGoogleTranslate": {
     "message": "Openen in google vertaler"
   },
-  "btnDonate": {
-    "message": "Alleen maar"
-  },
   "btnNeverTranslate": {
     "message": "Deze site nooit vertalen"
   },
@@ -73,9 +70,6 @@
   },
   "btnMobileNeverTranslate": {
     "message": "Deze site nooit vertalen"
-  },
-  "btnMobileDonate": {
-    "message": "Alleen maar"
   },
   "optionsNeverTranslate": {
     "message": "Vertaal deze sites nooit"
@@ -100,9 +94,6 @@
   },
   "btnMoreOptions": {
     "message": "Meer opties"
-  },
-  "lblPlsDonate": {
-    "message": "Help de ontwikkelaar met een donatie"
   },
   "msgTranslateFor": {
     "message": "Vertaal naar $LANGUAGE_NAME$",
@@ -149,9 +140,6 @@
   "lblAlwaysTranslateSites": {
     "message": "Vertaal deze sites altijd"
   },
-  "msgDonateWithPaypal": {
-    "message": "Doneer met PayPal"
-  },
   "lblDarkMode": {
     "message": "Donkere modus"
   },
@@ -194,9 +182,6 @@
   "msgHotkeys": {
     "message": "Sneltoetsen"
   },
-  "lblMakeDonation": {
-    "message": "Doe een gift"
-  },
   "lblReleaseNotes": {
     "message": "Release-opmerkingen"
   },
@@ -217,12 +202,6 @@
   },
   "msgToTranslateSites": {
     "message": "Om de site te vertalen"
-  },
-  "msgThanksForUseExtension": {
-    "message": "Bedankt voor het gebruik van deze extensie."
-  },
-  "msgIWillBeGrateful": {
-    "message": "Ik zal u dankbaar zijn als u een donatie kunt doen."
   },
   "btnAlwaysTranslateThisLanguage": {
     "message": "Vertaal deze taal altijd"
@@ -384,9 +363,6 @@
   },
   "calculatestorage": {
     "message": "Bereken"
-  },
-  "donatewithpaypal": {
-    "message": "Doneer Met PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
     "message": "Automatisch vertalen wanneer u op een link klikt die u naar hetzelfde domein brengt als de huidige site"
