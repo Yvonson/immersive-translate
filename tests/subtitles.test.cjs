@@ -44,7 +44,9 @@ test('subtitle translations are debounced, stale responses discarded and output 
   assert.ok(state.elements.some(node => node.textContent === '<script>plain text</script>'));
   const overlay = state.elements.find(node => node.className === 'notranslate');
   assert.equal(overlay.hidden, false);
+  assert.equal(overlay.style.display, 'block');
   state.disable(); assert.equal(overlay.hidden, true);
+  assert.equal(overlay.style.display, 'none');
   state.advance(1000); assert.equal(state.requests.length, 2);
 });
 

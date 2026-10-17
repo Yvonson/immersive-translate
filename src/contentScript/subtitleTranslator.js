@@ -15,7 +15,7 @@
   let overlayParent;
 
   function hide() {
-    if (overlay) overlay.hidden = true;
+    if (overlay) { overlay.hidden = true; overlay.style.display = "none"; }
   }
 
   function display(original, translated, video) {
@@ -45,6 +45,7 @@
     sourceLine.textContent = original;
     translationLine.textContent = translated;
     overlay.hidden = false;
+    overlay.style.display = "block";
   }
 
   function read() {
