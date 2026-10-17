@@ -14,6 +14,7 @@
 - 用户确认 Google 译文末尾夹杂“合集、了解细节”；尚无原视频链接。
 - 修复前两项浏览器测试捕获：隐藏节点进入翻译请求、行内评论越界包含作者/时间/工具栏。现已修复提取过滤、站点正文边界、保留片段及动态显隐；不按词删除译文，保留仅译文模式和原节点。
 - 本地 `npm test` 12 项、`npm run test:browser` 15 项、构建和产物检查通过；版本字段不变。
+- 修复提交 `78d546631ac8d81c3586e74d6510f441e78eb531` 已推送；[远程 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39035840702) 成功，包含 Linux Chromium 的 15 项浏览器回归及扩展包上传。
 - 真实 Google 同一接口的原始响应和解析结果均无上述尾词；公开 YouTube 样本确认 `#content-text` 为行内元素，未取得用户原评论现场。证据和限制见 [排查说明](../YOUTUBE-TEXT-EXTRACTION.md)。
 
 ## 界面改版与用户反馈（2026-10-17）
