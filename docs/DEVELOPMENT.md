@@ -1,5 +1,7 @@
 # 开发说明
 
+开始接续开发前，请先阅读 [协作约定](../AGENTS.md) 和 [项目记忆索引](memory/README.md)。实现细节在本文维护；长期决定、验证状态及待办分别在记忆文档中维护。
+
 ## 项目结构
 
 - `src/contentScript/pageTranslator.js`：原网页内容识别、按段落翻译及动态内容处理。

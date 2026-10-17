@@ -57,6 +57,7 @@ Ollama 兼容接口说明：https://docs.ollama.com/api/openai-compatibility
 ## 继续开发
 
 - 源码在 `src/`，详细说明见 [开发文档](docs/DEVELOPMENT.md)。
+- 项目背景、关键决策、验证记录和待办见 [项目记忆](docs/memory/README.md)；协作约定见 [AGENTS.md](AGENTS.md)。
 - 推送代码会运行 GitHub Actions 并生成 ZIP artifacts。
 - 推送 `v*` 标签会创建 GitHub Release；不会操作上游商店账号。
 - 下一步建议：真实网站回归测试、字幕预取与批量翻译、逐站适配、模型限流与故障提示、更新老构建依赖。
