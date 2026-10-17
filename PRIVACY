@@ -1,0 +1,13 @@
+Open Bilingual Translate — data handling
+
+This extension reads and modifies web-page text to show bilingual translations. Text selected by the translation logic, and existing video caption text when the optional subtitle feature is enabled, are sent to the translation provider you choose.
+
+Legacy providers include Google and Yandex; inherited translation code also contains Bing/DeepL support. AI providers send text directly to the configured DeepSeek or compatible endpoint. A loopback endpoint can be used for local model inference; the model server's own data handling remains under your control. This project does not operate a translation relay server.
+
+AI API credentials and settings are stored in chrome.storage.local in the browser profile. They are not included in normal configuration exports and are not intentionally injected into the web page. Browser extension storage is not an OS-encrypted credential vault. Restoring default settings removes the saved AI profiles.
+
+The inherited Google/Yandex translation cache can persist translations locally. AI translations use a bounded in-memory cache; incognito AI requests bypass that shared cache. Use browser profile controls to remove local extension data.
+
+Provider privacy policies, network access and API charges depend on the provider you select. Links to external translation, documentation or original-author support sites are governed by those sites' policies.
+
+Source: https://github.com/Yvonson/immersive-translate

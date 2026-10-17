@@ -1,0 +1,139 @@
+{
+  "manifest_version": 2,
+  "default_locale": "en",
+  "name": "Open Bilingual Translate",
+  "description": "Independent bilingual web and subtitle translator with Google, DeepSeek and local model support.",
+  "version": "0.1.0",
+  "homepage_url": "https://github.com/Yvonson/immersive-translate",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "open-bilingual-translate@yvonson",
+      "strict_min_version": "63.0"
+    }
+  },
+  "commands": {
+    "hotkey-toggle-translation": {
+      "suggested_key": {
+        "default": "Alt+Shift+T"
+      },
+      "description": "__MSG_lblSwitchTranslatedAndOriginal__"
+    },
+    "hotkey-toggle-dual": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "__MSG_lblSwitchDual__"
+    }
+  },
+  "icons": {
+    "32": "/icons/icon-32.png",
+    "48": "/icons/icon-48.png",
+    "64": "/icons/icon-64.png",
+    "128": "/icons/icon-128.png"
+  },
+  "permissions": [
+    "<all_urls>",
+    "storage",
+    "activeTab",
+    "contextMenus",
+    "webRequest"
+  ],
+  "optional_permissions": [
+    "webNavigation"
+  ],
+  "web_accessible_resources": [
+    "/icons/icon-32.png",
+    "/icons/google-translate-32.png",
+    "/icons/yandex-translate-32.png",
+    "/icons/swap-32.png",
+    "/contentScript/css/*"
+  ],
+  "options_ui": {
+    "page": "/options/options.html",
+    "open_in_tab": true,
+    "browser_style": false
+  },
+  "browser_action": {
+    "browser_style": false,
+    "default_icon": "/icons/icon-32.png",
+    "default_title": "__MSG_pageActionTitle__"
+  },
+  "page_action": {
+    "browser_style": false,
+    "default_icon": "/icons/icon-32.png",
+    "default_title": "__MSG_pageActionTitle__"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_start",
+      "all_frames": false,
+      "js": [
+        "/contentScript/checkScriptIsInjected.js"
+      ]
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "js": [
+        "/lib/languages.js",
+        "/lib/config.js",
+        "/lib/platformInfo.js"
+      ]
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_end",
+      "all_frames": true,
+      "match_about_blank": true,
+      "js": [
+        "/lib/i18n.js",
+        "/contentScript/showOriginal.js",
+        "/lib/specialRules.js",
+        "/contentScript/enhance.js",
+        "/contentScript/pageTranslator.js"
+      ]
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_end",
+      "all_frames": false,
+      "js": [
+        "/contentScript/popupMobile.js"
+      ]
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "js": [
+        "/contentScript/subtitleTranslator.js"
+      ]
+    }
+  ],
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "/lib/languages.js",
+      "/lib/config.js",
+      "/lib/platformInfo.js",
+      "/lib/util.js",
+      "/background/translationCache.js",
+      "/background/aiProviders.js",
+      "/background/translationService.js",
+      "/background/background.js"
+    ]
+  }
+}
