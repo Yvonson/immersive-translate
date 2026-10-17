@@ -21,6 +21,7 @@
 
 - `npm test`：12 项通过；`npm run build`、`npm run check`：Chrome/Firefox 构建、页面资源、语法、JSON、清理检查通过。ZIP 内容另行扫描，无旧收款/邀请入口和图片。
 - `npm run test:browser`：12 项通过；新增设置分区、未知 hash、小屏导航、主题、字幕样式保存、模型配置保留、弹窗引擎选择与翻译/恢复，以及 YouTube 结构模拟页的普通/影院/小尺寸/200% 缩放/全屏、键盘返回、原生菜单互斥和控制栏重建。
+- 代码提交 `01044732403d27fe7927498b7c1f355092577c60` 已推送 `main`；[远程 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39033763180) 成功，包含 Linux Chromium 的 12 项浏览器回归，并上传扩展 ZIP artifact。
 - 浏览器测试中的扩展弹窗以扩展页面方式加载。独立 Chromium 的 `chrome.action.openPopup()` 可调用，但无可捕获的弹窗页面；真实工具栏弹窗仍需正常 Chrome 人工检查。
 - 真实 YouTube 公开样本布局通过：独立无登录 Chromium 中按钮紧邻 CC，尺寸 48×40；菜单范围 x=706–1006、y=210–580.5，位于播放器 x=24–1014、y=80–637 内，菜单底部在控制栏按钮上方。仅验证布局，没有重测字幕翻译端到端。
 - 截图位于忽略目录 `.local/`：弹窗、浅/深设置、播放器模拟页、全屏及真实 YouTube；不提交视频页面截图或课程材料。
