@@ -20,6 +20,7 @@
 - 本地 `npm test` 22 项、浏览器回归 27 项、Chrome／Firefox 构建和 `npm run check` 通过。新增浏览器用例覆盖新按键、词卡兜底／新选区／旧语境、慢确认与 Esc 后保存、重复键、空／过长选词、编辑／输入法、失败提示、配置即时生效／清空／重置、跨域 iframe、可选原生路径去重与开放 Shadow DOM 编辑器保护。收藏使用隔离真实 SQLite；可选原生入口的 getAll 绑定状态和触发入口在自动化中受控模拟，不能称为用户正常 Chrome 已手工配置成功。
 - 独立真实 Chromium 离线按 Alt+Q，经实际已安装的 Windows 组件查询现有大词库 hello 成功、Esc 关闭成功，两个新原生命令确认为未绑定；没有重新安装组件或向用户收藏写测试词。证据 `.local/dictionary-shortcut-native-verification.json`，设置截图 `.local/browser-results/dictionary-shortcut-settings.png`。
 - 没有改原生协议、数据库、组件、词库或版本；用户需重新加载扩展并刷新旧网页。未重测真实语音 API 或视频站点，本轮重点为减少操作步骤。
+- 功能提交 `2476896` 已推送；[远程扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39105028420) 成功，包含 22 项扩展单元、13 项 Python、构建／检查和 27 项 Linux Chromium 回归，并上传扩展 ZIP artifact。原生组件工作流未触发，无需更新 Windows 包。
 
 ## 本地收藏与翻卡学习（2026-10-18）
 
