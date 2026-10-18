@@ -27,6 +27,7 @@
 - Windows 新组件已构建、安装／注册；`node scripts/verify-favorites-native.cjs` 验证真实 Chrome Native Messaging 能力、复用现有大词库，隔离数据在重复安装后笔记／复习／快照保留，缺词库仍可读取并导出。未给用户生词本写测试词，原有数量保持不变；证据 `.local/dictionary/favorites-native-verification.json`。对应源码包同步生成；未重新下载词库、录音或模型。
 - 截图在忽略目录 `.local/browser-results/favorites-*.png`。真实用户常用 Chrome 的扩展需重新加载并刷新网页；本轮未补充真实语音 API 或视频站点验收。版本仍为 `0.2.0`／`0.2.0-preview.1`，未创建 Release 或标签。
 - 功能提交 `6a789d9` 已推送；[扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39102146070) 与 [Windows 组件 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39102146074) 均成功，上传扩展 ZIP／组件二进制及源码 artifact，未触发大词库资源下载。随后补充选词引号／标点规范化的星标状态回归，本地 4 项生词本浏览器测试通过。
+- 最终修复 `b1e24f8` 的 [扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39102272604) 和 [Windows 组件 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39102272626) 均成功；本机最终二进制已重复安装验证，带引号选词状态一致，源码 ZIP 同步更新。使用者可下载这两次运行的匹配 artifact，词库沿用现有安装。
 
 ## 本地词典与发音（2026-10-18）
 
