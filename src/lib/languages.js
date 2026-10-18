@@ -5154,15 +5154,13 @@ const twpLang = (function () {
     return allLanguagesNames[uiLanguage];
   };
 
-  /** @type {Map<string, string>} */
-  const alternatives = new Map();
   const pageTranslationServices = ["google", "yandex"];
   /**
-   * gets an alternate translation service if the selected translation service does not support the current target language.
+   * Validates the selected service without sending text to an alternate provider.
    * @param {string} lang
    * @param {string} serviceName
    * @param {boolean} forPageTranslation
-   * @returns {string} alternativeServiceName
+   * @returns {string} selectedServiceName
    */
   twpLang.getAlternativeService = function getAlternativeService(
     lang,
@@ -5170,27 +5168,13 @@ const twpLang = (function () {
     forPageTranslation = false
   ) {
     if (["deepseek", "local", "custom"].includes(serviceName)) return serviceName;
-    lang = twpLang.fixTLanguageCode(lang);
-    if (!twpLang.SupportedLanguages[serviceName])
-      return pageTranslationServices[0];
-    if (
-      forPageTranslation &&
-      pageTranslationServices.indexOf(serviceName) === -1
-    )
-      serviceName = pageTranslationServices[0];
-    if (twpLang.SupportedLanguages[serviceName].indexOf(lang) !== -1)
-      return serviceName;
-    for (const sn in twpLang.SupportedLanguages) {
-      if (sn === serviceName) continue;
-      if (forPageTranslation && pageTranslationServices.indexOf(sn) === -1)
-        continue;
-      const langs = twpLang.SupportedLanguages[sn];
-      if (langs.indexOf(lang) !== -1) {
-        alternatives.set(lang, sn);
-        return sn;
-      }
+    if (!Object.hasOwn(twpLang.SupportedLanguages, serviceName) ||
+      (forPageTranslation && !pageTranslationServices.includes(serviceName))) {
+      throw new Error("当前翻译服务不可用，请在设置中自行选择其他服务。");
     }
-    return pageTranslationServices[0];
+    // Legacy language tables can lag behind a provider. Keep the user's choice;
+    // an unsupported language must never send their text to another company.
+    return serviceName;
   };
 
   /**

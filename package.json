@@ -1,30 +1,17 @@
 {
   "name": "open-bilingual-translate",
   "version": "0.2.0",
-  "browserslist": [
-    "firefox 63",
-    "chrome 70"
-  ],
   "scripts": {
-    "build": "npx gulp",
-    "firefox": "npx gulp firefox-build ",
-    "chrome": "npx gulp chrome-build ",
+    "build": "node scripts/build.cjs",
+    "firefox": "node scripts/build.cjs firefox",
+    "chrome": "node scripts/build.cjs chrome",
     "test": "node --test tests/*.test.cjs",
     "check": "node scripts/check-build.cjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {
-    "@babel/core": "^7.19.3",
-    "@babel/preset-env": "^7.19.3",
     "@playwright/test": "^1.64.1",
-    "@types/chrome": "^0.0.197",
-    "@types/firefox-webext-browser": "^94.0.1",
-    "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-concat": "^2.6.1",
-    "gulp-replace": "^1.1.3",
-    "gulp-sourcemaps": "^3.0.0",
-    "gulp-zip": "^5.1.0"
+    "fflate": "^0.8.2"
   },
   "private": true,
   "license": "MPL-2.0",

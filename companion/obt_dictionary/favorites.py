@@ -138,6 +138,9 @@ class Favorites:
             CREATE INDEX IF NOT EXISTS contexts_domain ON contexts(domain, wordId);
             PRAGMA user_version=1;
         """)
+        # Repair pre-release clock rollback rows; preserve all personal content.
+        with self.db:
+            self.db.execute("UPDATE words SET lastCollectedAt=firstCollectedAt WHERE lastCollectedAt<firstCollectedAt")
         self.transfers = {}
 
     def close(self):
@@ -171,7 +174,7 @@ class Favorites:
             row = self.db.execute("SELECT id FROM words WHERE identity=?", (identity,)).fetchone()
             word_id = row[0] if row else uuid.uuid4().hex
             if row:
-                self.db.execute("UPDATE words SET lastCollectedAt=? WHERE id=?", (collected, word_id))
+                self.db.execute("UPDATE words SET lastCollectedAt=max(lastCollectedAt,firstCollectedAt,?) WHERE id=?", (collected, word_id))
             else:
                 self.db.execute("INSERT INTO words(id,identity,word,snapshot,firstCollectedAt,lastCollectedAt) VALUES(?,?,?,?,?,?)",
                                 (word_id, identity, canonical, json.dumps(snapshot, ensure_ascii=False), collected, collected))
@@ -342,6 +345,8 @@ class Favorites:
                     fields = ("identity", "word", "personalMeaning", "notes", "state", "firstCollectedAt", "lastCollectedAt", "reviewCount", "lastReviewedAt", "lastOutcome")
                     self.db.execute("INSERT INTO words(id,snapshot," + ",".join(fields) + ") VALUES(" + ",".join("?" for _ in range(12)) + ")", [word_id, json.dumps(row["snapshot"], ensure_ascii=False)] + [row[key] for key in fields])
                 self.db.executemany("INSERT OR IGNORE INTO tags VALUES(?,?)", ((word_id, tag) for tag in row["tags"]))
+                if self.db.execute("SELECT count(*) FROM tags WHERE wordId=?", (word_id,)).fetchone()[0] > 30:
+                    raise DictionaryError("INVALID_FAVORITE", "合并后标签超过每词 30 个，原数据未改动。请先整理标签。")
                 for context in row["contexts"]:
                     self._context(word_id, context, context["collectedAt"])
         return {"created": created, "merged": merged}

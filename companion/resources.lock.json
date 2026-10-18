@@ -8,5 +8,10 @@
     "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/8defb76/LICENSE",
     "sha256": "ebd1186ec36c0dba6bb2d77cc59b0b292d4429b1dbe19c39bd0eab121ec73369",
     "bytes": 1063
+  },
+  "zhwiktionary.jsonl.gz": {
+    "url": "https://kaikki.org/zhwiktionary/raw-wiktextract-data.jsonl.gz",
+    "sha256": "b97696cdb53bd1dc6236dd93b69f4e9359217cd9504d1c998508ded9ce11de3f",
+    "bytes": 234449710
   }
 }

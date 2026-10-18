@@ -30,3 +30,8 @@ test('old profiles gain dictionary defaults without overwriting cleared or confl
   api=config({pageShortcuts:{'hotkey-dictionary-lookup':'','hotkey-dictionary-collect':'Alt+E'}});assert.equal(api.get('pageShortcuts')['hotkey-dictionary-lookup'],'');assert.equal(api.get('pageShortcuts')['hotkey-dictionary-collect'],'Alt+E');
   const original=api.getDefault('pageShortcuts');original['hotkey-dictionary-lookup']='changed';assert.equal(api.getDefault('pageShortcuts')['hotkey-dictionary-lookup'],'Alt+Q');
 });
+
+test('general configuration never loads translation or speech credentials',()=>{
+  const api=config({aiProviderSettings:{secret:'fixture'},dictionaryVoiceSecrets:{googleCloud:'fixture'}});
+  assert.equal(api.get('aiProviderSettings'),undefined);assert.equal(api.get('dictionaryVoiceSecrets'),undefined);
+});

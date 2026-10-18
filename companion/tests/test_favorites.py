@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from obt_dictionary.favorites import Favorites, source_url
@@ -88,6 +89,33 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(self.store.listing({"search": "Visible original"})["total"], 1)
         self.assertEqual(self.store.listing({"search": "%"})["total"], 0)
         self.assertEqual(self.store.listing({"search": "license"})["total"], 0)
+
+    def test_clock_rollback_and_future_import_keep_backup_restorable(self):
+        with patch("obt_dictionary.favorites.now", return_value="2030-01-02T00:00:00.000Z"):
+            word_id = self.collect()
+        self.collect()
+        saved = self.store.get(word_id)
+        self.assertEqual(saved["firstCollectedAt"], saved["lastCollectedAt"])
+        self.assertEqual(self.restore(self.backup()), {"created": 0, "merged": 1})
+        with self.store.db:
+            self.store.db.execute("UPDATE words SET lastCollectedAt='2020-01-01T00:00:00.000Z' WHERE id=?", (word_id,))
+        self.store.close()
+        self.store = Favorites(self.root)
+        self.assertEqual(self.store.get(word_id)["lastCollectedAt"], saved["firstCollectedAt"])
+        self.assertEqual(self.restore(self.backup()), {"created": 0, "merged": 1})
+
+    def test_import_tag_union_limit_rolls_back_all_records(self):
+        word_id = self.collect()
+        self.store.update(word_id, {"tags": [f"old-{i}" for i in range(30)]})
+        data = json.loads(self.backup())
+        existing = copy.deepcopy(data["words"][0]); existing["tags"] = ["new-tag"]
+        new = copy.deepcopy(existing); new["word"] = "another-word"; new["identity"] = "word:another-word"
+        data["words"] = [new, existing]
+        with self.assertRaisesRegex(DictionaryError, "标签超过"):
+            self.restore(json.dumps(data))
+        self.assertEqual(self.store.meta()["count"], 1)
+        self.assertEqual(len(self.store.get(word_id)["tags"]), 30)
+        self.assertEqual(self.restore(self.backup()), {"created": 0, "merged": 1})
 
     def test_backup_roundtrip_idempotence_preserve_existing_progress(self):
         word_id = self.collect()

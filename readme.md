@@ -6,9 +6,9 @@
 
 [下载扩展](https://github.com/Yvonson/immersive-translate/releases/latest) · [报告问题](https://github.com/Yvonson/immersive-translate/issues) · [开发文档](docs/DEVELOPMENT.md)
 
-> 当前源码为 **0.2.0-preview.1**：包含 Ctrl 段落开关、保留原文的段下译文、快捷键配置，以及新版分区界面和播放器字幕菜单。当前重点支持 Chrome；公开稳定 Release 仍为 `v0.1.0`，其下载包不含这些新功能。新能力可从源码构建，或在开发机器加载 `dist/chrome`。字幕适配仍为实验功能，真实验收情况见 [当前状态](docs/memory/STATUS.md)。
+> 当前版本 **v0.2.0**：网页双语、Ctrl 段落翻译、视频字幕菜单、本地英汉词典、生词本和 Alt+Q／Alt+S 快捷键。重点支持 Chrome；字幕适配仍为实验功能，真实验收范围见 [发布说明](docs/releases/v0.2.0.md) 和 [当前状态](docs/memory/STATUS.md)。
 
-预览下载：打开 [main 的 CI 构建列表](https://github.com/Yvonson/immersive-translate/actions/workflows/ci.yml?query=branch%3Amain)，选择最近一次成功运行（绿色对勾），登录 GitHub 后在 **Artifacts** 下载 `browser-extensions`。解压得到 `chrome.zip`，再解压它；按下面的 Chrome 方法加载直接包含 `manifest.json` 的目录。预览包不是商店安装包，CI 附件可能过期。
+**只使用网页／字幕翻译，下载 [chrome.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/chrome.zip) 即可。** 想用本地词典和生词本，再下载 [Windows 组件](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/dictionary-companion-windows-x64.zip) 和 [词库包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/dictionary-core.zip)。普通用户不需要源码包、原始词典快照或 Node.js。完整步骤见 [安装指南](docs/INSTALL.md)。Release 附件公开下载，无需登录 GitHub。
 
 ## 目录
 
@@ -43,7 +43,7 @@
 | 本地离线词典 | Windows x64＋Chrome：选词右键查英汉释义、音标、详细解释与例句；英美音使用浏览器语音或自配 Google Cloud API；释义需额外安装伴随程序和词库包 |
 | 本地生词本 | 网页星标／右键收藏，保存释义和原文语境；按收藏时间、标签、状态和来源筛选，支持翻卡复习、JSON 备份；数据留在本机独立文件 |
 | Chrome / Edge | 提供可手动加载的扩展包 |
-| Firefox | 提供临时加载的开发包，尚未签名上架 |
+| Firefox | Firefox 128+ 临时加载开发包，尚未签名或完成本项目功能验收 |
 
 当前不含无字幕视频的语音识别、画面内字幕 OCR、Safari、手机 App 和桌面客户端。PDF、电子书及其他视频平台的完整使用流程尚未在本项目验收，不作为当前稳定支持范围。
 
@@ -120,7 +120,7 @@
 
 设置页分为 **基础设置、翻译服务、网页翻译、视频字幕、快捷键、数据与高级**。在基础设置中选择浅色、深色或跟随系统主题。没有账号、会员、赞助或旧群邀请入口；项目源码、反馈和许可证入口保留。
 
-正式 2.0 Release 发布前，按维护者要求保持当前版本字段 `0.2.0` / `0.2.0-preview.1`，因此版本号相同的本地构建也可能包含更新。查看 [变更记录](CHANGELOG.md) 或构建对应的提交确认内容，更新时重新加载扩展并刷新网页。
+本次正式 Release 保持数字版本 `0.2.0`，显示版本移除 `preview` 后缀。查看 [变更记录](CHANGELOG.md) 或包内 `BUILD.json` 确认对应提交；更新后重新加载扩展并刷新网页。
 
 ## 接入 Google 或 Yandex 翻译
 

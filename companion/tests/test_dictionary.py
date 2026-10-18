@@ -1,4 +1,5 @@
 import io
+import gzip
 import json
 from pathlib import Path
 import sqlite3
@@ -7,12 +8,13 @@ import sys
 import tempfile
 import unittest
 import zipfile
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from obt_dictionary.engine import Dictionary, DictionaryError, normalize
 from obt_dictionary.host import read_message, write_message
-from obt_dictionary.resources import convert_wiki, pack, sound_accent
-from obt_dictionary.storage import active_packs, install_pack, verify_packs
+from obt_dictionary.resources import build, convert_wiki, pack, sound_accent, verify_sources
+from obt_dictionary.storage import active_packs, digest, install_pack, verify_packs
 
 
 def fixture(directory):
@@ -98,6 +100,30 @@ class DictionaryTests(unittest.TestCase):
         self.assertEqual(sound_accent({"raw_tags":["音頻（美式）"]}),"en-US")
         self.assertEqual(sound_accent({"raw_tags":["音頻 (RP)"]}),"en-GB")
         self.assertEqual(sound_accent({"tags":["US","UK"]}),"unknown")
+
+    def test_resource_build_requires_locked_inputs_and_records_every_source(self):
+        cache = self.root / "cache"; cache.mkdir()
+        with zipfile.ZipFile(cache / "ecdict.zip", "w") as archive:
+            archive.write(self.root / "source/ecdict.db", "ecdict.db")
+        (cache / "ecdict-license.txt").write_text("Fixture license", encoding="utf-8")
+        with gzip.open(cache / "zhwiktionary.jsonl.gz", "wt", encoding="utf-8") as stream:
+            stream.write(json.dumps({"word": "hello", "lang_code": "en", "senses": [{"glosses": ["你好"]}]}))
+        locked = {name: ("https://example.org/" + name, digest(cache / name)) for name in ("ecdict.zip", "ecdict-license.txt", "zhwiktionary.jsonl.gz")}
+        stale = self.root / "work/core"; stale.mkdir(parents=True)
+        (stale / "ecdict.db").write_bytes(b"unrelated stale build")
+        with patch("obt_dictionary.resources.DOWNLOADS", locked):
+            build(cache, self.root / "packages")
+            with zipfile.ZipFile(self.root / "packages/dictionary-core.zip") as archive:
+                manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual({item["name"] for item in manifest["sources"]}, set(locked))
+            self.assertEqual(manifest["counts"], {"ecdictEntries": 4, "wiktionaryEntries": 1})
+            (cache / "ecdict-license.txt").write_text("corrupted", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "校验失败"):
+                verify_sources(cache)
+        locked["zhwiktionary.jsonl.gz"] = ("https://example.org/wiki", None)
+        with patch("obt_dictionary.resources.DOWNLOADS", locked):
+            with self.assertRaises(ValueError):
+                verify_sources(cache)
 
 
 if __name__=="__main__":unittest.main()

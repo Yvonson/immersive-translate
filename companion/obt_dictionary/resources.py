@@ -109,13 +109,13 @@ def convert_wiki(entry):
 def build_core(cache, directory):
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / "ecdict.db"
-    if not target.exists():
-        with zipfile.ZipFile(cache / "ecdict.zip") as archive:
-            candidates = [name for name in archive.namelist() if name.endswith((".db", ".sqlite"))]
-            if len(candidates) != 1:
-                raise ValueError("Unexpected ECDICT archive layout")
-            with archive.open(candidates[0]) as incoming, target.open("wb") as output:
-                shutil.copyfileobj(incoming, output)
+    # Never reuse an unrelated database left in the build directory.
+    with zipfile.ZipFile(cache / "ecdict.zip") as archive:
+        candidates = [name for name in archive.namelist() if name.endswith((".db", ".sqlite"))]
+        if len(candidates) != 1:
+            raise ValueError("Unexpected ECDICT archive layout")
+        with archive.open(candidates[0]) as incoming, target.open("wb") as output:
+            shutil.copyfileobj(incoming, output)
     core = sqlite3.connect(target)
     # Release 1.0.28 already contains the sd_1 NOCASE word index.
     core.commit()
@@ -174,13 +174,23 @@ def digest_file_list(files):
     return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
 
 
+def verify_sources(cache):
+    sources = {}
+    for name, (url, sha) in DOWNLOADS.items():
+        path = Path(cache) / name
+        if not sha or digest(path) != sha:
+            raise ValueError("原始词库未锁定或校验失败: " + name)
+        sources[name] = {"url": url, "sha256": sha, "bytes": path.stat().st_size}
+    return sources
+
+
 def build(cache, output):
     cache, output = Path(cache), Path(output)
+    sources = verify_sources(cache)
     work = cache.parent / "work"
     counts = build_core(cache, work / "core")
-    sources = json.loads((cache / "sources.lock.json").read_text(encoding="utf-8"))
     manifest = pack(work / "core", output / "dictionary-core.zip", "core", counts,
-                    [{"name": key, **value} for key, value in sources.items() if key.startswith(("ecdict", "zhwiki"))])
+                    [{"name": key, **value} for key, value in sources.items()])
     target = output / "dictionary-core.zip"
     atomic_json(output / "catalog.json", {"schema": 1, "components": [{"component": "core", "filename": target.name,
         "downloadBytes": target.stat().st_size, "sha256": digest(target),

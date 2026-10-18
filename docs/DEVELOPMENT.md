@@ -12,7 +12,7 @@
 - `src/background/dictionaryService.js`、`src/dictionary/`、`companion/`：选词查词、共享词卡／词典页、Native Messaging、本地 SQLite 与独立浏览器／Google Cloud 语音；协议、安装、资源构建和验收见 [本地词典](LOCAL-DICTIONARY.md)。
 - `src/chrome_manifest.json`：Chrome / Edge Manifest V3。
 - `src/manifest.json`：Firefox Manifest V2，独立扩展 ID。
-- `gulpfile.js`：生成 `dist/chrome`、`dist/firefox` 及两个 ZIP 包。
+- `scripts/build.cjs`：用 Node.js 和 fflate 生成 `dist/chrome`、`dist/firefox` 及两个 ZIP；保留现代浏览器原生语法，不再依赖 Gulp／Babel。
 - `tests/`：单元测试和真实 Chromium DOM / 扩展测试；默认使用本地模拟接口，无需付费 Key。
 
 新消息、配置、渲染约定及验收步骤见 [阅读与字幕升级](READING-UPGRADE.md)。
@@ -46,7 +46,7 @@ AI 引擎使用 `POST /chat/completions`。基础 URL 可以包含 `/v1`，也�
 
 - 每次 push / pull request：测试、构建、产物检查，上传两个 ZIP artifact。
 - 手动 preview：构建并上传测试包。
-- 推送 `v*` 标签：验证后创建 GitHub Release，附带两个 ZIP。
+- 推送 `v*` 标签：扩展完整回归、Windows 官方 Python 构建及对应源码检查通过后创建草稿；补齐已校验词库和所有附件后发布，见 [发布流程](RELEASING.md)。
 - 不需要上游作者的任何密钥，不会上传到上游 Chrome 商店，也不会自动执行 Firefox 签名。
 
 Firefox 正式分发签名、商店上架、Safari 或独立桌面端需要另行开发或配置。

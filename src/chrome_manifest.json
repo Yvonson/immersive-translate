@@ -171,5 +171,5 @@
     "service_worker": "background/background-entry.js"
   },
   "minimum_chrome_version": "111",
-  "version_name": "0.2.0-preview.1"
+  "version_name": "0.2.0"
 }

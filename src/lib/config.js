@@ -210,7 +210,7 @@ const twpConfig = (function () {
     twpConfig.onReady(function () {
       if (areaName === "local") {
         for (const name in changes) {
-          if (name === "aiProviderSettings") continue;
+          if (name === "aiProviderSettings" || name === "dictionaryVoiceSecrets") continue;
           const newValue = changes[name].newValue;
           if (config[name] !== newValue) {
             config[name] = fixObjectType(name, newValue);
@@ -226,7 +226,7 @@ const twpConfig = (function () {
     chrome.storage.local.get(null, (onGot) => {
       // load config; convert object/array to map/set if necessary
       for (const name in onGot) {
-        if (name === "aiProviderSettings") continue;
+        if (name === "aiProviderSettings" || name === "dictionaryVoiceSecrets") continue;
         config[name] = fixObjectType(name, onGot[name]);
       }
 

@@ -8,7 +8,7 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "open-bilingual-translate@yvonson",
-      "strict_min_version": "63.0"
+      "strict_min_version": "128.0"
     }
   },
   "commands": {
@@ -139,5 +139,5 @@
       "/background/background.js"
     ]
   },
-  "version_name": "0.2.0-preview.1"
+  "version_name": "0.2.0"
 }

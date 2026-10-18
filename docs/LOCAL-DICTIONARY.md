@@ -1,10 +1,10 @@
 # 本地英汉词典与读音
 
-当前预览功能由 **Chrome 扩展＋Windows x64 查词伴随程序＋本地词库包** 组成。释义、音标和例句在本地 SQLite 检索；发音默认使用浏览器语音，可选择自己的 Google Cloud API。按用户最新要求，已停止真人录音下载，不需要录音包或大型离线语音模型。
+当前功能由 **Chrome 扩展＋Windows x64 查词伴随程序＋本地词库包** 组成。释义、音标和例句在本地 SQLite 检索；发音默认使用浏览器语音，可选择自己的 Google Cloud API。按用户最新要求，已停止真人录音下载，不需要录音包或大型离线语音模型。
 
 ## 获取与安装
 
-本功能属于当前预览源码，公开旧版 `v0.1.0` 不包含它。源码推送后，浏览器包可从 [扩展 CI 成功运行的 Artifacts](https://github.com/Yvonson/immersive-translate/actions/workflows/ci.yml) 获取。Windows 程序从 [词典构建工作流](https://github.com/Yvonson/immersive-translate/actions/workflows/dictionary.yml) 的成功运行获取；组件源码修改会自动构建，也可手动运行，只有手动勾选资源选项才构建词库包。附件需登录 GitHub，过期需重建；正式 2.0 前不因此创建新 Release。
+在 [v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0) 下载下面的附件，无需登录 GitHub。普通用户只需扩展、Windows 程序及词库；已安装旧词库可继续使用。完整步骤见 [安装指南](INSTALL.md)。开发中的 CI artifact 不替代固定版本的 Release。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -29,7 +29,7 @@
 
 普通网页中也可以选词后按 **Alt+Q 查词／Alt+S 收藏**。在 **设置 → 快捷键** 直接录入新按键，支持清除、恢复默认及重复／保留组合检查，保存后即时生效。词卡内可直接按收藏键保存当前词；新选区优先，未选词且没有词卡时仅提示。按住键不连续执行，相同收藏正在保存时合并请求；关闭词卡不取消收藏写入。输入框、编辑器和输入法组合输入期间不触发，不读取剪贴板或自动悬停取词。
 
-这两个动作默认使用网页快捷键，Chrome 原生入口可另外绑定；设置显示实际绑定，同键时只执行原生路径一次。默认只在普通网页有焦点时生效；受限页面、网站／系统占键可能影响按键。原生入口无法找到可执行网页时，工具栏图标的悬停标题给出提示。更新本次快捷键只需更新扩展，词库和 Windows 组件沿用现有版本。
+这两个动作默认使用网页快捷键，Chrome 原生入口可另外绑定；设置显示实际绑定，同键时只执行原生路径一次。默认只在普通网页有焦点时生效；受限页面、网站／系统占键可能影响按键。原生入口无法找到可执行网页时，工具栏图标的悬停标题给出提示。v0.2.0 同时修复生词本时钟回拨／导入标签上限问题，从预览版本升级时也应更新 Windows 组件；已有词库无需重下。
 
 - 选词不超过 120 个字符、8 个词；长句使用原网页翻译。
 - 词卡在选词所在 iframe 内显示，Esc 或点击外部关闭；不能注入的 Chrome 内部页面改开词典页。
@@ -80,7 +80,7 @@
 - [ECDICT 1.0.28](https://github.com/skywind3000/ECDICT/releases/tag/1.0.28)：SQLite 英汉释义、英文解释、音标、词形和考试标签，保留上游 MIT 声明。
 - [中文维基词典，经 Kaikki／Wiktextract](https://kaikki.org/zhwiktionary/rawdata.html)：仅保留 `lang_code=en`，包含中文解释、音标和部分例句／词源，保留逐词链接、CC BY-SA／GFDL 及转换说明。
 
-词库约 290 MB 下载、970 MB 安装，精确体积和各来源记录数以 `catalog.json` 为准；记录可能重复，不将总记录数称为独立词数。原始数据不进入 Git。程序 GPL-3.0-only 与扩展 MPL-2.0 分开，详见 [第三方说明](../companion/THIRD_PARTY.md)。没有分发商业词典的非授权词库。
+v0.2.0 词库约 254 MiB 下载、889 MiB 安装，精确体积和各来源记录数以 `catalog.json` 为准；重新从锁定原始数据库构建，未复用旧工作目录中的冗余数据。记录可能重复，不将总记录数称为独立词数。原始数据不进入 Git。程序 GPL-3.0-only 与扩展 MPL-2.0 分开，详见 [第三方说明](../companion/THIRD_PARTY.md)。没有分发商业词典的非授权词库。
 
 ## 更新、故障与卸载
 
@@ -119,7 +119,7 @@ python companion/main.py --build-resources
 python scripts/package-dictionary-sources.py
 ```
 
-只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定原始快照 SHA-256；Kaikki 更新导致校验失败时需审查新快照并更新锁，不能绕过校验冒充旧版。
+只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定所有原始快照 SHA-256；构建前再次校验，清单保留全部来源。若 Kaikki 滚动地址已更新，从同版本 Release 获取 `zhwiktionary.jsonl.gz` 放入缓存再运行；或另行审查并更新锁，不绕过校验冒充旧版。
 
 生成文件在 `.local/dictionary/`。Native Messaging 协议 `{v:1,id,op,...}` 提供 `status/lookup/cancel` 和 `favorites.*`，32 位小端长度＋UTF-8 JSON，入站 16 KiB，不接受网页提供的路径／命令。收藏地址仅是存储文本，不供程序抓取。语音由扩展独立处理。普通测试不修改系统注册；`node scripts/verify-dictionary-native.cjs` 明确安装当前程序、注册并验证真实词库及实际可用浏览器音色；`node scripts/verify-favorites-native.cjs` 明确安装／更新程序、用真实 Chrome 检查能力，再用隔离收藏文件验证升级保留及缺词库仍可用，不向用户生词本写入测试词。
 

@@ -12,11 +12,13 @@ function native(binary,userRoot,dataRoot){
   if(process.platform!=='win32')throw new Error('Windows only');
   const extension=path.resolve('dist/chrome'),installer=path.resolve('.local/dictionary/windows/install.ps1');
   const binary=path.join(process.env.LOCALAPPDATA,'OpenBilingualTranslate/Companion/dictionary-companion.exe');
+  const previousSettings=JSON.parse(fs.readFileSync(path.join(path.dirname(binary),'settings.json'),'utf8'));
   const context=await chromium.launchPersistentContext('',{headless:true,channel:'chromium',args:[`--disable-extensions-except=${extension}`,`--load-extension=${extension}`,'--no-proxy-server']});
   let id,baseline;
   try{
     const worker=context.serviceWorkers()[0]||await context.waitForEvent('serviceworker');id=new URL(worker.url()).host;
     execFileSync('powershell',['-NoProfile','-ExecutionPolicy','Bypass','-File',installer,'-ExtensionId',id,'-NoManage'],{windowsHide:true,stdio:'pipe'});
+    assert.equal(JSON.parse(fs.readFileSync(path.join(path.dirname(binary),'settings.json'),'utf8')).dataDir,previousSettings.dataDir);
     const page=await context.newPage();await page.goto(`chrome-extension://${id}/dictionary/index.html#hello`);await page.locator('.dictionary-entry').first().waitFor({timeout:15000});
     const status=await page.evaluate(()=>dictionaryView.send('dictionaryStatus'));assert.equal(status.capabilities.favorites,1);assert.equal(status.ready,true);
     baseline=await page.evaluate(()=>dictionaryView.send('dictionaryFavorites',{op:'meta'}));
@@ -30,6 +32,15 @@ function native(binary,userRoot,dataRoot){
     assert.equal((await client.request('favorites.state',{text:'“Hello,”'})).result.id,word);
     assert.equal((await client.request('favorites.update',{wordId:word,changes:{notes:'Persist through upgrade',tags:['verification']}})).ok,true);
     assert.equal((await client.request('favorites.review',{wordId:word,outcome:'mastered'})).ok,true);
+    const transfer=(await client.request('favorites.exportStart')).result;
+    const backup=JSON.parse((await client.request('favorites.exportChunk',{token:transfer.token,index:0})).result.text);
+    const future={...backup.words[0],word:'clock-rollback-fixture',identity:'word:clock-rollback-fixture',snapshot:{entries:[]},tags:[],contexts:[],firstCollectedAt:'2030-01-02T00:00:00.000Z',lastCollectedAt:'2030-01-02T00:00:00.000Z'};
+    const raw=JSON.stringify({...backup,words:[future]}),token=(await client.request('favorites.importStart')).result.token;
+    for(let offset=0,index=0;offset<raw.length;offset+=2000,index++)assert.equal((await client.request('favorites.importChunk',{token,index,text:raw.slice(offset,offset+2000)})).ok,true);
+    assert.equal((await client.request('favorites.importCommit',{token})).ok,true);
+    const repeated=await client.request('favorites.collect',{text:future.word});assert.equal(repeated.ok,true);
+    const row=(await client.request('favorites.get',{wordId:repeated.result.id})).result;
+    assert.equal(row.lastCollectedAt,row.firstCollectedAt);
   }finally{await client.close();}
   const before=fs.readFileSync(path.join(userRoot,'favorites.sqlite3'));
   execFileSync('powershell',['-NoProfile','-ExecutionPolicy','Bypass','-File',installer,'-ExtensionId',id,'-NoManage'],{windowsHide:true,stdio:'pipe'});
@@ -39,11 +50,14 @@ function native(binary,userRoot,dataRoot){
     const entry=(await client.request('favorites.get',{wordId:word})).result;assert.equal(entry.notes,'Persist through upgrade');assert.equal(entry.state,'mastered');assert.equal(entry.reviewCount,1);assert.ok(entry.snapshot.entries.length);assert.equal(entry.contexts[0].url,'https://example.org/lesson');
     const status=(await client.request('status')).result;assert.equal(status.ready,false);assert.equal(status.capabilities.favorites,1);
     assert.equal((await client.request('lookup',{text:'hello'})).ok,false);
-    assert.equal((await client.request('favorites.list')).result.total,1);
+    assert.equal((await client.request('favorites.list')).result.total,2);
     const transfer=(await client.request('favorites.exportStart')).result;const backup=JSON.parse((await client.request('favorites.exportChunk',{token:transfer.token,index:0})).result.text);assert.equal(backup.words[0].notes,entry.notes);
   }finally{await client.close();}
   const realRoot=path.join(process.env.LOCALAPPDATA,'OpenBilingualTranslate/UserData');client=native(binary,realRoot);
   try{assert.equal((await client.request('favorites.meta')).result.count,baseline.count);}finally{await client.close();}
-  const evidence={verifiedAt:new Date().toISOString(),extensionId:id,installedBinary:binary,capability:1,realChromeNativeMessaging:true,reusedExistingCore:true,isolatedFavoritesPersistAfterUpgrade:true,snapshotsUsableWithoutDictionary:true,originalUserCountPreserved:baseline.count,voiceApiCalled:false};
+  const info=JSON.parse(fs.readFileSync(path.join(path.dirname(binary),'BUILD.json'),'utf8').replace(/^\uFEFF/,''));assert.equal(info.runtime,'cpython');
+  function files(root,prefix=''){return fs.readdirSync(root,{withFileTypes:true}).flatMap(item=>item.isDirectory()?files(path.join(root,item.name),prefix+item.name+'/'):[prefix+item.name]).sort();}
+  assert.deepEqual(files(path.join(path.dirname(binary),'_internal')),files(path.resolve('.local/dictionary/windows/dictionary-companion/_internal')));
+  const evidence={verifiedAt:new Date().toISOString(),extensionId:id,installedBinary:binary,sourceCommit:info.commit,python:info.python,officialRuntime:true,cleanRuntimeReplacement:true,resourceDirectoryPreserved:true,clockRollbackNative:true,capability:1,realChromeNativeMessaging:true,reusedExistingCore:true,isolatedFavoritesPersistAfterUpgrade:true,snapshotsUsableWithoutDictionary:true,originalUserCountPreserved:baseline.count,voiceApiCalled:false};
   fs.writeFileSync('.local/dictionary/favorites-native-verification.json',JSON.stringify(evidence,null,2));console.log(JSON.stringify(evidence,null,2));
 })().catch(error=>{console.error(error);process.exitCode=1});

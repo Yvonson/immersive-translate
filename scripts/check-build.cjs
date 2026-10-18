@@ -2,6 +2,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
+const {unzipSync} = require('fflate');
+const {files:buildFiles} = require('./build.cjs');
 
 for (const browser of ['chrome', 'firefox']) {
   const root = path.resolve('dist', browser);
@@ -12,6 +14,10 @@ for (const browser of ['chrome', 'firefox']) {
   for (const file of files) assert.ok(fs.existsSync(path.join(root, file.replace(/^\//, ''))), `${browser}: missing ${file}`);
   assert.equal(manifest.name, 'Open Bilingual Translate');
   assert.equal(manifest.version, require('../package.json').version);
+  for (const name of ['LICENSE','UPSTREAM.md','PRIVACY','BUILD.json']) assert.ok(fs.existsSync(path.join(root,name)), `${browser}: missing provenance ${name}`);
+  const archive = unzipSync(fs.readFileSync(`dist/${browser}.zip`));
+  assert.deepEqual(Object.keys(archive).sort(), buildFiles(root).sort(), `${browser}: ZIP file set differs from installation directory`);
+  for (const [name,bytes] of Object.entries(archive)) assert.ok(Buffer.from(bytes).equals(fs.readFileSync(path.join(root,name))), `${browser}: stale ZIP entry ${name}`);
   function check(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const file = path.join(dir, entry.name);
@@ -35,5 +41,5 @@ for (const browser of ['chrome', 'firefox']) {
   }
   check(root);
   assert.ok(fs.statSync(`dist/${browser}.zip`).size > 1000);
-  console.log(`${browser}: manifest/UI references, syntax, JSON, funding cleanup and archive OK`);
+  console.log(`${browser}: manifest/UI, syntax, JSON, licenses, funding cleanup and ZIP contents OK`);
 }
