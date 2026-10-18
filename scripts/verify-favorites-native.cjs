@@ -27,6 +27,7 @@ function native(binary,userRoot,dataRoot){
   let client=native(binary,userRoot),word;
   try{
     const collected=await client.request('favorites.collect',{text:'hello',context:{sentence:'Hello from the installed native binary.',url:'https://example.org/lesson?token=secret',title:'Verification'}});assert.equal(collected.ok,true);word=collected.result.id;
+    assert.equal((await client.request('favorites.state',{text:'“Hello,”'})).result.id,word);
     assert.equal((await client.request('favorites.update',{wordId:word,changes:{notes:'Persist through upgrade',tags:['verification']}})).ok,true);
     assert.equal((await client.request('favorites.review',{wordId:word,outcome:'mastered'})).ok,true);
   }finally{await client.close();}

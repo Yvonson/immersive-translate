@@ -53,6 +53,7 @@ test('card star and right-click persist only visible original contexts in real S
   await expect.poll(()=>card(page,'function(){return this.textContent}')).toContain('☆ 收藏');
   await card(page,'function(){this.querySelector(".favorite-button").click()}');
   await expect.poll(()=>card(page,'function(){return this.textContent}')).toContain('★ 已收藏');
+  await worker.evaluate(tabId=>dictionaryService.openSelection({selectionText:'“Hello,”',frameId:0},{id:tabId}),tabId);await expect.poll(()=>card(page,'function(){return this.querySelector(".favorite-button").textContent}')).toBe('★ 已收藏');
   await page.keyboard.press('Escape');
   let saved=(await api('list',{filters:{search:'hello'}})).items[0];expect(saved.word).toBe('hello');let entry=await api('get',{wordId:saved.id});
   expect(entry.contexts[0].sentence).toBe('Say hello to a stranger.');expect(entry.contexts[0].url).toBe('https://reading.example.org/lesson');expect(JSON.stringify(entry)).not.toContain('private');

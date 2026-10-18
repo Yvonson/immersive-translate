@@ -10,7 +10,7 @@ import sys
 import threading
 
 from . import PROTOCOL_VERSION
-from .engine import Dictionary, DictionaryError
+from .engine import Dictionary, DictionaryError, normalize
 from .favorites import Favorites
 
 MAX_MESSAGE = 16384
@@ -98,7 +98,7 @@ def serve(root, incoming=None, outgoing=None, user_root=None):
                 result = {"entries": []}
             return collection().collect(message.get("text"), result, message.get("context"))
         if operation == "favorites.state":
-            query = message.get("text")
+            query = normalize(message.get("text"))
             try:
                 result = dictionary().lookup(query)
                 matches = [entry["headword"] for entry in result["entries"] if entry["headword"].casefold() == query.casefold()]
