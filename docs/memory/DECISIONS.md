@@ -141,6 +141,7 @@
 ## D-016：规范文件名、双安装包与独立 Resources
 
 - 日期：2026-10-18。
+- 状态：已于 2026-10-18 实施并验证，服务端发布及零写入重放成功，证据见 STATUS。
 - 用户选择：两种用户安装包，开发资料另放；本轮只改发布与下载，不做安装向导。用户确认计划后要求实施。
 - 命名：统一 `open-bilingual-translate-<version>-chromium-extension.zip`、`open-bilingual-translate-<version>-windows-x64-bundle.zip`，清除覆盖文件名的显示标签。正式页只上传两件，加两个自动源码项共四项。校验值在正文折叠区，旧直链更新为新名，不保留重复附件。
 - 开发资料：统一 `open-bilingual-translate-<version>-development-resources.zip`，放在 `resources-v<version>` Release，明确 `make_latest=false`。资源标签指向本次包装提交；档内软件对应源码仍匹配原软件源提交。保留 GPL 对应源码、许可证与原始快照。
