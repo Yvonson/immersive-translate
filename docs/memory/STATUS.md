@@ -5,18 +5,20 @@
 ## 源码与交付
 
 - 用户按 D-014 明确选择正式 `v0.2.0`，源码及显示版本均为 `0.2.0`；本机扩展目录 `dist/chrome`，包 `dist/chrome.zip`。
-- 已公开正式 [v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0)，标签指向 `28a651c1cf3f0e53202bd32cc341d074604b035a`。20 个附件逐个核对远程 SHA-256／大小后发布为 latest；匿名 latest 跳转、Chrome ZIP 实际下载 SHA-256、词库下载 HTTP 200／精确体积和来源分片清单均通过。未上架浏览器商店。
+- 已公开正式 [v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0)，标签仍指向 `28a651c1cf3f0e53202bd32cc341d074604b035a`。按 D-015 精简为 4 个上传附件＋2 个 GitHub 自动源码项，共显示 6 项；普通用户只选轻量包或 Windows 完整包。远程 SHA-256／大小、匿名 latest／下载和公开校验值通过，未上架浏览器商店。
 - 独立根提交 `b8d680ad59bdf3a8f211bd1b78dbeccb7cb7b7cb`；旧稳定标签对应 `a3f814f71e101e95198a439c4b723cf102a24813`。保留独立历史，GitHub 创建时确认 `fork: false`。
 - `.upstream-git-history/` 为完整本地上游历史备份；`.upstream-git-backup/` 为早期不完整备份；两者不进入 Git。
 
 ## v0.2.0 发布审查（2026-10-18）
 
-- 下载整理进行中（D-015）：用户指出 20 个手传附件加 2 个自动源码项难以选择，要求精简。已生成并逐文件核对轻量包／Windows 完整包／开发资料包，包装的 3 项回归和脚本语法通过；准备在 GitHub 运行器上传验证后撤下分件。实际公开附件数以下次远程核对为准，尚不把计划的 6 项写成已完成。
+- 下载整理已完成（D-015）：`chrome.zip` 383,125 字节；`windows-full.zip` 280,941,378 字节，含 `chrome/`、`companion/`、词库 ZIP 和安装指南；`developer-resources.zip` 238,893,283 字节，集中对应源码、Firefox 开发包、原始快照及审计资料；另附 `SHA256SUMS.txt`。普通用户下载其中一个安装包即可，完整包仍需手工注册／导入。旧分件已安装用户无需为整理重装。
+- [整理工作流 39137811264](https://github.com/Yvonson/immersive-translate/actions/runs/39137811264) 成功，先完整审查旧输入，逐文件核对新包装与原程序／来源数据，上传核对后才撤下分件；保留原标签和 Chrome 包哈希。3 项包装回归与 [6dbf4c6 的扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39137592018) 通过。首次整理审计因 Windows／Linux 版权文本换行差异停止且没有删附件，0184d8f 仅规范化 3 份声明文本的换行后重跑成功，运行文件／词库仍按字节校验。
+- 整理后匿名 latest 指向 v0.2.0；轻量包实际下载 SHA-256 保持不变，公开校验文件 3 条均与远程 digest 一致，完整包／开发包 HTTP 200 和精确体积通过。证据 `.local/release/public-before-simplify.json`、`public-after-simplify.json`、`compact-public-verification.json`，工作流 artifact 保存修改前后清单和新下载清单。以下初次发布的 20 附件记录为历史，当前布局以上述 4 附件为准。
 
 - [审查记录](../RELEASE-REVIEW-2026-10-18.md)：修复旧入口自动换服务、收藏时钟回拨和导入标签越限，排除通用配置中的语音密钥；补齐词库锁／完整来源和构建前校验，避免复用旧工作数据库。
 - Node＋fflate 替换旧 Gulp／Babel，删除 550 项依赖；npm audit 从 28 项降至 0。24 项扩展单元、16 项 Python、27 项浏览器回归通过；最终提交的 [扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39128723158)、[Windows CI](https://github.com/Yvonson/immersive-translate/actions/runs/39128723179) 与 [标签发布工作流](https://github.com/Yvonson/immersive-translate/actions/runs/39128902096) 均成功。
 - 新资源原始记录数不变，重新构建下载 266,383,521 字节、安装 932,611,439 字节，SHA-256 `7238c154c1f8aca1d7c58ce1d5975a7d3c64c1f0631ef39d3b9688e2eee883eb`，revision `20261018-1c9003161fd2`。旧已安装词库仍可使用；此处取代下方早期资源体积记录。
-- 发布流程改为全测后草稿、完整附件检查和远程哈希核对后公开；本次最终 20 个附件。普通安装使用单个词库 ZIP；开发用原始快照拆成 7 片，附 `source-parts.json` 和合并脚本，每片及完整重组 SHA-256 均验证，损坏分片拒绝测试通过。许可证／来源／隐私和提交信息随包，正式二进制采用同提交 Windows 官方 CPython CI。安装与升级指南见 [INSTALL](../INSTALL.md)。
+- 初次发布采用全测后草稿、完整附件检查和远程哈希核对后公开，共 20 个内部交付附件；现已按 D-015 包装为 4 个下载附件。开发原始快照的 7 片、清单和合并脚本都保留在开发 ZIP 内，每片／完整 SHA-256 和损坏拒绝验证通过。许可证／来源／隐私和提交信息随包，正式二进制采用同提交 Windows 官方 CPython CI。安装与升级指南见 [INSTALL](../INSTALL.md)。
 - 审查提交 `bdd89d0` 的早期 CI 成功；最终 `28a651c` 补齐 OpenSSL 3.5.9／zlib 1.3.1 许可。正式 Windows 包为官方 CPython 3.13.16，对应 GPL 源码 ZIP 独立重建与 Tk／SQLite 诊断成功，二进制及源码提交一致。
 - 最终官方程序通过真实 Chrome Native Messaging 和重复安装验证：干净替换旧运行库、保留原词库位置、隔离收藏／笔记／复习升级保留、未来时间再收藏顺序正常，原有收藏数量保持不变且未写入测试词。最终词库用实际 Windows 程序在隔离目录导入／校验，8 组查询及 US/us／took→take 原形展开通过；未切换用户现用词库。证据 `.local/dictionary/favorites-native-verification.json`、`.local/release/resource-smoke/verification.json`。
 - 发布工具实际执行后修正草稿查询（按列表选唯一 tag，再按 ID 操作）和大文件流式传输；每次写入前刷新草稿状态。完整快照上传失败后采用互异分片并行交付，全部校验后才公开。发布与匿名下载证据在 `.local/release/`，不保存认证材料。工具和证据后续提交不移动已发布标签，不重建已验证安装包。
