@@ -49,7 +49,7 @@ def audit(directory, tag, commit):
                     assert file in archive.namelist()
                 assert info["runtime"] == "cpython", "Release must use official CPython, not an unreviewed distribution"
                 licenses = "dictionary-companion/_internal/licenses/"
-                for file in ("PYTHON-LICENSE.txt", "TCL-LICENSE.txt", "TK-LICENSE.txt"):
+                for file in ("PYTHON-LICENSE.txt", "TCL-LICENSE.txt", "TK-LICENSE.txt", "OPENSSL-LICENSE.txt", "ZLIB-LICENSE.txt"):
                     assert licenses + file in archive.namelist()
     lock = json.loads((directory / "resources.lock.json").read_text(encoding="utf-8"))
     assert lock == json.loads((ROOT / "companion/resources.lock.json").read_text(encoding="utf-8"))

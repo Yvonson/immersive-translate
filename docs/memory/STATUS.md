@@ -15,6 +15,8 @@
 - Node＋fflate 替换旧 Gulp／Babel，删除 550 项依赖；npm audit 从 28 项降至 0。24 项扩展单元、16 项 Python、27 项浏览器回归通过，最终提交和 Windows CI 包验证仍需补记。
 - 新资源原始记录数不变，重新构建下载 266,383,521 字节、安装 932,611,439 字节，SHA-256 `7238c154c1f8aca1d7c58ce1d5975a7d3c64c1f0631ef39d3b9688e2eee883eb`，revision `20261018-1c9003161fd2`。旧已安装词库仍可使用；此处取代下方早期资源体积记录。
 - 发布流程改为全测后草稿、完整 12 附件检查和远程哈希核对后公开；许可证／来源／隐私和提交信息随包，正式二进制采用同提交 Windows 官方 CPython CI。安装与升级指南见 [INSTALL](../INSTALL.md)。
+- 审查提交 `bdd89d0` 的 [扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39107141389) 和 [Windows CI](https://github.com/Yvonson/immersive-translate/actions/runs/39107141361) 成功；Windows 包为官方 CPython 3.13.16，独立解压对应 GPL 源码重建与 Tk／SQLite 诊断成功。实际 DLL 核对后另补 OpenSSL 3.5.9／zlib 1.3.1 许可，最终正式包会使用包含它们的后续提交。
+- 已用该官方程序通过真实 Chrome Native Messaging 和重复安装验证：干净替换旧运行库、保留原词库位置、隔离收藏／笔记／复习升级保留、未来时间再收藏顺序正常。用户现有 3 条收藏数量保持不变，未写入测试词；证据 `.local/dictionary/favorites-native-verification.json`。验证辅助脚本改为等待实际收藏数量加载，避免把初始占位符当作失败。
 
 ## 功能扩展研究（2026-10-18）
 

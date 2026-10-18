@@ -13,3 +13,5 @@
 Windows 包与对应源码 ZIP 一起交付。源码包包含本程序、构建／安装脚本及锁定 PyInstaller 对应源码；运行库自身的许可随二进制保留。浏览器语音和 Google Cloud 音频不作为本地数据资源再分发。
 
 正式 Windows 包使用 GitHub Actions 的官方 CPython 3.13 环境。完整发行版许可显式复制到 `_internal/licenses/PYTHON-LICENSE.txt`，包含其附属软件许可；Tcl/Tk 通用许可另保存在同目录（固定来源 `tcltk/tcl`、`tcltk/tk` 的 `core-8-6-13/license.terms`，原文未修改）。包内 Tk 资源自身的 `license.terms` 也保留。Anaconda 等其他发行环境可用于开发，但不作为本次正式二进制来源。
+
+v0.2.0 正式运行库为 CPython 3.13.16；随包 OpenSSL 3.5.9（Copyright 1998–2026 The OpenSSL Authors）及 zlib 1.3.1，分别保留官方固定版本 `openssl/openssl/openssl-3.5.9/LICENSE.txt`（Apache-2.0）与 `madler/zlib/v1.3.1/LICENSE`（zlib 许可），位于 `_internal/licenses/OPENSSL-LICENSE.txt`、`ZLIB-LICENSE.txt`。改变 Python 运行库版本时须重新核对实际 DLL 和相关许可，不能只更新版本字符串。

@@ -27,6 +27,7 @@
 - `npm run build`／`npm run check`：Chrome 与 Firefox 构建，manifest／本地页面资源／语法／JSON／旧赞助清理、许可证及 ZIP 内容一致性。
 - `npm run test:browser`：27 项 Chromium 回归，真实 DOM／跨域 iframe、模拟翻译／语音、测试桥连接隔离的真实 SQLite。测试桥和模拟结果不能当作已安装 Native Messaging 或真实收费 API。
 - 最终同提交 Windows CI 包另行安装／升级，实际 Chrome Native Messaging、既有词库和隔离收藏验证；最终词库在隔离目录导入／校验并查询，结果和远程 CI 链接补记 [当前状态](memory/STATUS.md)。
+- `bdd89d0` 的远程扩展／Windows CI 已成功，包含从 GPL 源码 ZIP 独立重建和 Tk／SQLite 诊断；官方 CPython 3.13.16 成品的实际升级与隔离收藏验证通过。核对 DLL 后补齐 OpenSSL 3.5.9 和 zlib 1.3.1 官方许可，再生成最终发布包。
 - 发布前完整资产检查：组件二进制／源码／扩展提交一致、许可、词库每文件 SHA-256、快照与清单、远程附件体积／digest；资产清单不含用户数据或凭据。
 
 ## 保留的边界与后续

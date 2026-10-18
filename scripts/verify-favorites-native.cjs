@@ -22,7 +22,9 @@ function native(binary,userRoot,dataRoot){
     const page=await context.newPage();await page.goto(`chrome-extension://${id}/dictionary/index.html#hello`);await page.locator('.dictionary-entry').first().waitFor({timeout:15000});
     const status=await page.evaluate(()=>dictionaryView.send('dictionaryStatus'));assert.equal(status.capabilities.favorites,1);assert.equal(status.ready,true);
     baseline=await page.evaluate(()=>dictionaryView.send('dictionaryFavorites',{op:'meta'}));
-    await page.locator('#favorites-link').click();await page.locator('#total-count').waitFor();assert.equal(await page.locator('#total-count').textContent(),baseline.count.toLocaleString('zh-CN'));
+    await page.locator('#favorites-link').click();
+    await page.waitForFunction(expected=>document.querySelector('#total-count')?.textContent===expected,baseline.count.toLocaleString('zh-CN'));
+    assert.equal(await page.locator('#total-count').textContent(),baseline.count.toLocaleString('zh-CN'));
     await worker.evaluate(()=>dictionaryService.disconnect());
   }finally{await context.close();}
   const root=fs.mkdtempSync(path.resolve('.local/dictionary/favorites-install-test-')),userRoot=path.join(root,'UserData');
