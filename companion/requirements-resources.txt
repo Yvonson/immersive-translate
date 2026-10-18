@@ -1,0 +1,1 @@
+# Resource preparation uses only Python standard library.

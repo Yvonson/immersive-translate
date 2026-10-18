@@ -11,3 +11,11 @@ web-ext-artifacts/
 .local/
 .env.*
 !.env.example
+__pycache__/
+*.pyc
+companion/.venv/
+companion/build/
+companion/dist/
+companion/*.spec
+companion/settings.json
+companion/native-host.json

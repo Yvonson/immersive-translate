@@ -13,3 +13,11 @@ When subtitle translation is enabled, the extension can read existing captions, 
 Provider privacy policies, network access and API charges depend on the provider you select. Links to external translation, documentation or original-author support sites are governed by those sites' policies.
 
 Source: https://github.com/Yvonson/immersive-translate
+
+The optional Windows local dictionary uses Chrome Native Messaging to query installed SQLite definition dictionaries. The lookup host has no network client in its query path, listens on no HTTP port and has no startup service. Definitions, IPA and examples stay local; no lookup history is created. A selected word may briefly appear in an extension URL fragment, which is removed after opening the dictionary page.
+
+Pronunciation is separate and only starts when requested. The default browser TTS provider uses an available voice of the chosen accent; voices are labeled local or remote. Remote voices send the requested word/phrase to their speech engine. Optional Google Cloud TTS sends only that word/phrase and voice settings directly to texttospeech.googleapis.com; API fees and provider policies apply. Errors never trigger an automatic switch to another provider. Audio is played from memory and is not retained as a recording collection.
+
+The Google Cloud key is stored separately in chrome.storage.local, excluded from ordinary configuration export, never returned in settings responses, and not sent in URLs or page-world messages. Storage is not an OS-encrypted vault. Delete the key in dictionary settings, or remove the extension's local data. Selection length is limited to 120 characters/8 words. Closing a card or changing a query cancels pending work and stops its playback.
+
+Initial definition resource preparation is an explicit developer download command; import, verification and ordinary queries do not download data. nativeMessaging connects the registered local program; tts accesses browser voices; offscreen plays requested Cloud audio in an extension document. No microphone or audio capture permission is added. Resource data is kept under the current user's LocalAppData by default and retained when uninstalling the companion unless explicitly deleted.

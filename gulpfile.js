@@ -65,7 +65,7 @@ gulp.task("chrome-babel", () => {
 });
 
 gulp.task("chrome-concat-background",()=>{
-  return gulp.src(["/lib/languages.js", "/lib/config.js", "/lib/platformInfo.js","/lib/util.js", "/background/translationCache.js", "/background/aiProviders.js", "/background/translationService.js", "/background/readingService.js", "/background/chrome_background.js"].map(item=>"dist/chrome"+item))
+  return gulp.src(["/lib/languages.js", "/lib/config.js", "/lib/platformInfo.js","/lib/util.js", "/background/translationCache.js", "/background/aiProviders.js", "/background/translationService.js", "/background/readingService.js", "/background/dictionaryService.js", "/background/chrome_background.js"].map(item=>"dist/chrome"+item))
   .pipe(concat('background-entry.js'))
   .pipe(gulp.dest('dist/chrome/background'));
 })

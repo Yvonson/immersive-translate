@@ -1,0 +1,65 @@
+name: Local dictionary companion
+on:
+  push:
+    paths:
+      - 'companion/**'
+      - 'scripts/*companion*'
+      - 'scripts/*dictionary*'
+      - '.github/workflows/dictionary.yml'
+  pull_request:
+    paths:
+      - 'companion/**'
+      - 'scripts/*companion*'
+      - 'scripts/*dictionary*'
+      - '.github/workflows/dictionary.yml'
+  workflow_dispatch:
+    inputs:
+      resources:
+        description: Build local definition dictionary (large download)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: companion/requirements.lock.txt
+      - run: python -m pip install -r companion/requirements.lock.txt
+      - run: python -m unittest discover -s companion/tests -v
+      - shell: pwsh
+        run: ./scripts/build-companion.ps1
+      - run: python scripts/package-dictionary-sources.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dictionary-companion-windows-x64
+          path: |
+            .local/dictionary/dictionary-companion-windows-x64.zip
+            .local/dictionary/dictionary-companion-sources.zip
+  resources:
+    if: inputs.resources
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/cache@v4
+        with:
+          path: .local/dictionary/cache
+          key: dictionary-ecdict28-wiki-${{ github.run_id }}
+          restore-keys: dictionary-ecdict28-wiki-
+      - run: python scripts/fetch-dictionary-ranges.py
+      - run: python -m pip install -r companion/requirements-resources.txt
+      - run: python companion/main.py --build-resources
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dictionary-offline-resources
+          compression-level: 0
+          path: .local/dictionary/packages/*

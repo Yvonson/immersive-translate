@@ -179,6 +179,11 @@ function resetBrowserAction(forceShow = false) {
 if (typeof chrome.contextMenus !== "undefined") {
     chrome.contextMenus.removeAll()
     chrome.contextMenus.create({
+        id: "dictionary-lookup",
+        title: "在本地词典中查询“%s”",
+        contexts: ["selection"]
+    })
+    chrome.contextMenus.create({
         id: "browserAction-showPopup",
         title: chrome.i18n.getMessage("btnShowPopup"),
         contexts: ["browser_action"]
@@ -212,7 +217,9 @@ if (typeof chrome.contextMenus !== "undefined") {
     const tabHasContentScript = {}
 
     chrome.contextMenus.onClicked.addListener((info, tab) => {
-        if (info.menuItemId == "translate-web-page") {
+        if (info.menuItemId === "dictionary-lookup") {
+            dictionaryService.openSelection(info, tab).catch(console.error)
+        } else if (info.menuItemId == "translate-web-page") {
             const isPdf =  globalIsPdf(tab)
             if(isPdf) {
               // show popup

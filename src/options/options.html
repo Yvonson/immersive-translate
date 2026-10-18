@@ -10,6 +10,7 @@
 <link href="/ui/theme.css" rel="stylesheet"/>
 <link href="options.css" rel="stylesheet"/>
 <link href="reading-options.css" rel="stylesheet"/>
+<link href="/dictionary/dictionary.css" rel="stylesheet"/>
 </head>
 <body>
 <aside id="sideBar">
@@ -64,6 +65,7 @@
      </span>
      数据与高级
     </a>
+<a href="#dictionary"><span aria-hidden="true" class="nav-number">07</span>本地词典</a>
 </nav>
 <div class="sidebar-footer">
 <a href="https://github.com/Yvonson/immersive-translate/blob/main/readme.md" rel="noopener noreferrer" target="_blank">
@@ -594,6 +596,12 @@
 </div>
 </section>
 </section>
+<section class="settings-section dictionary-section" id="dictionary" aria-label="本地词典" hidden>
+<p class="section-intro">看清释义，听懂读音。选中网页中的词语，右键即可查询本地词典。</p>
+<section class="card"><h2>离线词典连接</h2><p id="dictionaryConnection" role="status">尚未检查。首版支持 Windows x64 与 Chrome。</p><div class="dictionary-actions"><button id="dictionaryReconnect" class="primary">重新连接</button><a href="/dictionary/index.html">打开本地词典 ↗</a></div><div class="resource-grid" id="dictionaryResources"></div></section>
+<section class="card"><h2>安装与修复</h2><p>先将伴随程序 ZIP 完整解压到一个文件夹，在该文件夹打开 PowerShell，执行下方命令。安装窗口会引导导入本地英汉词库资源包（dictionary-core.zip）。</p><code class="command" id="dictionaryInstallCommand"></code><button id="dictionaryCopyCommand">复制安装命令</button><p class="help">命令已包含当前扩展 ID。移动扩展目录或换浏览器后，可重新执行此命令修复注册。资源包不会打包进浏览器扩展。</p><code class="command">&amp; "$env:LOCALAPPDATA\OpenBilingualTranslate\Companion\dictionary-companion.exe" --manage</code><p class="help">再次导入或校验资源可运行上方管理命令。更新资源后点击“重新连接”。</p><a href="https://github.com/Yvonson/immersive-translate/blob/main/docs/LOCAL-DICTIONARY.md" target="_blank" rel="noopener noreferrer">下载、安装与离线词典说明 ↗</a></section>
+<section class="card"><h2>发音与学习</h2><p>释义、音标和例句在本地查询。点击播放后，在线语音仅接收当前单词或短语；无需录音包或离线语音模型。</p><div class="setting-row"><label for="dictionaryVoiceProvider">发音服务</label><select id="dictionaryVoiceProvider"><option value="browser">浏览器语音（无需 Key）</option><option value="googleCloud">Google Cloud 官方 API</option></select></div><div id="dictionaryBrowserVoices"><div class="setting-row"><label for="dictionaryUKVoice">英音音色</label><select id="dictionaryUKVoice"></select></div><div class="setting-row"><label for="dictionaryUSVoice">美音音色</label><select id="dictionaryUSVoice"></select></div><p class="help">默认优先使用可用的 Google 音色，缺失时使用同口音的系统音色。列表标明在线／本机；Chrome 和 Windows 的音色由实际环境决定。</p></div><div id="dictionaryCloudVoice" hidden><label for="dictionaryCloudKey">Google Cloud API Key</label><input type="password" id="dictionaryCloudKey" autocomplete="off" placeholder="输入新 Key；留空保留已保存的 Key"/><p id="dictionaryCloudKeyStatus" class="help"></p><p class="help">需启用 Cloud Text-to-Speech API 并开通结算。使用 Standard 音色；免费额度与超额费用以 <a href="https://cloud.google.com/text-to-speech/pricing" target="_blank" rel="noopener noreferrer">Google 官方价格</a>为准。Key 只存本地，不进入普通配置导出。建议限制 Key 仅可调用此 API。</p><button id="dictionaryRemoveKey">删除已保存的 Key</button></div><div class="dictionary-actions"><button id="dictionarySaveVoice" class="primary">保存发音设置</button><button id="dictionaryRefreshVoices">刷新音色</button></div><p id="dictionarySaveVoiceStatus" role="status"></p><div class="setting-row"><label for="dictionaryAccent">默认口音</label><select id="dictionaryAccent"><option value="en-GB">英音</option><option value="en-US">美音</option></select></div><div class="setting-row"><label for="dictionarySpeed">播放速度</label><select id="dictionarySpeed"><option value="1">正常语速</option><option value="0.75">慢速 0.75×（保持音调）</option></select></div><div class="dictionary-actions"><button id="dictionaryTestVoice">试听 hello</button></div><p id="dictionaryVoiceStatus" class="help" role="status">使用已保存的语音服务。多音词请结合音标与义项学习。</p><p class="help">查词不调用翻译接口；在线发音会发送当前单词或短语。默认不保存查词历史；词条来源链接只在点击时打开。</p></section>
+</section>
 </main>
 <script src="/lib/languages.js">
 </script>
@@ -614,5 +622,6 @@
 <script src="reading-options.js">
 </script>
 <script src="subtitle-options.js"></script>
+<script src="/dictionary/view.js"></script><script src="dictionary-options.js"></script>
 </body>
 </html>

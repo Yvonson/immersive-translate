@@ -1,0 +1,12 @@
+{
+  "ecdict.zip": {
+    "url": "https://github.com/skywind3000/ECDICT/releases/download/1.0.28/ecdict-sqlite-28.zip",
+    "sha256": "ea01f76a3b3351021ce47077e89234465cc9441c8793054495320d06c0c3f3f6",
+    "bytes": 216765132
+  },
+  "ecdict-license.txt": {
+    "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/8defb76/LICENSE",
+    "sha256": "ebd1186ec36c0dba6bb2d77cc59b0b292d4429b1dbe19c39bd0eab121ec73369",
+    "bytes": 1063
+  }
+}

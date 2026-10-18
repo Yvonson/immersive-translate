@@ -1,6 +1,6 @@
 # 当前状态
 
-更新日期：2026-10-17。
+更新日期：2026-10-18。
 
 ## 源码与交付
 
@@ -8,6 +8,22 @@
 - 新功能为预览交付，尚未创建 `v0.2.0` 稳定发布标签。公开稳定下载仍为 [v0.1.0](https://github.com/Yvonson/immersive-translate/releases/tag/v0.1.0)，其中不含本轮升级。
 - 独立根提交 `b8d680ad59bdf3a8f211bd1b78dbeccb7cb7b7cb`；旧稳定标签对应 `a3f814f71e101e95198a439c4b723cf102a24813`。保留独立历史，GitHub 创建时确认 `fork: false`。
 - `.upstream-git-history/` 为完整本地上游历史备份；`.upstream-git-backup/` 为早期不完整备份；两者不进入 Git。
+
+## 本地词典与发音（2026-10-18）
+
+- 选词右键查词、闭合 Shadow DOM 词卡、完整释义页与设置分区已实现。简明／完整页共用纯文本渲染，保留逐词来源、音标、例句、词形、词源及相关词；不改动原 `customDictionary` 替换规则。
+- Windows x64 本地组件通过 Native Messaging 读取 SQLite，无 HTTP 服务或开机启动；资源导入校验大小／路径／SHA-256／数据库结构，成功后原子切换。默认安装和词库位置见 [安装说明](../LOCAL-DICTIONARY.md)。
+- 用户要求停止真人录音下载并选择浏览器语音优先、可选 Google Cloud，见 D-011。代码和资源构建不再下载／交付真人录音或 Kokoro 模型，已有开发缓存保留；本地程序只负责释义。
+- 英美音及 0.75×：浏览器按实际同口音音色选择并显示在线／本机；Cloud 使用 Standard 官方接口、自配独立 Key。只有点击播放才发送单词／短语，不发送网页正文／URL；缺音色或请求失败明确提示，不自动切换服务；关闭／换词取消旧响应与发音。
+- 词库实包：ECDICT 3,402,564 条记录，中文维基词典英语扩展 97,019 条；可能重复，不等于独立单词数。下载 304,036,491 字节，安装 1,016,684,911 字节，SHA-256 和来源在 `.local/dictionary/packages/catalog.json`。本地 Windows 包及对应源码 ZIP 在 `.local/dictionary/`，开发文件和词库不进入 Git。
+- 版本保持 `0.2.0`／`0.2.0-preview.1`，未创建 Release 或标签。
+
+验证证据：
+
+- 2026-10-18 `npm test` 16 项、Python `unittest` 4 项、浏览器回归 19 项通过，包含真实 DOM／跨域 iframe 词卡、取消迟到结果、选择限制、设置与 Key 不回显，以及模拟 Cloud 响应在真实离屏页解码播放、鉴权失败不降级；网页／字幕原有回归也通过。
+- Chrome／Firefox 构建和产物检查通过；本功能仍只验收 Chrome。Windows PyInstaller 组件打包、实际安装／注册、Tk／SQLite 诊断、完整词库导入／校验通过；断网查询 hello／took／US／us／record／read／neural network／未收录词通过，证据 `.local/dictionary/native-verification.json`。
+- 真实独立 Chromium 普通窗口仅列出本机三种中文音色，无英美音；Chrome 临时配置的 Web Speech 英美音列表也为空。缺音色提示已验证，**未通过真实英文发音播放或人工听辨**，需用户安装对应系统英文语音或配置 Cloud。不能把模拟声音成功写成真实读音准确。
+- 未提供真实 Cloud Key，因此未调用真实计费 API；官方接口、计费和认证约定已核对，模拟请求／音频播放不替代账户端到端验收。真实使用仍取决于网络、API 启用／限制／结算与配额。
 
 ## 评论正文污染修复（2026-10-17）
 

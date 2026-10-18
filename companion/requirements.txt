@@ -1,0 +1,2 @@
+# Runtime uses only the Python standard library. Build dependency:
+pyinstaller==6.16.0

@@ -9,6 +9,7 @@
 - `src/background/aiProviders.js`：DeepSeek 和兼容接口；分批、最多两路请求、25 秒超时、内存缓存及输出校验。
 - `src/contentScript/subtitleTranslator.js`：按播放器管理字幕入口、时间轴、预取及叠加层；配合 YouTube / Vidstack 站点桥接。
 - `src/options/ai-options.js`：API 地址、模型、密钥和连接测试。
+- `src/background/dictionaryService.js`、`src/dictionary/`、`companion/`：选词查词、共享词卡／词典页、Native Messaging、本地 SQLite 与独立浏览器／Google Cloud 语音；协议、安装、资源构建和验收见 [本地词典](LOCAL-DICTIONARY.md)。
 - `src/chrome_manifest.json`：Chrome / Edge Manifest V3。
 - `src/manifest.json`：Firefox Manifest V2，独立扩展 ID。
 - `gulpfile.js`：生成 `dist/chrome`、`dist/firefox` 及两个 ZIP 包。

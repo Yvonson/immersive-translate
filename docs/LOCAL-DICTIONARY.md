@@ -1,0 +1,100 @@
+# 本地英汉词典与读音
+
+当前预览功能由 **Chrome 扩展＋Windows x64 查词伴随程序＋本地词库包** 组成。释义、音标和例句在本地 SQLite 检索；发音默认使用浏览器语音，可选择自己的 Google Cloud API。按用户最新要求，已停止真人录音下载，不需要录音包或大型离线语音模型。
+
+## 获取与安装
+
+本功能属于当前预览源码，公开旧版 `v0.1.0` 不包含它。源码推送后，浏览器包可从 [扩展 CI 成功运行的 Artifacts](https://github.com/Yvonson/immersive-translate/actions/workflows/ci.yml) 获取。Windows 程序从 [词典构建工作流](https://github.com/Yvonson/immersive-translate/actions/workflows/dictionary.yml) 的成功运行获取；组件源码修改会自动构建，也可手动运行，只有手动勾选资源选项才构建词库包。附件需登录 GitHub，过期需重建；正式 2.0 前不因此创建新 Release。
+
+| 文件 | 用途 |
+| --- | --- |
+| `chrome.zip` | 浏览器扩展，解压后在 `chrome://extensions` 加载 |
+| `dictionary-companion-windows-x64.zip` | 本地程序、运行环境及安装／卸载脚本 |
+| `dictionary-companion-sources.zip` | 与程序匹配的源码和构建说明所用源码 |
+| `dictionary-core.zip` | ECDICT 英汉释义／词形和中文维基词典英语解释／例句 |
+| `catalog.json` | 词库版本、下载／安装体积、记录数、SHA-256 |
+
+1. 加载新版扩展并刷新网页，进入 **全部设置 → 本地词典**。
+2. 将 Windows 程序 ZIP **完整解压**，保留 `dictionary-companion` 和 `_internal`，不要只复制 EXE。
+3. 在包含 `install.ps1` 的文件夹打开 PowerShell，执行设置页提供的安装命令，其中已包含当前扩展 ID。
+4. 程序装入 `%LOCALAPPDATA%\OpenBilingualTranslate\Companion`，按当前用户注册 Chrome Native Messaging，无需管理员权限。
+5. 管理窗口导入 **dictionary-core.zip**，资源存入 `%LOCALAPPDATA%\OpenBilingualTranslate\Dictionary`。
+6. 回到扩展点击 **重新连接**；在发音设置查看可用音色，选择默认口音并“试听 hello”。
+
+自定义词库位置可在安装命令后增加 `-DataDir 'E:\Dictionaries\OpenBilingualTranslate'`。更改位置不会自动搬迁旧资源，需重新导入。移动扩展路径或更换浏览器后，复制新扩展 ID 的安装命令修复注册。
+
+## 查词与学习
+
+选中网页英文单词或短语，右键选择 **在本地词典中查询**。词卡显示简明解释、音标和英／美音按钮；点击 **详细解释与例句** 打开完整词典页，也可从设置直接打开词典输入查询。
+
+- 选词不超过 120 个字符、8 个词；长句使用原网页翻译。
+- 词卡在选词所在 iframe 内显示，Esc 或点击外部关闭；不能注入的 Chrome 内部页面改开词典页。
+- 切词或关闭会停止其发音、取消迟到响应；支持正常／0.75× 慢速。
+- 词形显示原形，各来源解释分开呈现。例句、词源、相关词仅在资料存在时显示；缺词不自动转发在线词典或翻译引擎。
+- 音标来自本地词库，读音由语音引擎生成。`read`、`lead`、`record` 等多音词未必与当前词义匹配，不能把一次合成当作所有义项的标准读音；当前不承诺按任意音标准确生成声音。
+
+## 默认浏览器语音：无需 Key
+
+设置中选择“浏览器语音”，刷新音色列表，英音和美音可分别选。自动选择优先使用 **同口音** 的 Google 音色，其次是同口音系统音色；没有相应音色会明确提示，不以另一口音代替。
+
+列表和播放提示标明实际名称及“在线／本机”。Google 音色是否出现取决于 Chrome、操作系统和已安装语音引擎，Windows 不保证自带 Google 或英音。本机音色可离线；在线音色需要联网，数据由其提供者处理。Windows 可在系统的语言／语音设置中安装英文语音后重启 Chrome 再刷新列表。
+
+实现使用 [Chrome tts API](https://developer.chrome.com/docs/extensions/reference/api/tts)；浏览器语音不等于 Google Cloud，不需要填 Cloud Key。
+
+## 可选 Google Cloud 官方 API
+
+1. 创建自己的 Google Cloud 项目，开通结算并启用 **Cloud Text-to-Speech API**，参见 [官方入门](https://docs.cloud.google.com/text-to-speech/docs/get-started)。
+2. 创建 API Key，建议将 API 限制设为 Cloud Text-to-Speech API；不要把 Key 写进源码或发到聊天中。浏览器扩展的请求来源限制需与自己的实际环境匹配，设置不当可能得到 403。
+3. 扩展 **本地词典 → 发音服务** 选择 Google Cloud，输入 Key，点击 **保存发音设置**，再试听。
+4. 使用固定 `en-GB-Standard-A`／`en-US-Standard-A`，向官方 `texttospeech.googleapis.com/v1/text:synthesize` 发送当前单词或短语；音频在扩展离屏页从内存播放，不保存音频包。
+
+截至 2026-10-17，[官方价格](https://cloud.google.com/text-to-speech/pricing)列出 Standard 每月前 400 万字符免费，超出为每百万字符 4 美元；**必须开通结算，超额会收费**，以账户实际价格／配额为准。此 Key 与网页 Google 翻译、DeepSeek Key 分开。设置保存后不回显 Key，留空保留，删除按钮可移除；不进入普通配置导出。本功能不提供预置 Key 或中转服务。
+
+只有点击读音才向选定语音服务发送当前单词／短语和语音参数，不发送网页正文或 URL；错误时不自动切换服务。鉴权、配额、网络或音频错误会显示提示，不回显服务原始响应或密钥。没有真实 Key 时只能验证模拟接口，不能据此宣称 Cloud 真实调用已通过。
+
+## 本地资源及许可
+
+- [ECDICT 1.0.28](https://github.com/skywind3000/ECDICT/releases/tag/1.0.28)：SQLite 英汉释义、英文解释、音标、词形和考试标签，保留上游 MIT 声明。
+- [中文维基词典，经 Kaikki／Wiktextract](https://kaikki.org/zhwiktionary/rawdata.html)：仅保留 `lang_code=en`，包含中文解释、音标和部分例句／词源，保留逐词链接、CC BY-SA／GFDL 及转换说明。
+
+词库约 290 MB 下载、970 MB 安装，精确体积和各来源记录数以 `catalog.json` 为准；记录可能重复，不将总记录数称为独立词数。原始数据不进入 Git。程序 GPL-3.0-only 与扩展 MPL-2.0 分开，详见 [第三方说明](../companion/THIRD_PARTY.md)。没有分发商业词典的非授权词库。
+
+## 更新、故障与卸载
+
+管理窗口命令：
+
+```powershell
+& "$env:LOCALAPPDATA\OpenBilingualTranslate\Companion\dictionary-companion.exe" --manage
+```
+
+导入检查路径、大小、SHA-256 和数据库结构，成功后原子切换版本，失败保留旧包；更新后回扩展重新连接。旧版本不自动删除。此前开发缓存中的录音／模型保留，不再使用或继续下载。
+
+| 现象 | 处理 |
+| --- | --- |
+| 无法连接本地组件 | 完整解压、执行当前扩展 ID 的安装命令，更新后重新连接 |
+| 连接成功但没有释义 | 导入 `dictionary-core.zip` |
+| 浏览器没有英音／美音 | 刷新列表，安装对应系统语音或自行选择 Cloud；不再安装录音／模型包 |
+| Cloud 401／403 | 检查 Key、API 启用状态、Key 限制及项目结算 |
+| Cloud 429 | 检查配额或等待限流恢复；不自动切换提供者 |
+| 校验失败 | 重新下载／导入损坏包，不忽略错误 |
+| IDM／代理导致下载失败 | 修复 IDM 独立代理，或关闭该次下载接管后重试；下载与本地查询相互独立 |
+
+运行解压目录的 `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall.ps1` 移除注册和程序，默认保留词库；增加 `-DeleteResources` 才删除默认资源。自定义目录自行清理。先关闭本组件和管理窗口。
+
+## 开发与验证
+
+```powershell
+python -m venv .local/dictionary/venv
+.local/dictionary/venv/Scripts/python.exe -m pip install -r companion/requirements.lock.txt
+python -m unittest discover -s companion/tests -v
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-companion.ps1 -Python .local/dictionary/venv/Scripts/python.exe
+python companion/main.py --fetch
+python companion/main.py --build-resources
+python scripts/package-dictionary-sources.py
+```
+
+只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定原始快照 SHA-256；Kaikki 更新导致校验失败时需审查新快照并更新锁，不能绕过校验冒充旧版。
+
+生成文件在 `.local/dictionary/`。Native Messaging 协议 `{v:1,id,op,...}` 提供 `status/lookup/cancel`，32 位小端长度＋UTF-8 JSON，入站 16 KiB，不接受任意路径／命令／URL。语音由扩展独立处理。普通测试不修改系统注册；`node scripts/verify-dictionary-native.cjs` 明确安装当前程序、注册并验证真实词库及实际可用浏览器音色。
+
+验收分别记录本地词库、真实 Windows 组件、浏览器音色、模拟 API 与真实 API。音频开始播放不等于已人工听辨准确性；Firefox 尚无本功能验收。
