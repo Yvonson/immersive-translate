@@ -1,120 +1,96 @@
-"""Explicitly regroup an existing public release without moving tags or rebuilding code."""
-import importlib.util
+"""Verify or publish a versioned distribution; default mode makes no remote writes."""
+import argparse
 import json
 import os
 from pathlib import Path
-import re
 import subprocess
+import sys
+import uuid
 
-ROOT = Path(__file__).resolve().parents[1]
-REPOSITORY = "Yvonson/immersive-translate"
-API = "repos/" + REPOSITORY
-
-
-def gh(*args, data=None):
-    command = ["gh", *args]
-    if data is not None:
-        command += ["--input", "-"]
-    return subprocess.check_output(command, input=json.dumps(data) if data is not None else None, text=True)
+from release_layout import (ROOT, ReleaseError, dump, names, package, release_body, require,
+                            resource_body, resources_tag, validate_plan)
+from release_remote import GitHub, incomplete, index_assets, publish, validate_main
 
 
-def api(path, method="GET", data=None):
-    raw = gh("api", API + path, "--method", method, data=data)
-    return json.loads(raw) if raw.strip() else None
+def prepare(client, tag, commit, output, directory=None):
+    version = tag.removeprefix("v")
+    filenames = names(version)
+    require(tag == "v" + version, "Expected a version tag")
+    require(json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"] == version, "Repository/package version mismatch")
+    require(client.commit(tag) == commit, "Software tag does not match expected source commit")
+    require(client.source_ci_ok(tag, commit), "Tagged source release CI must have passed")
+    main = client.release(tag)
+    validate_main(main, version)
+    resource = client.release(resources_tag(tag))
+    if resource:
+        require(not resource.get("immutable") and not resource["prerelease"] and set(index_assets(resource)) <= {filenames["resources"]}, "Unexpected resource-release layout")
+    output.mkdir(parents=True, exist_ok=True)
+    require(not (output / "prepared.json").exists(), "Choose a fresh preparation directory; apply the saved prepared.json to resume locally")
+    dump(output / "before.json", {"main": main, "resources": resource})
+    print("Preflight passed: source tag, source CI, and supported remote layouts", flush=True)
+    if directory is None:
+        directory = output / "inputs"
+        directory.mkdir(exist_ok=True)
+        for asset in main["assets"]:
+            if not (asset["name"] in filenames.values() and incomplete(asset)):
+                client.download(asset, directory)
+        if resource:
+            for asset in resource["assets"]:
+                if not incomplete(asset):
+                    client.download(asset, directory)
+    packaging_commit = client.commit(resources_tag(tag)) if resource else subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    downloads = output / "downloads"
+    plan = package(directory, downloads, tag, commit, packaging_commit)
+    validate_plan(plan)
+    (downloads / "main-body.md").write_text(release_body(plan), encoding="utf-8", newline="\n")
+    (downloads / "resources-body.md").write_text(resource_body(plan), encoding="utf-8", newline="\n")
+    prepared = {"plan": plan, "before": main}
+    dump(downloads / "prepared.json", prepared)
+    dump(output / "prepared.json", prepared)
+    print("Packaging passed: runtime bytes and corresponding source verified", flush=True)
+    return downloads, prepared
 
 
-def module(filename):
-    spec = importlib.util.spec_from_file_location(filename.replace("-", "_"), ROOT / "scripts" / (filename + ".py"))
-    value = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(value)
-    return value
-
-
-def reorganize(tag, commit):
-    if not re.fullmatch(r"v\d+\.\d+\.\d+", tag) or not re.fullmatch(r"[0-9a-f]{40}", commit):
-        raise ValueError("Invalid tag or expected source commit")
-    release = api("/releases/tags/" + tag)
-    if release["draft"] or release["prerelease"] or release.get("immutable"):
-        raise ValueError("Expected an editable, public stable release")
-    if api("/commits/" + tag)["sha"] != commit:
-        raise ValueError("Refusing to regroup another source commit")
-    work = ROOT / ".local/release" / ("reorganize-" + tag)
-    work.mkdir(parents=True, exist_ok=False)
-    (work / "before.json").write_text(json.dumps(release, indent=2), encoding="utf-8")
-    inputs = work / "original"
-    inputs.mkdir()
-    gh("release", "download", tag, "--repo", REPOSITORY, "--dir", str(inputs))
-    # Audit against the original tagged commit; current HEAD only changes delivery.
-    module("check-release").audit(inputs, tag, commit)
-    downloads = work / "downloads"
-    plan = module("package-release-downloads").package(inputs, downloads)
-    expected = {entry["name"]: entry for entry in plan["assets"]}
-    original_names = {asset["name"] for asset in release["assets"]}
-    release_id = release["id"]
-
-    def current():
-        value = api("/releases/" + str(release_id))
-        if value["tag_name"] != tag or value["draft"] or value.get("immutable"):
-            raise ValueError("Release state changed; stop before writing")
-        return value
-
-    def verified(value):
-        assets = {asset["name"]: asset for asset in value["assets"]}
-        for name, entry in expected.items():
-            remote = assets.get(name)
-            if not remote or remote["size"] != entry["bytes"] or remote.get("digest") != "sha256:" + entry["sha256"]:
-                raise ValueError("Remote archive not verified: " + name)
-
-    # Keep every old runtime/source asset until both new archives are uploaded and hashed.
-    for name in ("windows-full.zip", "developer-resources.zip", "chrome.zip", "SHA256SUMS.txt"):
-        entry = expected[name]
-        existing = [asset for asset in current()["assets"] if asset["name"] == name]
-        if existing and existing[0]["size"] == entry["bytes"] and existing[0].get("digest") == "sha256:" + entry["sha256"]:
-            continue
-        if existing and name != "SHA256SUMS.txt":
-            raise ValueError("Refusing to overwrite an existing runtime archive")
-        if name == "SHA256SUMS.txt":
-            # Both complete new archives must exist before replacing checksum metadata.
-            remote_names = {asset["name"] for asset in current()["assets"]}
-            if not {"windows-full.zip", "developer-resources.zip"}.issubset(remote_names):
-                raise ValueError("New bundles are not uploaded")
-        args = ["release", "upload", tag, str(downloads / name), "--repo", REPOSITORY]
-        if existing:
-            args.append("--clobber")
-        gh(*args)
-        assets = {asset["name"]: asset for asset in current()["assets"]}
-        remote = assets[name]
-        if remote["size"] != entry["bytes"] or remote.get("digest") != "sha256:" + entry["sha256"]:
-            raise ValueError("Upload checksum mismatch: " + name)
-    verified(current())
-    # Recheck the tag immediately before cleanup. All original source bytes are in the developer archive.
-    if api("/commits/" + tag)["sha"] != commit:
-        raise ValueError("Tag changed during upload")
-    value = current()
-    if {asset["name"] for asset in value["assets"]} - original_names - expected.keys():
-        raise ValueError("Concurrent assets appeared; leave everything for review")
-    notes = (ROOT / "docs/releases" / (tag + ".md")).read_text(encoding="utf-8")
-    api("/releases/" + str(release_id), "PATCH", {"body": notes, "make_latest": "true"})
-    for asset in value["assets"]:
-        if asset["name"] not in expected:
-            verified(current())
-            api("/releases/assets/" + str(asset["id"]), "DELETE")
-    labels = {"chrome.zip": "网页与字幕：轻量扩展包", "windows-full.zip": "Windows 完整包：扩展＋词典＋词库",
-              "developer-resources.zip": "开发者资料与对应源码（普通用户无需下载）", "SHA256SUMS.txt": "下载文件校验值（可选）"}
-    for asset in current()["assets"]:
-        api("/releases/assets/" + str(asset["id"]), "PATCH", {"label": labels[asset["name"]]})
-    final = current()
-    verified(final)
-    if {asset["name"] for asset in final["assets"]} != set(expected):
-        raise ValueError("Unexpected final download set")
-    if api("/releases/latest")["id"] != release_id:
-        raise ValueError("Stable latest changed")
-    (work / "after.json").write_text(json.dumps(final, indent=2), encoding="utf-8")
-    print(json.dumps({"url": final["html_url"], "assets": len(final["assets"]), "commit": commit,
-                      "verified": True, "tagUnchanged": True}))
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("verify", "publish"), default="verify")
+    parser.add_argument("--tag", default=os.environ.get("RELEASE_TAG"))
+    parser.add_argument("--source-commit", default=os.environ.get("RELEASE_SOURCE_COMMIT"))
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--directory", type=Path)
+    parser.add_argument("--prepared", type=Path)
+    parser.add_argument("--direct", action="store_true")
+    parser.add_argument("--expect-no-writes", action="store_true", help="Verify that replaying a prepared publication needs zero mutations")
+    args = parser.parse_args()
+    client = GitHub(allow_writes=args.mode == "publish" and not args.expect_no_writes, direct=args.direct)
+    if args.prepared:
+        require(args.mode == "publish", "Use publish mode to apply a prepared distribution")
+        prepared = json.loads(args.prepared.read_text(encoding="utf-8"))
+        downloads = args.prepared.parent
+    else:
+        require(args.tag and args.source_commit, "--tag and --source-commit are required")
+        output = args.output or ROOT / ".local/release" / ("distribution-" + uuid.uuid4().hex)
+        downloads, prepared = prepare(client, args.tag, args.source_commit, output.resolve(), args.directory.resolve() if args.directory else None)
+    if args.mode == "publish":
+        result = publish(client, downloads, prepared)
+        print(json.dumps({"published": True, "uploadedMainAssets": len(result["main"]["assets"]), "writes": result["writes"], "verified": True}))
+        summary = "Publication verified: two English-named user downloads, public corresponding source, software tag unchanged. Writes: " + str(result["writes"])
+    else:
+        require(client.writes == 0, "Verify mode performed an unexpected write")
+        print(json.dumps({"verified": True, "writes": 0, "prepared": str(downloads / "prepared.json")}))
+        summary = "Verification and packaging passed. No GitHub writes performed."
     if os.environ.get("GITHUB_STEP_SUMMARY"):
-        Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text("Downloads regrouped and SHA-256 verified: " + final["html_url"], encoding="utf-8")
+        with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+            stream.write(summary + "\n")
 
 
 if __name__ == "__main__":
-    reorganize(os.environ["RELEASE_TAG"], os.environ["RELEASE_SOURCE_COMMIT"])
+    try:
+        main()
+    except Exception as error:
+        message = str(error) if isinstance(error, ReleaseError) else type(error).__name__ + ": " + str(error)
+        print("Release packaging failed: " + message, file=sys.stderr)
+        if os.environ.get("GITHUB_STEP_SUMMARY"):
+            with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+                stream.write("Release packaging failed: " + message + "\n")
+        sys.exit(1)

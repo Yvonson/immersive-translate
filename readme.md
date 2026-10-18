@@ -12,10 +12,10 @@
 
 | 你的需求 | 下载 |
 | --- | --- |
-| 只翻译网页／视频已有字幕（Chrome／Edge） | [chrome.zip · 轻量扩展包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/chrome.zip) |
-| Windows x64＋Chrome，还要离线词典／生词本 | [windows-full.zip · 完整包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/windows-full.zip)，已含扩展、程序和词库 |
+| 只翻译网页／视频已有字幕（Chrome／Edge） | [open-bilingual-translate-0.2.0-chromium-extension.zip · 轻量扩展包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/open-bilingual-translate-0.2.0-chromium-extension.zip) |
+| Windows x64＋Chrome，还要离线词典／生词本 | [open-bilingual-translate-0.2.0-windows-x64-bundle.zip · 完整包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/open-bilingual-translate-0.2.0-windows-x64-bundle.zip)，已含扩展、程序和词库 |
 
-完整包解压后按 [安装指南](docs/INSTALL.md) 加载 `chrome/`，在 `companion/` 注册组件，再导入随包词库。无需另外下载轻量包。`developer-resources.zip` 与两项 Source code 供开发者使用；`SHA256SUMS.txt` 仅用于可选校验。公开下载无需登录 GitHub，也不需要 Node.js。
+完整包解压后按 [安装指南](docs/INSTALL.md) 加载 `chrome/`，在 `companion/` 注册组件，再导入随包词库。无需另外下载轻量包。开发资料统一放在 [Resources 页面](https://github.com/Yvonson/immersive-translate/releases/tag/resources-v0.2.0)，两项 Source code 也是源码；校验值见正式页的 SHA-256 折叠区。公开下载无需登录 GitHub，也不需要 Node.js。
 
 ## 目录
 
@@ -59,7 +59,7 @@
 ### Chrome / Edge：下载后直接安装
 
 1. 打开 [Releases 下载页](https://github.com/Yvonson/immersive-translate/releases/latest)。
-2. 在该版本的 **Assets（附件）** 中下载 **`chrome.zip`**。Chrome 和 Edge 使用同一个包。
+2. 在该版本的 **Assets（附件）** 中下载 **`open-bilingual-translate-0.2.0-chromium-extension.zip`**。Chrome 和 Edge 使用同一个包。
 3. 解压到一个长期保留的文件夹，例如 `D:\BrowserExtensions\OpenBilingualTranslate`。加载后的插件会依赖这个文件夹，后续不要随意删除或移动。
 4. 在浏览器地址栏输入：Chrome 使用 `chrome://extensions`，Edge 使用 `edge://extensions`。
 5. 打开 **开发者模式（Developer mode）**。
@@ -73,7 +73,7 @@
 
 ### Firefox：临时安装开发包
 
-1. 在同一个 [下载页](https://github.com/Yvonson/immersive-translate/releases/latest) 下载 `developer-resources.zip`，从中提取 `firefox.zip` 再解压；这是开发者入口，普通 Chrome 用户不用下载。
+1. 在 [Resources 页面](https://github.com/Yvonson/immersive-translate/releases/tag/resources-v0.2.0) 下载 `open-bilingual-translate-0.2.0-development-resources.zip`，从中提取 `firefox.zip` 再解压；这是开发者入口，普通 Chrome 用户不用下载。
 2. 在 Firefox 地址栏输入 `about:debugging#/runtime/this-firefox`。
 3. 点击 **临时载入附加组件（Load Temporary Add-on）**。
 4. 选择解压目录中的 `manifest.json`，再刷新待翻译网页。
@@ -293,7 +293,7 @@ DeepLearning.AI 会尝试读取 Vidstack 或课时 VTT。在展开的文字稿�
 
 首版面向 **Windows x64＋Chrome**。这是可选的本地学习功能，需要安装伴随程序和英汉释义包；旧版稳定 Release 没有这些内容。
 
-1. 下载并完整解压 [windows-full.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/windows-full.zip)，加载其中的 `chrome/` 扩展（已有用户保留原路径更新），打开扩展设置 → **本地词典**。
+1. 下载并完整解压 [open-bilingual-translate-0.2.0-windows-x64-bundle.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/open-bilingual-translate-0.2.0-windows-x64-bundle.zip)，加载其中的 `chrome/` 扩展（已有用户保留原路径更新），打开扩展设置 → **本地词典**。
 2. 在包内 `companion/` 目录运行设置页生成的安装命令，再在管理窗口导入包内 `dictionary-core.zip`；回到扩展点击 **重新连接**。已有词库无需再次导入。
 3. 在网页选中陌生英文词语，右键选择 **在本地词典中查询**。词卡显示音标、英音／美音和释义，点击 **详细解释与例句** 查看学习资料。
 4. 点击发音按钮重播，或选择 **0.75× 慢速**；默认使用无需 Key 的浏览器语音，有可用 Google 音色时优先选择，并显示在线／本机来源。
@@ -402,7 +402,7 @@ npm run test:browser
 | --- | --- |
 | Chrome / Edge 加载目录 | `dist/chrome` |
 | Firefox 临时加载入口 | `dist/firefox/manifest.json` |
-| Chrome / Edge 分发包 | `dist/chrome.zip` |
+| Chrome / Edge 分发包 | `dist/open-bilingual-translate-0.2.0-chromium-extension.zip` |
 | Firefox 开发包 | `dist/firefox.zip` |
 
 修改 `src/` 后重新构建、重新加载插件并刷新网页。不要直接修改 `dist/`，也不要将 API Key 写进代码。

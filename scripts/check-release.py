@@ -7,6 +7,8 @@ import re
 import subprocess
 import zipfile
 
+from release_layout import notice_equal
+
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = {"chrome.zip", "firefox.zip", "dictionary-companion-windows-x64.zip",
             "dictionary-companion-sources.zip", "dictionary-core.zip", "catalog.json",
@@ -44,7 +46,7 @@ def audit(directory, tag, commit):
             for name in ("LICENSE", "UPSTREAM.md", "PRIVACY"):
                 # Windows-produced packages and Linux checkout use different text newlines.
                 # Only these notice texts are canonicalized; runtime/data hashes stay exact.
-                assert archive.read(name).decode("utf-8").replace("\r\n", "\n") == (ROOT / name).read_text(encoding="utf-8")
+                notice_equal(archive.read(name), (ROOT / name).read_bytes(), name)
             assert not archive.testzip()
             assert all(not re.search(r"(^|/)(?:node_modules|\.git|\.env|settings\.json|native-host\.json|favorites\.sqlite3)(?:/|$)", name) for name in archive.namelist())
     for name, metadata in (("dictionary-companion-windows-x64.zip", "BUILD.json"), ("dictionary-companion-sources.zip", "SOURCE.json")):
@@ -92,8 +94,8 @@ def audit(directory, tag, commit):
             with archive.open(item["path"]) as stream:
                 assert hashlib.file_digest(stream, "sha256").hexdigest() == item["sha256"]
     assets = [{"name":name, "bytes":(directory/name).stat().st_size, "sha256":sha(directory/name)} for name in sorted(expected)]
-    (directory / "SHA256SUMS.txt").write_text("".join(f"{asset['sha256']}  {asset['name']}\n" for asset in assets), encoding="utf-8")
-    (directory / "release-manifest.json").write_text(json.dumps({"version":version, "tag":tag, "commit":commit, "assets":assets}, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+    (directory / "SHA256SUMS.txt").write_text("".join(f"{asset['sha256']}  {asset['name']}\n" for asset in assets), encoding="utf-8", newline="\n")
+    (directory / "release-manifest.json").write_text(json.dumps({"version":version, "tag":tag, "commit":commit, "assets":assets}, ensure_ascii=False, indent=2)+"\n", encoding="utf-8", newline="\n")
     print(json.dumps({"tag":tag,"commit":commit,"validatedAssets":len(assets),"bytes":sum(a["bytes"] for a in assets)}))
 
 

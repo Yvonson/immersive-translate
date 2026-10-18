@@ -11,6 +11,8 @@
 
 ## v0.2.0 发布审查（2026-10-18）
 
+- D-016 规范发布正在实施：已增加统一命名与内部清单、独立 Resources、零写入预检和重复发布／失败恢复保护；本地 20 项发布回归通过，真实原始输入完整审查和新包装通过。线上仍以上方现有附件为准；待远程执行和匿名验证后更新本节。
+
 - 下载整理已完成（D-015）：`chrome.zip` 383,125 字节；`windows-full.zip` 280,941,378 字节，含 `chrome/`、`companion/`、词库 ZIP 和安装指南；`developer-resources.zip` 238,893,283 字节，集中对应源码、Firefox 开发包、原始快照及审计资料；另附 `SHA256SUMS.txt`。普通用户下载其中一个安装包即可，完整包仍需手工注册／导入。旧分件已安装用户无需为整理重装。
 - [整理工作流 39137811264](https://github.com/Yvonson/immersive-translate/actions/runs/39137811264) 成功，先完整审查旧输入，逐文件核对新包装与原程序／来源数据，上传核对后才撤下分件；保留原标签和 Chrome 包哈希。3 项包装回归与 [6dbf4c6 的扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39137592018) 通过。首次整理审计因 Windows／Linux 版权文本换行差异停止且没有删附件，0184d8f 仅规范化 3 份声明文本的换行后重跑成功，运行文件／词库仍按字节校验。
 - 整理后匿名 latest 指向 v0.2.0；轻量包实际下载 SHA-256 保持不变，公开校验文件 3 条均与远程 digest 一致，完整包／开发包 HTTP 200 和精确体积通过。证据 `.local/release/public-before-simplify.json`、`public-after-simplify.json`、`compact-public-verification.json`，工作流 artifact 保存修改前后清单和新下载清单。以下初次发布的 20 附件记录为历史，当前布局以上述 4 附件为准。

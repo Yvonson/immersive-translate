@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -B -m unittest discover -s companion/tests -v
-      - run: python -B tests/release_downloads_test.py
+      - run: python -B -m unittest discover -s tests -p '*release*test.py' -v
       - run: npm run build
       - run: npm run check
       - run: npx playwright install --with-deps chromium
@@ -79,4 +79,4 @@ jobs:
           body_path: docs/releases/${{ github.ref_name }}.md
           files: release-assets/*.zip
       # Internal ZIPs are draft inputs only. Audit complete sources/data, then
-      # package four public downloads with publish-release.ps1 (docs/RELEASING.md).
+      # publish two user downloads and a separate resources release with publish-release.ps1 (docs/RELEASING.md).

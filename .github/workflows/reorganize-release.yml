@@ -1,22 +1,44 @@
-name: Simplify existing release downloads
+name: Release Packaging
+run-name: Release Packaging / ${{ inputs.tag }} / ${{ inputs.mode }}
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published stable release to regroup (tag stays unchanged)
+        description: Software release tag (never moved)
         required: true
         default: v0.2.0
       source_commit:
-        description: Exact commit of the existing tested binaries
+        description: Exact source commit of the tested software
         required: true
         default: 28a651c1cf3f0e53202bd32cc341d074604b035a
+      mode:
+        description: Verify only, or publish the verified downloads
+        type: choice
+        options: [verify, publish]
+        default: verify
 permissions:
   contents: read
 concurrency:
   group: release-downloads-${{ inputs.tag }}
   cancel-in-progress: false
+env:
+  PYTHONUTF8: '1'
 jobs:
-  regroup:
+  validate:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+      - run: python -B -m unittest discover -s tests -p '*release*test.py' -v
+  distribution:
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -27,19 +49,35 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-      - run: python -B tests/release_downloads_test.py
-      - name: Verify, bundle, upload, then retire redundant attachments
+          python-version: '3.13.16'
+      - name: Verify inputs and package downloads (no remote writes)
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
           RELEASE_SOURCE_COMMIT: ${{ inputs.source_commit }}
-        run: python -B scripts/reorganize-release.py
-      - uses: actions/upload-artifact@v4
+        run: python -B scripts/reorganize-release.py --mode verify --output .local/release/prepared
+      - name: Publish verified resources and user downloads
+        if: inputs.mode == 'publish'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -B scripts/reorganize-release.py --mode publish --prepared .local/release/prepared/downloads/prepared.json
+      - name: Preserve first publication report
+        if: inputs.mode == 'publish'
+        run: python -c "import shutil; shutil.copyfile('.local/release/prepared/downloads/after.json', '.local/release/prepared/downloads/first-publication.json')"
+      - name: Verify repeat publication requires zero writes
+        if: inputs.mode == 'publish'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -B scripts/reorganize-release.py --mode publish --prepared .local/release/prepared/downloads/prepared.json --expect-no-writes
+      - name: Save publication evidence
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: release-download-evidence
+          name: release-packaging-evidence
           path: |
-            .local/release/reorganize-*/before.json
-            .local/release/reorganize-*/after.json
-            .local/release/reorganize-*/downloads/download-manifest.json
+            .local/release/prepared/before.json
+            .local/release/prepared/downloads/download-manifest.json
+            .local/release/prepared/downloads/after.json
+            .local/release/prepared/downloads/first-publication.json
+            .local/release/prepared/downloads/main-body.md
+            .local/release/prepared/downloads/resources-body.md

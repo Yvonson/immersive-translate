@@ -4,7 +4,7 @@
 
 ## 获取与安装
 
-在 [v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0) 只下载 **windows-full.zip** 即可获得扩展、Windows 程序和词库，不用下载其他 Assets。已安装旧词库可继续使用。完整步骤见 [安装指南](INSTALL.md)。开发中的 CI artifact 不替代固定版本的 Release。
+在 [v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0) 只下载 **open-bilingual-translate-0.2.0-windows-x64-bundle.zip** 即可获得扩展、Windows 程序和词库，不用下载其他 Assets。已安装旧词库可继续使用。完整步骤见 [安装指南](INSTALL.md)。开发中的 CI artifact 不替代固定版本的 Release。
 
 | 完整包内的位置 | 用途 |
 | --- | --- |
@@ -12,7 +12,7 @@
 | `companion/` | 本地程序、运行环境及安装／卸载脚本 |
 | `dictionary-core.zip` | ECDICT 英汉释义／词形和中文维基词典英语解释／例句 |
 
-开发者所需的 `dictionary-companion-sources.zip`、`catalog.json`、来源锁及原始快照统一在 `developer-resources.zip` 内，普通用户无需下载。
+开发者所需的 `dictionary-companion-sources.zip`、`catalog.json`、来源锁及原始快照统一在 [Resources 页面](https://github.com/Yvonson/immersive-translate/releases/tag/resources-v0.2.0) 的 `open-bilingual-translate-0.2.0-development-resources.zip` 内，普通用户无需下载。
 
 1. 加载新版扩展并刷新网页，进入 **全部设置 → 本地词典**。
 2. 将完整包 **完整解压**，保留 `companion/` 内的 `dictionary-companion` 和 `_internal`，不要只复制 EXE。
@@ -119,7 +119,7 @@ python companion/main.py --build-resources
 python scripts/package-dictionary-sources.py
 ```
 
-只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定所有原始快照 SHA-256；构建前再次校验，清单保留全部来源。Kaikki 滚动地址更新时，从同版本 Release 获取 `developer-resources.zip`，解压后在包含 `source-parts.json`、合并脚本和 7 个快照分片的目录运行 `python restore-dictionary-source.py`，还原校验正确的 gzip 后放入缓存。也可审查后更新锁，不绕过校验。原始快照只供开发重建；普通用户使用完整包内的 `dictionary-core.zip`。
+只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定所有原始快照 SHA-256；构建前再次校验，清单保留全部来源。Kaikki 滚动地址更新时，从 [Resources 页面](https://github.com/Yvonson/immersive-translate/releases/tag/resources-v0.2.0) 获取 `open-bilingual-translate-0.2.0-development-resources.zip`，解压后在包含 `source-parts.json`、合并脚本和 7 个快照分片的目录运行 `python restore-dictionary-source.py`，还原校验正确的 gzip 后放入缓存。也可审查后更新锁，不绕过校验。原始快照只供开发重建；普通用户使用完整包内的 `dictionary-core.zip`。
 
 生成文件在 `.local/dictionary/`。Native Messaging 协议 `{v:1,id,op,...}` 提供 `status/lookup/cancel` 和 `favorites.*`，32 位小端长度＋UTF-8 JSON，入站 16 KiB，不接受网页提供的路径／命令。收藏地址仅是存储文本，不供程序抓取。语音由扩展独立处理。普通测试不修改系统注册；`node scripts/verify-dictionary-native.cjs` 明确安装当前程序、注册并验证真实词库及实际可用浏览器音色；`node scripts/verify-favorites-native.cjs` 明确安装／更新程序、用真实 Chrome 检查能力，再用隔离收藏文件验证升级保留及缺词库仍可用，不向用户生词本写入测试词。
 
