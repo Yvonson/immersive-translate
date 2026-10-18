@@ -184,6 +184,11 @@ if (typeof chrome.contextMenus !== "undefined") {
         contexts: ["selection"]
     })
     chrome.contextMenus.create({
+        id: "dictionary-favorite",
+        title: "收藏到本地生词本",
+        contexts: ["selection"]
+    })
+    chrome.contextMenus.create({
         id: "browserAction-showPopup",
         title: chrome.i18n.getMessage("btnShowPopup"),
         contexts: ["browser_action"]
@@ -219,6 +224,8 @@ if (typeof chrome.contextMenus !== "undefined") {
     chrome.contextMenus.onClicked.addListener((info, tab) => {
         if (info.menuItemId === "dictionary-lookup") {
             dictionaryService.openSelection(info, tab).catch(console.error)
+        } else if (info.menuItemId === "dictionary-favorite") {
+            dictionaryService.openSelection(info, tab, true).catch(console.error)
         } else if (info.menuItemId == "translate-web-page") {
             const isPdf =  globalIsPdf(tab)
             if(isPdf) {

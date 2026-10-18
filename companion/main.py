@@ -108,6 +108,7 @@ def main():
     parser.add_argument("--install", metavar="EXTENSION_ID")
     parser.add_argument("--unregister", action="store_true")
     parser.add_argument("--data-dir", type=Path)
+    parser.add_argument("--user-data-dir", type=Path, help="Override personal vocabulary directory (isolated testing/portable use)")
     parser.add_argument("--manage", action="store_true")
     parser.add_argument("--import-pack", type=Path)
     parser.add_argument("--verify", action="store_true")
@@ -155,7 +156,7 @@ def main():
             msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
         from obt_dictionary.host import serve
-        serve(root)
+        serve(root, user_root=args.user_data_dir)
     else:
         parser.print_help()
 

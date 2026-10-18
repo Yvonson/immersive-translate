@@ -66,3 +66,15 @@ Firefox 正式分发签名、商店上架、Safari 或独立桌面端需要另�
 `src/ui/theme.css` / `theme.js` 提供共享颜色变量和主题切换。弹窗及设置使用这些变量；播放器菜单位于独立 Shadow DOM，保持深色原生播放器风格。YouTube 按钮挂到 CC 后（无 CC 时齿轮前），菜单作为播放器容器的子层定位，避免控制栏的 overflow/transform 影响。
 
 设置导航使用固定的分区映射，不直接把任意 hash 传给选择器；旧 `#others` 映射到数据与高级，未知入口回基础设置。所有配置继续沿用原键；UI 改版不清除或导出 API Key。版本冻结约定见项目记忆 D-008。
+
+## 生词本实现约定
+
+`companion/obt_dictionary/favorites.py` 管理固定 UserData 下的 SQLite（schema v1），词条／语境／标签分表，WAL、外键和事务保证并发归并及导入原子性。收藏与词库引擎惰性、独立创建；`main.py --user-data-dir` 仅供用户命令行或隔离验证，不通过网页消息接受路径。不要将文件放进资源包、安装目录或 Git。
+
+协议版本继续为 1，`status.capabilities.favorites: 1` 协商能力；旧主机仍可查词，新功能明确提示更新。`dictionaryFavorites` 内部消息映射到 `favorites.state/collect/meta/list/ids/get/update/remove/review/exportStart/exportChunk/importStart/importChunk/importCommit`。仅扩展页面可读取批量收藏、编辑和备份；内容脚本只允许当前选词的 state／collect。背景校验自身 sender、隐身窗口、分片 token 的文档归属、请求 UTF-8 体积；原生进程再次校验内容与地址。没有 page-world 接口或生产 HTTP 服务。
+
+收藏请求有独立 owner，`dictionaryCancel` 只取消查询和发音；保存成功后才显示已收藏。写入不自动重试，超时提示先核对实际状态。`chrome.storage.local.dictionaryFavoritesRevision` 只传变更信号，不保存个人词表；词卡星标、词典计数及列表通过它刷新。新页面 `dictionary/favorites.html` 不复用查词页 `#word`，避免与真实单词冲突。
+
+备份是一致读事务快照，出站每片 60,000 字符；导入每片至多 2,000 个 JS UTF-16 单位，避开代理对，原生按顺序暂存至 128 MiB 上限，完整校验后单事务合并。token 只存在当前主机／扩展文档会话。notes 等自由文本仅以 textContent／value 显示，绝不能注入 HTML。保存资料有上限，详见 [用户说明](LOCAL-DICTIONARY.md#本地生词本)。
+
+`tests/browser/favorites.spec.cjs` 用随机回环地址作为**测试桥**连接真实 Python Native Messaging 主机和隔离 SQLite，以便 Linux CI 不安装 Windows 程序；不进入扩展包或生产运行路径，不接触真实用户词表。覆盖 5,001 条收藏的页面／筛选、语境过滤、翻卡键盘和分片备份；Python 额外覆盖多连接写入、失败回滚。普通浏览器测试需 PATH 有 Python 3.13，或设置 `OBT_TEST_PYTHON`。安装验证和真实 API／网站验收继续分开记录。

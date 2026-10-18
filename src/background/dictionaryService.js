@@ -3,12 +3,14 @@
 var dictionaryService = (() => {
   const host = "org.openbilingual.dictionary", pending = new Map();
   let port, idle, audioOwner, sequence = 0, playback = 0, creatingOffscreen, speechAbort, rejectSpeech;
+  let favoritesCapability;
+  const transfers = new Map();
   const failure = (code, message) => Object.assign(new Error(message), {code});
   const owner = sender => sender.tab ? `${sender.tab.id}:${sender.frameId || 0}:${sender.documentId || ""}` : sender.documentId || sender.url;
   function armIdle() { clearTimeout(idle); if (port && !pending.size) idle = setTimeout(disconnect, 120000); }
   function disconnect() {
     clearTimeout(idle);
-    const previous = port; port = null;
+    const previous = port; port = null; favoritesCapability = null; transfers.clear();
     previous?.disconnect();
     for (const item of pending.values()) { clearTimeout(item.timeout); item.reject(failure("DISCONNECTED", "本地词典连接已断开，请重新连接。")); }
     pending.clear();
@@ -35,7 +37,7 @@ var dictionaryService = (() => {
     native.onDisconnect.addListener(() => {
       const ignored = chrome.runtime.lastError;
       if (port !== native) return;
-      port = null;
+      port = null; favoritesCapability = null; transfers.clear();
       for (const item of pending.values()) { clearTimeout(item.timeout); item.reject(failure("HOST_UNAVAILABLE", "未连接到本地词典。请安装伴随程序，或在设置中检查当前扩展 ID 的注册。")); }
       pending.clear();
     });
@@ -47,12 +49,13 @@ var dictionaryService = (() => {
       let timeout;
       try {
         const native = connect();
+        const mutation = operation.startsWith("favorites.");
         timeout = setTimeout(() => {
-          pending.delete(id); reject(failure("TIMEOUT", "本地词典响应超时，请重试或修复资源。"));
-          try { native.postMessage({v:1,id:"c"+(++sequence),op:"cancel",target:id}); } catch (_) { /* Disconnected meanwhile. */ }
+          pending.delete(id); reject(failure("TIMEOUT", mutation ? "生词本响应超时，操作可能已保存。请刷新核对后再操作。" : "本地词典响应超时，请重试或修复资源。"));
+          if (!mutation) try { native.postMessage({v:1,id:"c"+(++sequence),op:"cancel",target:id}); } catch (_) { /* Disconnected meanwhile. */ }
           armIdle();
-        }, 15000);
-        pending.set(id, {resolve, reject, timeout, owner:key});
+        }, operation === "favorites.importCommit" || operation === "favorites.exportStart" ? 60000 : 15000);
+        pending.set(id, {resolve, reject, timeout, owner:mutation ? "favorites:"+key : key});
         native.postMessage({v:1, id, op:operation, ...data});
       } catch (error) { clearTimeout(timeout); pending.delete(id); reject(error); armIdle(); }
     });
@@ -91,6 +94,42 @@ var dictionaryService = (() => {
     return sender.id === chrome.runtime.id && (sender.url?.startsWith(chrome.runtime.getURL("")) || (sender.tab && /^(https?:|file:|about:)/.test(sender.url || "")));
   }
   function extensionPage(sender) { return sender.url?.startsWith(chrome.runtime.getURL("")); }
+  async function favorites(message, sender) {
+    const op = message.op, key = owner(sender);
+    const allowed = ["state","collect","meta","list","ids","get","update","remove","review","exportStart","exportChunk","importStart","importChunk","importCommit"];
+    if (!allowed.includes(op)) throw failure("INVALID_OPERATION", "无效的生词本操作。");
+    if (!extensionPage(sender) && !["state","collect"].includes(op)) throw failure("FORBIDDEN", "请从我的收藏页面管理生词本。");
+    if (sender.tab?.incognito || sender.incognito) throw failure("INCOGNITO", "隐身窗口不保存或读取生词本，请在普通窗口学习。");
+    if (!favoritesCapability) {
+      const status = await request("status", {}, "favorites:"+key);
+      if (status?.capabilities?.favorites !== 1) throw failure("UPDATE_REQUIRED", "请更新本地伴随程序以启用收藏；无需重新下载词库。");
+      favoritesCapability = true;
+    }
+    const data = {};
+    if (["state","collect"].includes(op)) data.text = normalize(message.text);
+    if (op === "collect") {
+      const context = message.context || {};
+      data.context = {sentence: typeof context.sentence === "string" ? context.sentence.slice(0,2000) : "", title: typeof context.title === "string" ? context.title.slice(0,500) : "", url: extensionPage(sender) ? "" : (sender.url || "").slice(0,4096)};
+    }
+    if (["get","update","remove","review"].includes(op)) data.wordId = message.wordId;
+    if (op === "update") data.changes = message.changes;
+    if (op === "review") data.outcome = message.outcome;
+    if (["list","ids"].includes(op)) { data.filters = message.filters; data.page = message.page; }
+    if (["exportChunk","importChunk","importCommit"].includes(op)) {
+      if (transfers.get(message.token) !== key) throw failure("TRANSFER_EXPIRED", "备份会话失效，请重新开始。");
+      data.token = message.token; data.index = message.index;
+      if (op === "importChunk") data.text = message.text;
+    }
+    if (new TextEncoder().encode(JSON.stringify(data)).length > 14000) throw failure("INVALID_FAVORITE", "单次编辑过长，请缩短内容（最多约 4,000 个汉字）。");
+    const result = await request("favorites."+op, data, key);
+    if (["exportStart","importStart"].includes(op)) transfers.set(result.token,key);
+    if (op === "importCommit") transfers.delete(message.token);
+    if (["collect","update","remove","review","importCommit"].includes(op)) {
+      // Revision only; personal entries stay in the native database.
+      await chrome.storage.local.set({dictionaryFavoritesRevision:Date.now()+":"+(++sequence)}).catch(()=>{});
+    }
+    return result;
+  }
   function voices() {
     return new Promise(resolve => {
       if (!chrome.tts) return resolve([]);
@@ -165,6 +204,11 @@ var dictionaryService = (() => {
   async function handle(message, sender) {
     if (!trusted(sender)) throw failure("FORBIDDEN", "无效的词典请求来源。");
     const key = owner(sender);
+    if (message.action === "dictionaryFavorites") return favorites(message,sender);
+    if (message.action === "dictionaryOpenFavorites") {
+      const suffix = /^[a-f0-9]{32}$/.test(message.wordId || "") ? "#"+message.wordId : "";
+      await chrome.tabs.create({url:chrome.runtime.getURL("dictionary/favorites.html")+suffix}); return {};
+    }
     if (message.action === "dictionarySpeechSettings") {
       if(!extensionPage(sender)) throw failure("FORBIDDEN", "请从设置页配置发音。");
       return speechSettings(message);
@@ -193,12 +237,17 @@ var dictionaryService = (() => {
     handle(message,sender).then(result=>reply({ok:true,result}),error=>reply({ok:false,error:{code:error.code || "NATIVE_ERROR",message:error.message}}));
     return true;
   });
-  async function openSelection(info, tab) {
+  async function openSelection(info, tab, collect = false) {
     if (!tab?.id || !info.selectionText) return;
     try {
-      const result = await chrome.tabs.sendMessage(tab.id, {action:"dictionaryShow",text:info.selectionText}, {frameId:info.frameId || 0});
+      const result = await chrome.tabs.sendMessage(tab.id, {action:collect?"dictionaryCollectSelection":"dictionaryShow",text:info.selectionText}, {frameId:info.frameId || 0});
       if (result?.ok) return;
     } catch (_) { /* Restricted pages have no content script. */ }
+    if (collect) {
+      if (tab.incognito) return;
+      const result = await favorites({op:"collect",text:info.selectionText}, {id:chrome.runtime.id,url:chrome.runtime.getURL("dictionary/index.html")});
+      await chrome.tabs.create({url:chrome.runtime.getURL("dictionary/favorites.html")+"#"+result.id}); return;
+    }
     // Encode the full input; the details page shows a validation message for long selections.
     await chrome.tabs.create({url:chrome.runtime.getURL("dictionary/index.html") + "#" + encodeURIComponent(info.selectionText.slice(0,4096))});
   }

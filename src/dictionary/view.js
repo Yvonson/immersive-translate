@@ -10,9 +10,25 @@ var dictionaryView = (() => {
     return reply.result;
   }
   function link(text,url) { const result=node("a",text); try {const parsed=new URL(url); if(parsed.protocol!=="https:")throw new Error(); result.href=parsed.href;result.target="_blank";result.rel="noopener noreferrer";}catch(_){} return result; }
-  function render(root,result,{details=false,lookup=()=>{}}={}) {
+  const favoriteControls = new Set();
+  function favoriteButton(text, context={}) {
+    const wrap=node("span",undefined,"favorite-control"), status=node("small","","favorite-status");status.setAttribute("role","status");
+    let savedId, busy=false;
+    const control=button("☆ 收藏",async()=>{
+      if(busy)return;
+      if(savedId){send("dictionaryOpenFavorites",{wordId:savedId}).catch(error=>status.textContent=error.message);return;}
+      busy=true;control.disabled=true;status.textContent="正在保存……";
+      try{const result=await send("dictionaryFavorites",{op:"collect",text,context});savedId=result.id;control.textContent="★ 已收藏";control.setAttribute("aria-pressed","true");status.textContent="已保存到本机";}
+      catch(error){status.textContent=error.message;}
+      finally{busy=false;control.disabled=false;}
+    },"favorite-button");control.setAttribute("aria-pressed","false");
+    const refresh=async()=>{if(busy)return;try{const state=await send("dictionaryFavorites",{op:"state",text});savedId=state.saved?state.id:null;control.textContent=state.saved?"★ 已收藏":"☆ 收藏";control.setAttribute("aria-pressed",String(state.saved));}catch(error){status.textContent=error.message;}};
+    wrap.append(control,status);favoriteControls.add({wrap,refresh});refresh();return wrap;
+  }
+  chrome.storage.onChanged.addListener(changes=>{if(!changes.dictionaryFavoritesRevision)return;for(const item of favoriteControls){if(item.wrap.isConnected)item.refresh();else favoriteControls.delete(item);}});
+  function render(root,result,{details=false,lookup=()=>{},favorite=true,favoriteContext={}}={}) {
     root.replaceChildren();
-    const title=node("div",undefined,"word-heading");title.append(node("h1",result.query),node("span","本地词典","local-label"));root.append(title);
+    const title=node("div",undefined,"word-heading");title.append(node("h1",result.query),node("span","本地词典","local-label"));if(favorite)title.append(favoriteButton(result.query,favoriteContext));root.append(title);
     if(result.lemmas?.length)root.append(node("p","原形："+result.lemmas.join(" / "),"muted"));
     const sounds=node("div",undefined,"pronunciations"), status=node("p","点击播放读音。使用词典设置中选择的语音服务；在线音色只发送当前单词或短语。","audio-status muted");status.setAttribute("role","status");
     const speed=document.createElement("select");speed.setAttribute("aria-label","发音速度");
@@ -50,5 +66,5 @@ var dictionaryView = (() => {
     }
     if(!details)root.append(button("详细解释与例句 ↗",()=>send("dictionaryOpenDetails",{text:result.query}),"detail-link"));
   }
-  return {node,button,send,render};
+  return {node,button,send,render,favoriteButton};
 })();

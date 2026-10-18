@@ -48,6 +48,28 @@ var pageTranslator = {};
     const style = getComputedStyle(element);
     return style.display === "none" || ["hidden","collapse"].includes(style.visibility) || style.contentVisibility === "hidden";
   }
+  // Read-only capture for explicit vocabulary collection. Reuse source wrapper
+  // identity and the same visibility rules as translation; never read translations.
+  pageTranslator.selectionContext = () => {
+    const selection = getSelection();
+    const element = selection?.anchorNode?.nodeType === Node.ELEMENT_NODE ? selection.anchorNode : selection?.anchorNode?.parentElement;
+    const root = resolve(element);
+    if (!root || !selection?.toString().trim()) return "";
+    let value = "";
+    function walk(node) {
+      if (value.length > 20000) return;
+      if (node.nodeType === Node.TEXT_NODE) { value += node.nodeValue; return; }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      if (!sourceWrappers.has(node) && (node.matches(excluded) || node.matches("[data-obt-result]") || excludedByRule(node) || hidden(node))) return;
+      if (node.tagName === "BR") value += " ";
+      node.childNodes.forEach(walk);
+    }
+    root.childNodes.forEach(walk);
+    value = value.replace(/\s+/g," ").trim();
+    const selected = selection.toString().trim(), at = value.indexOf(selected);
+    const start = Math.max(0,at - 800);
+    return value.slice(start,start + 2000);
+  };
   function resolve(element) {
     if (!element?.closest || element.closest(excluded) || excludedByRule(element) || readingShortcuts.editable(element) || (twpConfig.get("translateTag_pre") === "no" && element.closest("pre"))) return null;
     let boundary;
