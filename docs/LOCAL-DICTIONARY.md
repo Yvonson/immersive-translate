@@ -119,7 +119,7 @@ python companion/main.py --build-resources
 python scripts/package-dictionary-sources.py
 ```
 
-只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定所有原始快照 SHA-256；构建前再次校验，清单保留全部来源。若 Kaikki 滚动地址已更新，从同版本 Release 获取 `zhwiktionary.jsonl.gz` 放入缓存再运行；或另行审查并更新锁，不绕过校验冒充旧版。
+只构建释义，不下载真人录音／模型。普通下载支持 `.part` 续传；大文件可用 `python scripts/fetch-dictionary-ranges.py --jobs 6`，依赖 curl，保留已完成分段。`--direct`／`--proxy` 仅作用于显式资源下载。`companion/resources.lock.json` 固定所有原始快照 SHA-256；构建前再次校验，清单保留全部来源。Kaikki 滚动地址已经更新时，从同版本 Release 下载 `source-parts.json`、`restore-dictionary-source.py` 和 7 个 `zhwiktionary.jsonl.gz.part01` 至 `.part07`，在同一目录运行 `python restore-dictionary-source.py`，还原校验正确的 `zhwiktionary.jsonl.gz` 后放入缓存。也可另行审查并更新锁，不绕过校验冒充旧版。分片和还原脚本只供开发重建，普通用户安装完整 `dictionary-core.zip`。
 
 生成文件在 `.local/dictionary/`。Native Messaging 协议 `{v:1,id,op,...}` 提供 `status/lookup/cancel` 和 `favorites.*`，32 位小端长度＋UTF-8 JSON，入站 16 KiB，不接受网页提供的路径／命令。收藏地址仅是存储文本，不供程序抓取。语音由扩展独立处理。普通测试不修改系统注册；`node scripts/verify-dictionary-native.cjs` 明确安装当前程序、注册并验证真实词库及实际可用浏览器音色；`node scripts/verify-favorites-native.cjs` 明确安装／更新程序、用真实 Chrome 检查能力，再用隔离收藏文件验证升级保留及缺词库仍可用，不向用户生词本写入测试词。
 

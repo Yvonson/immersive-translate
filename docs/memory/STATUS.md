@@ -5,18 +5,19 @@
 ## 源码与交付
 
 - 用户按 D-014 明确选择正式 `v0.2.0`，源码及显示版本均为 `0.2.0`；本机扩展目录 `dist/chrome`，包 `dist/chrome.zip`。
-- 本次正在准备正式发布；在最终公开核对完成前，不把草稿／本地包写成已上线。公开版本结果后续补记本节。
+- 已公开正式 [v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0)，标签指向 `28a651c1cf3f0e53202bd32cc341d074604b035a`。20 个附件逐个核对远程 SHA-256／大小后发布为 latest；匿名 latest 跳转、Chrome ZIP 实际下载 SHA-256、词库下载 HTTP 200／精确体积和来源分片清单均通过。未上架浏览器商店。
 - 独立根提交 `b8d680ad59bdf3a8f211bd1b78dbeccb7cb7b7cb`；旧稳定标签对应 `a3f814f71e101e95198a439c4b723cf102a24813`。保留独立历史，GitHub 创建时确认 `fork: false`。
 - `.upstream-git-history/` 为完整本地上游历史备份；`.upstream-git-backup/` 为早期不完整备份；两者不进入 Git。
 
 ## v0.2.0 发布审查（2026-10-18）
 
 - [审查记录](../RELEASE-REVIEW-2026-10-18.md)：修复旧入口自动换服务、收藏时钟回拨和导入标签越限，排除通用配置中的语音密钥；补齐词库锁／完整来源和构建前校验，避免复用旧工作数据库。
-- Node＋fflate 替换旧 Gulp／Babel，删除 550 项依赖；npm audit 从 28 项降至 0。24 项扩展单元、16 项 Python、27 项浏览器回归通过，最终提交和 Windows CI 包验证仍需补记。
+- Node＋fflate 替换旧 Gulp／Babel，删除 550 项依赖；npm audit 从 28 项降至 0。24 项扩展单元、16 项 Python、27 项浏览器回归通过；最终提交的 [扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39128723158)、[Windows CI](https://github.com/Yvonson/immersive-translate/actions/runs/39128723179) 与 [标签发布工作流](https://github.com/Yvonson/immersive-translate/actions/runs/39128902096) 均成功。
 - 新资源原始记录数不变，重新构建下载 266,383,521 字节、安装 932,611,439 字节，SHA-256 `7238c154c1f8aca1d7c58ce1d5975a7d3c64c1f0631ef39d3b9688e2eee883eb`，revision `20261018-1c9003161fd2`。旧已安装词库仍可使用；此处取代下方早期资源体积记录。
-- 发布流程改为全测后草稿、完整 12 附件检查和远程哈希核对后公开；许可证／来源／隐私和提交信息随包，正式二进制采用同提交 Windows 官方 CPython CI。安装与升级指南见 [INSTALL](../INSTALL.md)。
-- 审查提交 `bdd89d0` 的 [扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39107141389) 和 [Windows CI](https://github.com/Yvonson/immersive-translate/actions/runs/39107141361) 成功；Windows 包为官方 CPython 3.13.16，独立解压对应 GPL 源码重建与 Tk／SQLite 诊断成功。实际 DLL 核对后另补 OpenSSL 3.5.9／zlib 1.3.1 许可，最终正式包会使用包含它们的后续提交。
-- 已用该官方程序通过真实 Chrome Native Messaging 和重复安装验证：干净替换旧运行库、保留原词库位置、隔离收藏／笔记／复习升级保留、未来时间再收藏顺序正常。用户现有 3 条收藏数量保持不变，未写入测试词；证据 `.local/dictionary/favorites-native-verification.json`。验证辅助脚本改为等待实际收藏数量加载，避免把初始占位符当作失败。
+- 发布流程改为全测后草稿、完整附件检查和远程哈希核对后公开；本次最终 20 个附件。普通安装使用单个词库 ZIP；开发用原始快照拆成 7 片，附 `source-parts.json` 和合并脚本，每片及完整重组 SHA-256 均验证，损坏分片拒绝测试通过。许可证／来源／隐私和提交信息随包，正式二进制采用同提交 Windows 官方 CPython CI。安装与升级指南见 [INSTALL](../INSTALL.md)。
+- 审查提交 `bdd89d0` 的早期 CI 成功；最终 `28a651c` 补齐 OpenSSL 3.5.9／zlib 1.3.1 许可。正式 Windows 包为官方 CPython 3.13.16，对应 GPL 源码 ZIP 独立重建与 Tk／SQLite 诊断成功，二进制及源码提交一致。
+- 最终官方程序通过真实 Chrome Native Messaging 和重复安装验证：干净替换旧运行库、保留原词库位置、隔离收藏／笔记／复习升级保留、未来时间再收藏顺序正常，原有收藏数量保持不变且未写入测试词。最终词库用实际 Windows 程序在隔离目录导入／校验，8 组查询及 US/us／took→take 原形展开通过；未切换用户现用词库。证据 `.local/dictionary/favorites-native-verification.json`、`.local/release/resource-smoke/verification.json`。
+- 发布工具实际执行后修正草稿查询（按列表选唯一 tag，再按 ID 操作）和大文件流式传输；每次写入前刷新草稿状态。完整快照上传失败后采用互异分片并行交付，全部校验后才公开。发布与匿名下载证据在 `.local/release/`，不保存认证材料。工具和证据后续提交不移动已发布标签，不重建已验证安装包。
 
 ## 功能扩展研究（2026-10-18）
 

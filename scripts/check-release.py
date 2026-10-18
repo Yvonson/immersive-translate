@@ -22,9 +22,19 @@ def audit(directory, tag, commit):
     version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
     if tag != "v" + version or not re.fullmatch(r"[0-9a-f]{40}", commit):
         raise ValueError("Tag, package version or source commit mismatch")
+    expected = set(REQUIRED)
+    auxiliary = {"SHA256SUMS.txt", "release-manifest.json"}
+    split = (directory / "source-parts.json").exists()
+    if split:
+        source_meta = json.loads((directory / "source-parts.json").read_text(encoding="utf-8"))
+        names = [part["name"] for part in source_meta["parts"]]
+        assert 1 <= len(names) <= 99 and names == [f"zhwiktionary.jsonl.gz.part{i+1:02d}" for i in range(len(names))]
+        expected.remove("zhwiktionary.jsonl.gz")
+        expected.update(names + ["source-parts.json", "restore-dictionary-source.py"])
+        auxiliary.add("zhwiktionary.jsonl.gz")  # Optional local original; never upload twice.
     actual = {file.name for file in directory.iterdir() if file.is_file()}
-    if actual - {"SHA256SUMS.txt", "release-manifest.json"} != REQUIRED:
-        raise ValueError("Unexpected or missing release assets: " + repr(actual ^ REQUIRED))
+    if actual - auxiliary != expected:
+        raise ValueError("Unexpected or missing release assets: " + repr((actual - auxiliary) ^ expected))
     for browser in ("chrome", "firefox"):
         with zipfile.ZipFile(directory / (browser + ".zip")) as archive:
             manifest = json.loads(archive.read("manifest.json"))
@@ -53,7 +63,18 @@ def audit(directory, tag, commit):
                     assert licenses + file in archive.namelist()
     lock = json.loads((directory / "resources.lock.json").read_text(encoding="utf-8"))
     assert lock == json.loads((ROOT / "companion/resources.lock.json").read_text(encoding="utf-8"))
-    assert sha(directory / "zhwiktionary.jsonl.gz") == lock["zhwiktionary.jsonl.gz"]["sha256"]
+    if split:
+        pinned = lock["zhwiktionary.jsonl.gz"]
+        assert source_meta["target"] == "zhwiktionary.jsonl.gz" and source_meta["sha256"] == pinned["sha256"] and source_meta["bytes"] == pinned["bytes"]
+        whole = hashlib.sha256(); total = 0
+        for part in source_meta["parts"]:
+            path = directory / part["name"]
+            assert path.stat().st_size == part["bytes"] and sha(path) == part["sha256"]
+            with path.open("rb") as stream:
+                while block := stream.read(1024*1024): whole.update(block); total += len(block)
+        assert total == pinned["bytes"] and whole.hexdigest() == pinned["sha256"]
+    else:
+        assert sha(directory / "zhwiktionary.jsonl.gz") == lock["zhwiktionary.jsonl.gz"]["sha256"]
     catalog = json.loads((directory / "catalog.json").read_text(encoding="utf-8"))["components"][0]
     core = directory / "dictionary-core.zip"
     assert core.stat().st_size == catalog["downloadBytes"] and sha(core) == catalog["sha256"]
@@ -68,7 +89,7 @@ def audit(directory, tag, commit):
             assert archive.getinfo(item["path"]).file_size == item["bytes"]
             with archive.open(item["path"]) as stream:
                 assert hashlib.file_digest(stream, "sha256").hexdigest() == item["sha256"]
-    assets = [{"name":name, "bytes":(directory/name).stat().st_size, "sha256":sha(directory/name)} for name in sorted(REQUIRED)]
+    assets = [{"name":name, "bytes":(directory/name).stat().st_size, "sha256":sha(directory/name)} for name in sorted(expected)]
     (directory / "SHA256SUMS.txt").write_text("".join(f"{asset['sha256']}  {asset['name']}\n" for asset in assets), encoding="utf-8")
     (directory / "release-manifest.json").write_text(json.dumps({"version":version, "tag":tag, "commit":commit, "assets":assets}, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
     print(json.dumps({"tag":tag,"commit":commit,"validatedAssets":len(assets),"bytes":sum(a["bytes"] for a in assets)}))

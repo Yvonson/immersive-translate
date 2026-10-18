@@ -29,3 +29,5 @@ PowerShell 可运行 `Get-FileHash .\chrome.zip -Algorithm SHA256` 与 `SHA256SU
 如果 IDM 提示无法连接 `127.0.0.1:10808`，是下载器使用了未运行的代理。修复 IDM 自己的代理设置，或关闭这次下载接管后用浏览器下载；不需要修改插件 API Key。连接词典失败时检查是否完整解压、扩展 ID 是否变化、是否执行安装命令。
 
 Chrome 是本次主要验收平台。Edge 可加载扩展，但本地词典注册首版仅面向 Windows x64＋Chrome。Firefox 128+ 的 `firefox.zip` 是未签名的临时开发包，重启需重载，未完成本项目功能验收。字幕只处理播放器已有文本，仍为实验功能；不能识别无字幕视频，也不能绕过课程登录或 DRM。
+
+开发者原始快照以 7 个 `zhwiktionary.jsonl.gz.part01` 至 `.part07` 分片提供；另下载 `source-parts.json` 和 `restore-dictionary-source.py`，在同一文件夹运行 `python restore-dictionary-source.py`，校验后还原完整 gzip。普通安装无需这些分片。

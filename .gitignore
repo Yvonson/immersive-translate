@@ -19,3 +19,5 @@ companion/dist/
 companion/*.spec
 companion/settings.json
 companion/native-host.json
+
+.venv/
