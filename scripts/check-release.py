@@ -42,7 +42,9 @@ def audit(directory, tag, commit):
             assert manifest["version"] == manifest.get("version_name") == version
             assert build == {"version": version, "commit": commit, "browser": browser}
             for name in ("LICENSE", "UPSTREAM.md", "PRIVACY"):
-                assert archive.read(name) == (ROOT / name).read_bytes()
+                # Windows-produced packages and Linux checkout use different text newlines.
+                # Only these notice texts are canonicalized; runtime/data hashes stay exact.
+                assert archive.read(name).decode("utf-8").replace("\r\n", "\n") == (ROOT / name).read_text(encoding="utf-8")
             assert not archive.testzip()
             assert all(not re.search(r"(^|/)(?:node_modules|\.git|\.env|settings\.json|native-host\.json|favorites\.sqlite3)(?:/|$)", name) for name in archive.namelist())
     for name, metadata in (("dictionary-companion-windows-x64.zip", "BUILD.json"), ("dictionary-companion-sources.zip", "SOURCE.json")):
