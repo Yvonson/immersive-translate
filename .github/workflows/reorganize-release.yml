@@ -1,0 +1,45 @@
+name: Simplify existing release downloads
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published stable release to regroup (tag stays unchanged)
+        required: true
+        default: v0.2.0
+      source_commit:
+        description: Exact commit of the existing tested binaries
+        required: true
+        default: 28a651c1cf3f0e53202bd32cc341d074604b035a
+permissions:
+  contents: read
+concurrency:
+  group: release-downloads-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  regroup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -B tests/release_downloads_test.py
+      - name: Verify, bundle, upload, then retire redundant attachments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: python -B scripts/reorganize-release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-download-evidence
+          path: |
+            .local/release/reorganize-*/before.json
+            .local/release/reorganize-*/after.json
+            .local/release/reorganize-*/downloads/download-manifest.json

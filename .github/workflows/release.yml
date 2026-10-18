@@ -24,6 +24,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -B -m unittest discover -s companion/tests -v
+      - run: python -B tests/release_downloads_test.py
       - run: npm run build
       - run: npm run check
       - run: npx playwright install --with-deps chromium
@@ -77,5 +78,5 @@ jobs:
           fail_on_unmatched_files: true
           body_path: docs/releases/${{ github.ref_name }}.md
           files: release-assets/*.zip
-      # Upload the separately verified dictionary snapshot and run the complete
-      # asset audit before publishing this draft (docs/RELEASING.md).
+      # Internal ZIPs are draft inputs only. Audit complete sources/data, then
+      # package four public downloads with publish-release.ps1 (docs/RELEASING.md).

@@ -11,6 +11,8 @@
 
 ## v0.2.0 发布审查（2026-10-18）
 
+- 下载整理进行中（D-015）：用户指出 20 个手传附件加 2 个自动源码项难以选择，要求精简。已生成并逐文件核对轻量包／Windows 完整包／开发资料包，包装的 3 项回归和脚本语法通过；准备在 GitHub 运行器上传验证后撤下分件。实际公开附件数以下次远程核对为准，尚不把计划的 6 项写成已完成。
+
 - [审查记录](../RELEASE-REVIEW-2026-10-18.md)：修复旧入口自动换服务、收藏时钟回拨和导入标签越限，排除通用配置中的语音密钥；补齐词库锁／完整来源和构建前校验，避免复用旧工作数据库。
 - Node＋fflate 替换旧 Gulp／Babel，删除 550 项依赖；npm audit 从 28 项降至 0。24 项扩展单元、16 项 Python、27 项浏览器回归通过；最终提交的 [扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39128723158)、[Windows CI](https://github.com/Yvonson/immersive-translate/actions/runs/39128723179) 与 [标签发布工作流](https://github.com/Yvonson/immersive-translate/actions/runs/39128902096) 均成功。
 - 新资源原始记录数不变，重新构建下载 266,383,521 字节、安装 932,611,439 字节，SHA-256 `7238c154c1f8aca1d7c58ce1d5975a7d3c64c1f0631ef39d3b9688e2eee883eb`，revision `20261018-1c9003161fd2`。旧已安装词库仍可使用；此处取代下方早期资源体积记录。

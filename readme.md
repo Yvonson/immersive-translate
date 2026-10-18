@@ -8,7 +8,14 @@
 
 > 当前版本 **v0.2.0**：网页双语、Ctrl 段落翻译、视频字幕菜单、本地英汉词典、生词本和 Alt+Q／Alt+S 快捷键。重点支持 Chrome；字幕适配仍为实验功能，真实验收范围见 [发布说明](docs/releases/v0.2.0.md) 和 [当前状态](docs/memory/STATUS.md)。
 
-**只使用网页／字幕翻译，下载 [chrome.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/chrome.zip) 即可。** 想用本地词典和生词本，再下载 [Windows 组件](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/dictionary-companion-windows-x64.zip) 和 [词库包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/dictionary-core.zip)。普通用户不需要源码包、原始词典快照或 Node.js。完整步骤见 [安装指南](docs/INSTALL.md)。Release 附件公开下载，无需登录 GitHub。
+**普通用户按需求选一个安装包即可，不用下载全部 Assets：**
+
+| 你的需求 | 下载 |
+| --- | --- |
+| 只翻译网页／视频已有字幕（Chrome／Edge） | [chrome.zip · 轻量扩展包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/chrome.zip) |
+| Windows x64＋Chrome，还要离线词典／生词本 | [windows-full.zip · 完整包](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/windows-full.zip)，已含扩展、程序和词库 |
+
+完整包解压后按 [安装指南](docs/INSTALL.md) 加载 `chrome/`，在 `companion/` 注册组件，再导入随包词库。无需另外下载轻量包。`developer-resources.zip` 与两项 Source code 供开发者使用；`SHA256SUMS.txt` 仅用于可选校验。公开下载无需登录 GitHub，也不需要 Node.js。
 
 ## 目录
 
@@ -66,7 +73,7 @@
 
 ### Firefox：临时安装开发包
 
-1. 在同一个 [下载页](https://github.com/Yvonson/immersive-translate/releases/latest) 下载 `firefox.zip`，并解压。
+1. 在同一个 [下载页](https://github.com/Yvonson/immersive-translate/releases/latest) 下载 `developer-resources.zip`，从中提取 `firefox.zip` 再解压；这是开发者入口，普通 Chrome 用户不用下载。
 2. 在 Firefox 地址栏输入 `about:debugging#/runtime/this-firefox`。
 3. 点击 **临时载入附加组件（Load Temporary Add-on）**。
 4. 选择解压目录中的 `manifest.json`，再刷新待翻译网页。
@@ -286,8 +293,8 @@ DeepLearning.AI 会尝试读取 Vidstack 或课时 VTT。在展开的文字稿�
 
 首版面向 **Windows x64＋Chrome**。这是可选的本地学习功能，需要安装伴随程序和英汉释义包；旧版稳定 Release 没有这些内容。
 
-1. 打开扩展设置 → **本地词典**，按安装说明下载并完整解压 Windows 伴随程序包。
-2. 在解压目录运行设置页生成的安装命令，再在管理窗口导入 `dictionary-core.zip` 词库包；回到扩展点击 **重新连接**。
+1. 下载并完整解压 [windows-full.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/windows-full.zip)，加载其中的 `chrome/` 扩展（已有用户保留原路径更新），打开扩展设置 → **本地词典**。
+2. 在包内 `companion/` 目录运行设置页生成的安装命令，再在管理窗口导入包内 `dictionary-core.zip`；回到扩展点击 **重新连接**。已有词库无需再次导入。
 3. 在网页选中陌生英文词语，右键选择 **在本地词典中查询**。词卡显示音标、英音／美音和释义，点击 **详细解释与例句** 查看学习资料。
 4. 点击发音按钮重播，或选择 **0.75× 慢速**；默认使用无需 Key 的浏览器语音，有可用 Google 音色时优先选择，并显示在线／本机来源。
 

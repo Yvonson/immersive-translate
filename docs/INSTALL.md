@@ -1,33 +1,44 @@
 # v0.2.0 安装与升级
 
-这是浏览器插件。网页／字幕翻译只需要扩展；离线英汉词典和生词本需要额外安装 Windows x64 组件与词库。下载入口：[v0.2.0 Release](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0)。
+这是浏览器插件。到 [正式版下载页](https://github.com/Yvonson/immersive-translate/releases/tag/v0.2.0)，**按需求选一个包，不用下载全部附件**：
 
-## 首次安装
+| 你的需求 | 下载这个 | 包含什么 |
+| --- | --- | --- |
+| 只翻译网页和视频已有字幕，Chrome／Edge | [chrome.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/chrome.zip) | 轻量扩展，无需安装本地组件 |
+| Windows x64＋Chrome，还要离线查词和生词本 | [windows-full.zip](https://github.com/Yvonson/immersive-translate/releases/download/v0.2.0/windows-full.zip) | 扩展、本地词典程序、词库、本文；**不用再下 chrome.zip** |
 
-1. 下载 **chrome.zip**，解压到长期保留的文件夹。
-2. Chrome 打开 `chrome://extensions`，启用开发者模式，点“加载已解压的扩展”，选择直接含 `manifest.json` 的文件夹。固定工具栏图标，刷新网页。
-3. 点击图标，选目标语言和 Google，点翻译。Google 无需 Key，需要能连通其服务。也可在设置中自行接入 DeepSeek、本地模型或其他兼容 API，详见 [完整 README](https://github.com/Yvonson/immersive-translate#readme)。
-4. 需要词典时，再下载 **dictionary-companion-windows-x64.zip** 和 **dictionary-core.zip**。组件 ZIP 完整解压，不要单独取 EXE；词库 ZIP 保持压缩状态。
-5. 扩展“全部设置 → 本地词典”复制包含当前扩展 ID 的 PowerShell 安装命令，在有 `install.ps1` 的组件目录执行。无需管理员权限。管理窗口点“导入离线资源包”，选 `dictionary-core.zip`，需约 1 GiB 可用空间。
-6. 回扩展词典设置点“重新连接”。选词后 **Alt+Q 查询、Alt+S 收藏**，也可用右键菜单或词卡星标。词典页右上角“我的收藏”支持筛选、笔记、翻卡复习和 JSON 备份。
+`developer-resources.zip` 供开发者重建、查看对应源码或测试 Firefox，普通用户无需下载。`SHA256SUMS.txt` 是可选校验文件。GitHub 另附的两项 Source code 是自动生成的源码，不能直接安装。
 
-默认读音使用浏览器实际提供的英／美语音，无需 Key。缺音色时先安装系统英文语音，或自行配置 Google Cloud TTS；后者需自己的 Key／API／结算。两种方式都只在点击读音时工作，不需要下载录音或语音模型。
+## 只安装网页／字幕翻译
 
-## 从本地预览版或旧版升级
+1. 将 `chrome.zip` 解压到长期保留的文件夹。
+2. Chrome 打开 `chrome://extensions`，启用开发者模式，点“加载已解压的扩展”，选择直接含 `manifest.json` 的文件夹。Edge 使用 `edge://extensions`。
+3. 固定工具栏图标，刷新网页，选目标语言和 Google，点翻译。Google 无需 Key，但需能连通服务。自己的 DeepSeek／本地模型配置见 [完整 README](https://github.com/Yvonson/immersive-translate#readme)。
 
-1. 建议先分别导出扩展配置和生词本 JSON。配置导出不含 API Key 或生词本。
-2. 关闭组件管理窗口，更新原有扩展目录内文件，在扩展管理页点“重新加载”，刷新旧网页。保持原路径可保留原扩展 ID 与浏览器配置，不要先移除扩展。
-3. 下载新版 Windows 组件并重新运行设置页中的安装命令，再点“重新连接”；本次修复收藏时间和备份边界，组件也需更新。已有词库可以沿用，无需重新下载。
-4. 程序在 `%LOCALAPPDATA%\OpenBilingualTranslate\Companion`，词库在 `Dictionary`，生词本独立在 `UserData\favorites.sqlite3`。升级和卸载组件默认保留词库及收藏；不要手工删除 UserData。
+## 安装 Windows 完整包
 
-## 附件说明与常见问题
+1. 将 `windows-full.zip` **完整解压**到长期保留的文件夹，建议至少有 2 GiB 可用空间。里面有 `chrome/`、`companion/`、`dictionary-core.zip` 和 `INSTALL.md`。
+2. 按上一节打开 Chrome 扩展管理页，加载其中的 **chrome 文件夹**；不用另下轻量包。
+3. 扩展“全部设置 → 本地词典”复制包含当前扩展 ID 的安装命令。
+4. 在解压后的 **companion 文件夹**打开 PowerShell，执行该命令；该目录直接含 `install.ps1`。无需管理员权限，不要单独复制 EXE。
+5. 程序管理窗口点“导入离线资源包”，选择完整包根目录的 **dictionary-core.zip**，不必解压词库 ZIP。
+6. 回扩展词典设置点“重新连接”。选词后 **Alt+Q 查询、Alt+S 收藏**，也可用右键或星标。词典页右上角“我的收藏”可筛选、记笔记、翻卡复习和 JSON 备份。
 
-普通用户无需下载 `dictionary-companion-sources.zip`、`zhwiktionary.jsonl.gz` 或 GitHub 自动生成的 Source code。它们提供对应源码及可重建数据快照；`catalog.json`／`resources.lock.json`／`release-manifest.json`／`SHA256SUMS.txt` 用于核对来源、版本、体积和 SHA-256。
+完整包已包含所有安装文件，**仍需执行组件注册和词库导入**，不是自动安装器。默认发音使用实际可用的浏览器英／美音，无需 Key；缺音色时安装系统英文语音，或自行配置 Google Cloud TTS 的 Key／API／结算。不下载录音或语音模型。
 
-PowerShell 可运行 `Get-FileHash .\chrome.zip -Algorithm SHA256` 与 `SHA256SUMS.txt` 对照。只从本仓库 Release 下载，不要忽略文件校验错误。
+## 已有用户升级
 
-如果 IDM 提示无法连接 `127.0.0.1:10808`，是下载器使用了未运行的代理。修复 IDM 自己的代理设置，或关闭这次下载接管后用浏览器下载；不需要修改插件 API Key。连接词典失败时检查是否完整解压、扩展 ID 是否变化、是否执行安装命令。
+1. 先按需导出扩展配置和生词本 JSON；配置导出不含 API Key 或生词本。
+2. 只用网页／字幕时下载轻量包；使用本地词典时下载完整包。**保留原扩展路径**：将新扩展文件复制到原目录，点“重新加载”并刷新网页；不要先移除扩展或另从新路径加载。
+3. 使用本地词典时，关闭旧管理窗口，在新版完整包的 `companion/` 目录重新运行设置页安装命令，再点“重新连接”。已有词库可沿用，**不用再次导入**。
+4. 已按旧分件方式安装的用户可继续使用，不必为这次附件整理重新安装。程序、扩展和词库内容仍对应原 v0.2.0。
 
-Chrome 是本次主要验收平台。Edge 可加载扩展，但本地词典注册首版仅面向 Windows x64＋Chrome。Firefox 128+ 的 `firefox.zip` 是未签名的临时开发包，重启需重载，未完成本项目功能验收。字幕只处理播放器已有文本，仍为实验功能；不能识别无字幕视频，也不能绕过课程登录或 DRM。
+程序位于 `%LOCALAPPDATA%\OpenBilingualTranslate\Companion`，词库在 `Dictionary`，收藏独立保存在 `UserData\favorites.sqlite3`。程序升级／卸载默认保留词库和收藏；不要手工删除 UserData。
 
-开发者原始快照以 7 个 `zhwiktionary.jsonl.gz.part01` 至 `.part07` 分片提供；另下载 `source-parts.json` 和 `restore-dictionary-source.py`，在同一文件夹运行 `python restore-dictionary-source.py`，校验后还原完整 gzip。普通安装无需这些分片。
+## 校验和故障排查
+
+可下载 `SHA256SUMS.txt`，运行 `Get-FileHash .\windows-full.zip -Algorithm SHA256` 比对。只从本仓库 Release 下载，不忽略校验错误。
+
+IDM 提示无法连接 `127.0.0.1:10808` 时，是下载器使用了未运行的代理；修复 IDM 的代理设置，或关闭下载接管改用浏览器。与插件 API Key 无关。词典连接失败时检查是否完整解压、扩展 ID 是否变化、是否在正确的 `companion/` 目录执行注册。
+
+本地词典首版只验证 Windows x64＋Chrome。Firefox 128+ 开发包位于开发资料 ZIP 内，未签名、重启需重载，未完成本项目功能验收。字幕仍为实验功能，只处理已有可读文本，不识别无字幕视频，也不绕过课程登录或 DRM。

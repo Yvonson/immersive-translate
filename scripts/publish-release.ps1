@@ -14,6 +14,10 @@ $assetDir = (Resolve-Path -LiteralPath $Directory).Path
 & $Python -B (Join-Path $PSScriptRoot 'check-release.py') $assetDir --tag $Tag
 if ($LASTEXITCODE -ne 0) { throw 'Complete release asset audit failed.' }
 $manifest = Get-Content -LiteralPath (Join-Path $assetDir 'release-manifest.json') -Raw | ConvertFrom-Json
+$downloadDir = Join-Path $assetDir 'downloads'
+& $Python -B (Join-Path $PSScriptRoot 'package-release-downloads.py') $assetDir $downloadDir
+if ($LASTEXITCODE -ne 0) { throw 'User download packaging failed; use an empty downloads folder.' }
+$downloadManifest = Get-Content -LiteralPath (Join-Path $downloadDir 'download-manifest.json') -Raw | ConvertFrom-Json
 $repository = 'Yvonson/immersive-translate'
 $api = 'https://api.github.com/repos/' + $repository
 # Read the existing Git login into process memory only. Never print/store it.
@@ -38,8 +42,8 @@ try {
   $release=$releaseCandidates[0]
   if (-not $release.draft) { throw 'Refusing to replace assets of a published release.' }
   $expected=@()
-  foreach ($name in @($manifest.assets.name) + @('SHA256SUMS.txt','release-manifest.json')) {
-    $file=Get-Item -LiteralPath (Join-Path $assetDir $name)
+  foreach ($name in @($downloadManifest.assets.name)) {
+    $file=Get-Item -LiteralPath (Join-Path $downloadDir $name)
     $expected += [pscustomobject]@{name=$name;bytes=$file.Length;sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
   }
   foreach ($asset in $expected) {
@@ -61,7 +65,7 @@ try {
     $request.Version=[Version]'2.0'
     $request.VersionPolicy=[Net.Http.HttpVersionPolicy]::RequestVersionOrLower
     foreach($headerName in $headers.Keys) { $request.Headers.TryAddWithoutValidation($headerName,[string]$headers[$headerName]) | Out-Null }
-    $stream=[IO.File]::OpenRead((Join-Path $assetDir $asset.name))
+    $stream=[IO.File]::OpenRead((Join-Path $downloadDir $asset.name))
     $request.Content=[Net.Http.StreamContent]::new($stream,262144)
     $request.Content.Headers.ContentType=[Net.Http.Headers.MediaTypeHeaderValue]::new('application/octet-stream')
     $request.Content.Headers.ContentLength=$asset.bytes
@@ -74,6 +78,17 @@ try {
     } finally { $request.Dispose();$http.Dispose();$handler.Dispose() }
     if ($uploaded.size -ne $asset.bytes -or $uploaded.digest -ne ('sha256:'+$asset.sha256)) { throw ('Remote checksum mismatch: '+$asset.name) }
   }
+  # Retire draft-only individual inputs after all four grouped downloads are verified.
+  $release=Invoke-RestMethod -Uri "$api/releases/$($release.id)" @network
+  foreach ($asset in $expected) {
+    $remote=@($release.assets | Where-Object name -eq $asset.name)
+    if ($remote.Count -ne 1 -or $remote[0].size -ne $asset.bytes -or $remote[0].digest -ne ('sha256:'+$asset.sha256)) { throw ('Cannot prune inputs before verifying: '+$asset.name) }
+  }
+  foreach ($extra in @($release.assets | Where-Object name -NotIn $expected.name)) {
+    $release=Invoke-RestMethod -Uri "$api/releases/$($release.id)" @network
+    if (-not $release.draft) { throw 'Release was published; refusing cleanup.' }
+    Invoke-RestMethod -Method Delete -Uri "$api/releases/assets/$($extra.id)" @network | Out-Null
+  }
   $release=Invoke-RestMethod -Uri "$api/releases/$($release.id)" @network
   if (@($release.assets).Count -ne $expected.Count) { throw 'Unexpected remote attachment set; leave draft for review.' }
   foreach ($asset in $expected) {
@@ -81,7 +96,7 @@ try {
     if ($remote.Count -ne 1 -or $remote[0].size -ne $asset.bytes -or $remote[0].digest -ne ('sha256:'+$asset.sha256)) { throw ('Final remote asset verification failed: '+$asset.name) }
   }
   if ($Publish) {
-    $body=@{draft=$false;prerelease=$false;make_latest='true';name=('Open Bilingual Translate '+$Tag);body=(Get-Content -LiteralPath (Join-Path $assetDir 'RELEASE-NOTES.md') -Raw)} | ConvertTo-Json
+    $body=@{draft=$false;prerelease=$false;make_latest='true';name=('Open Bilingual Translate '+$Tag);body=(Get-Content -LiteralPath (Join-Path $projectDir ('docs/releases/'+$Tag+'.md')) -Raw)} | ConvertTo-Json
     $release=Invoke-RestMethod -Method Patch -Uri "$api/releases/$($release.id)" -Body $body -ContentType 'application/json; charset=utf-8' @network
     if ($release.draft -or $release.prerelease) { throw 'Release remains unpublished.' }
     Write-Output ('Published: '+$release.html_url)
