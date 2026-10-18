@@ -8,7 +8,7 @@ var pageTranslator = {};
   const typography = ["font-family","font-size","font-weight","font-style","line-height","letter-spacing","word-spacing","color","text-align","text-transform","text-decoration","direction","white-space"];
   const inline = new Set(["A","B","STRONG","I","EM","U","S","SMALL","SUB","SUP","CODE","KBD","MARK","SPAN","ABBR","CITE","Q"]);
   let ready = false, wholePage = false, language = document.documentElement.lang || "und", target, service, session = "", serial = 0;
-  let pointer, tap, nativeBindings = [], mutationTimer, configTimer, intersection;
+  let pointer, tap, mutationTimer, configTimer, intersection;
   let ruleCache, ruleURL;
   function rule() {
     if (ruleCache !== undefined && ruleURL === location.href) return ruleCache;
@@ -258,9 +258,18 @@ var pageTranslator = {};
   pageTranslator.onGetOriginalTabLanguage = callback => ready ? callback(language) : languageObservers.push(callback);
   pageTranslator.swapTranslationService = () => twpConfig.set("pageTranslatorService",service === "google" ? "yandex" : "google");
   function command(action) {
+    tap = null;
     if (action === "hotkey-toggle-translation") wholePage ? pageTranslator.restorePage() : pageTranslator.translatePage();
     if (action === "hotkey-toggle-dual") twpConfig.set("isShowDualLanguage",twpConfig.get("isShowDualLanguage") === "no" ? "yes" : "no");
   }
+  pageTranslator.cancelParagraphTrigger = () => { tap = null; };
+  readingShortcuts.before(pageTranslator.cancelParagraphTrigger);
+  for (const action of ["hotkey-toggle-translation","hotkey-toggle-dual"]) readingShortcuts.register(action,()=>{
+    if (!ready) return;
+    if (window === window.top) command(action);
+    else chrome.runtime.sendMessage({action:"readingCommand",command:action},()=>{void chrome.runtime.lastError;});
+  });
+  readingShortcuts.listen();
   document.addEventListener("pointermove",event => {
     const element = event.composedPath()[0];
     pointer = element.closest?.("[data-obt-translation]") ? [...records.values()].find(r => r.container?.contains(element))?.root : resolve(element);
@@ -270,15 +279,10 @@ var pageTranslator = {};
     const trigger = twpConfig.get("paragraphTrigger") || "Control";
     if (event.key === trigger && !event.repeat && ![event.ctrlKey && trigger !== "Control",event.altKey && trigger !== "Alt",event.shiftKey && trigger !== "Shift",event.metaKey].some(Boolean) && twpConfig.get("paragraphTranslation") !== "no" && !readingShortcuts.editable(event.composedPath()[0])) tap = pointer;
     else if (event.key !== trigger) tap = null;
-    if (event.repeat || readingShortcuts.editable(event.composedPath()[0])) return;
-    const chord = readingShortcuts.chord(event); if (!chord || nativeBindings.some(item => item.shortcut === chord)) return;
-    const bindings = twpConfig.get("pageShortcuts") || {}, action = Object.keys(bindings).find(key => bindings[key] === chord);
-    if (action) { event.preventDefault(); event.stopPropagation(); if (window === window.top) command(action); else chrome.runtime.sendMessage({action:"readingCommand",command:action},() => { void chrome.runtime.lastError; }); }
   },true);
   document.addEventListener("keyup",event => { if (event.key === (twpConfig.get("paragraphTrigger") || "Control")) { const root = tap; tap = null; if (root && event.isTrusted && !readingShortcuts.editable(event.composedPath()[0])) pageTranslator.toggleParagraph(root); } },true);
   ["pointerdown","wheel"].forEach(name => document.addEventListener(name,() => { tap = null; },{passive:true,capture:true}));
   window.addEventListener("blur",() => { tap = null; });
-  window.addEventListener("focus",() => message({action:"getNativeShortcuts"}).then(value => { nativeBindings = value; }).catch(() => {}));
   window.addEventListener("resize",refreshStyles);
   chrome.runtime.onMessage.addListener((request,sender,reply) => {
     if (!ready) return;
@@ -305,7 +309,6 @@ var pageTranslator = {};
   });
   twpConfig.onReady(async () => {
     ready = true; target = twpConfig.get("targetLanguage"); service = twpConfig.get("pageTranslatorService"); newSession();
-    message({action:"getNativeShortcuts"}).then(value => { nativeBindings = value; }).catch(() => {});
     try { language = (await message({action:"detectTabLanguage"})) || language; } catch (_) { /* Keep document language. */ }
     languageObservers.forEach(callback => callback(language));
     intersection = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting && wholePage) { intersection.unobserve(entry.target); if (!getRecord(entry.target).suppressed) translate(entry.target,"page"); } }),{rootMargin:"100px"});

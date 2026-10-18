@@ -166,7 +166,7 @@ test('subtitle VTT timeline, seeking and disable work in a real DOM',async()=>{
 });
 test('options exposes editable page keys and actual native bindings',async()=>{
   const extensionId=new URL(worker.url()).host;const p=await context.newPage();await p.goto(`chrome-extension://${extensionId}/options/options.html#hotkeys`);
-  const input=p.getByRole('textbox',{name:'翻译 / 恢复原文',exact:true});await expect(input).toBeEnabled();await input.focus();await p.keyboard.press('Alt+e');await expect(input).toHaveValue('Alt+E');
+  const input=p.getByRole('textbox',{name:'翻译 / 恢复原文',exact:true});await expect(input).toBeEnabled();await input.focus();await p.keyboard.press('Alt+Shift+e');await expect(input).toHaveValue('Alt+Shift+E');
   await expect(p.locator('#obt-native-keys')).toContainText('翻译 / 恢复原文');await p.close();
 });
 

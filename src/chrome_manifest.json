@@ -17,6 +17,12 @@
         "default": "Alt+Shift+D"
       },
       "description": "__MSG_lblSwitchDual__"
+    },
+    "hotkey-dictionary-lookup": {
+      "description": "本地词典：查询选词（可选原生快捷键）"
+    },
+    "hotkey-dictionary-collect": {
+      "description": "本地词典：收藏选词（可选原生快捷键）"
     }
   },
   "icons": {

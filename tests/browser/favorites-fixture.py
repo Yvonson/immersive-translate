@@ -25,7 +25,7 @@ if not (root / "seeded").exists():
             word = ["serendipity", "ephemeral", "resilience", "neural network"][i] if i < 4 else f"vocabulary-{i:04d}"
             meaning = ["不期而遇的美好；意外发现珍宝的能力", "短暂的；转瞬即逝的", "韧性；恢复力", "神经网络"][i] if i < 4 else "测试词条，用于验证真实分页"
             result = {"entries": [{"headword": word, "source": "Test dictionary", "license": "Fixture", "sourceUrl": "https://example.org", "senses": [{"zh": meaning}], "pronunciations": [{"ipa": "ˌserənˈdɪpɪti", "accent": "en-GB"}]}]}
-            collected = f"2026-10-{18 - i % 15:02d}T08:00:00.000Z"
+            collected = f"2026-10-{18 - i % 15:02d}T00:00:00.000Z"
             word_id = f"{i:032x}"
             store.db.execute("INSERT INTO words(id,identity,word,snapshot,firstCollectedAt,lastCollectedAt) VALUES(?,?,?,?,?,?)", (word_id, "word:"+word, word, json.dumps(snapshot_data(result, word), ensure_ascii=False), collected, collected))
             if i < 4:

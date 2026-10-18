@@ -11,7 +11,9 @@ var dictionaryView = (() => {
   }
   function link(text,url) { const result=node("a",text); try {const parsed=new URL(url); if(parsed.protocol!=="https:")throw new Error(); result.href=parsed.href;result.target="_blank";result.rel="noopener noreferrer";}catch(_){} return result; }
   const favoriteControls = new Set();
+  function disposeFavorites(root){for(const item of favoriteControls)if(!item.wrap.isConnected || root?.contains(item.wrap))favoriteControls.delete(item);}
   function favoriteButton(text, context={}) {
+    disposeFavorites();
     const wrap=node("span",undefined,"favorite-control"), status=node("small","","favorite-status");status.setAttribute("role","status");
     let savedId, busy=false;
     const control=button("☆ 收藏",async()=>{
@@ -66,5 +68,5 @@ var dictionaryView = (() => {
     }
     if(!details)root.append(button("详细解释与例句 ↗",()=>send("dictionaryOpenDetails",{text:result.query}),"detail-link"));
   }
-  return {node,button,send,render,favoriteButton};
+  return {node,button,send,render,favoriteButton,disposeFavorites};
 })();

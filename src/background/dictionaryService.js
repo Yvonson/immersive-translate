@@ -5,10 +5,13 @@ var dictionaryService = (() => {
   let port, idle, audioOwner, sequence = 0, playback = 0, creatingOffscreen, speechAbort, rejectSpeech;
   let favoritesCapability;
   const transfers = new Map();
+  const shortcutActions = new Set(["hotkey-dictionary-lookup","hotkey-dictionary-collect"]), shortcutRequests = new Map();
   const failure = (code, message) => Object.assign(new Error(message), {code});
   const owner = sender => sender.tab ? `${sender.tab.id}:${sender.frameId || 0}:${sender.documentId || ""}` : sender.documentId || sender.url;
   function armIdle() { clearTimeout(idle); if (port && !pending.size) idle = setTimeout(disconnect, 120000); }
   function disconnect() {
+    for (const request of shortcutRequests.values()) clearTimeout(request.timeout);
+    shortcutRequests.clear();
     clearTimeout(idle);
     const previous = port; port = null; favoritesCapability = null; transfers.clear();
     previous?.disconnect();
@@ -204,6 +207,16 @@ var dictionaryService = (() => {
   async function handle(message, sender) {
     if (!trusted(sender)) throw failure("FORBIDDEN", "无效的词典请求来源。");
     const key = owner(sender);
+    if (message.action === "dictionaryShortcutClaim") {
+      const request = shortcutRequests.get(message.requestId);
+      if (!request || request.tabId !== sender.tab?.id || !shortcutActions.has(request.command) || !sender.documentId) throw failure("FORBIDDEN", "快捷键请求已失效。");
+      shortcutRequests.delete(message.requestId);clearTimeout(request.timeout);
+      chrome.action?.setTitle({tabId:sender.tab.id,title:""}).catch(()=>{});
+      // The first focused document owns this invocation. Never broadcast execution
+      // or reuse its word selection in another frame after navigation/focus changes.
+      await chrome.tabs.sendMessage(sender.tab.id,{action:"dictionaryShortcutExecute",command:request.command},{documentId:sender.documentId});
+      return {claimed:true};
+    }
     if (message.action === "dictionaryFavorites") return favorites(message,sender);
     if (message.action === "dictionaryOpenFavorites") {
       const suffix = /^[a-f0-9]{32}$/.test(message.wordId || "") ? "#"+message.wordId : "";
@@ -251,5 +264,21 @@ var dictionaryService = (() => {
     // Encode the full input; the details page shows a validation message for long selections.
     await chrome.tabs.create({url:chrome.runtime.getURL("dictionary/index.html") + "#" + encodeURIComponent(info.selectionText.slice(0,4096))});
   }
-  return {openSelection, handle, disconnect, normalize};
+  async function dispatchShortcut(command, tab) {
+    if (!shortcutActions.has(command)) return false;
+    if (!tab?.id) tab = (await chrome.tabs.query({active:true,currentWindow:true}))[0];
+    if (!tab?.id) return false;
+    const requestId = "key"+Date.now().toString(36)+"_"+(++sequence);
+    const timeout = setTimeout(()=>{
+      shortcutRequests.delete(requestId);
+      // Restricted pages have no content script. Do not open an empty dictionary
+      // or inspect a stale selection from a different document.
+      chrome.action?.setTitle({tabId:tab.id,title:"本地词典快捷键：请在普通网页正文获得焦点后选词使用；受限页面不支持。"}).catch(()=>{});
+    },1000);
+    shortcutRequests.set(requestId,{tabId:tab.id,command,timeout});
+    try { await chrome.tabs.sendMessage(tab.id,{action:"dictionaryShortcutProbe",requestId}); }
+    catch (_) { /* Timeout shows the restricted-page hint on the toolbar. */ }
+    return true;
+  }
+  return {openSelection, handle, disconnect, normalize, dispatchShortcut};
 })();

@@ -78,3 +78,11 @@ Firefox 正式分发签名、商店上架、Safari 或独立桌面端需要另�
 备份是一致读事务快照，出站每片 60,000 字符；导入每片至多 2,000 个 JS UTF-16 单位，避开代理对，原生按顺序暂存至 128 MiB 上限，完整校验后单事务合并。token 只存在当前主机／扩展文档会话。notes 等自由文本仅以 textContent／value 显示，绝不能注入 HTML。保存资料有上限，详见 [用户说明](LOCAL-DICTIONARY.md#本地生词本)。
 
 `tests/browser/favorites.spec.cjs` 用随机回环地址作为**测试桥**连接真实 Python Native Messaging 主机和隔离 SQLite，以便 Linux CI 不安装 Windows 程序；不进入扩展包或生产运行路径，不接触真实用户词表。覆盖 5,001 条收藏的页面／筛选、语境过滤、翻卡键盘和分片备份；Python 额外覆盖多连接写入、失败回滚。普通浏览器测试需 PATH 有 Python 3.13，或设置 `OBT_TEST_PYTHON`。安装验证和真实 API／网站验收继续分开记录。
+
+## 查词与收藏快捷键
+
+`pageShortcuts` 新增 `hotkey-dictionary-lookup`（Alt+Q）与 `hotkey-dictionary-collect`（Alt+S）。配置读取／导入仅补缺失项，保留显式空值和自定义键；新默认键与既有动作冲突时，新动作保持未绑定并在设置中提示。`twpConfig.getDefault` 为设置提供默认值副本。共享 `readingShortcuts` 注册／分发四个动作、校验冲突、抑制连发与编辑／输入法事件；处理组合键前清除段落单按状态，避免松开修饰键追加翻译。
+
+Chrome manifest 的两个词典命令默认无 `suggested_key`；网页内录入为主要入口，原生实际绑定优先处理重合组合。原生路径使用 `dictionaryShortcutProbe → dictionaryShortcutClaim → dictionaryShortcutExecute`：背景保存短期请求，只有当前标签页首个认领的自身扩展 document 可执行，按 documentId 定向发送，不广播执行，也不从其他 frame 搬运选区。选词、坐标和语境留在执行 frame 内捕获。无网页认领时只给工具栏标题提示，不弹空词典页。此消息不改变 Native Messaging 协议或数据库结构。
+
+词卡持有当前查询及其原文语境；快捷键在聚焦词卡前读取新选区，不使用旧 contextmenu 快照，新范围优先于词卡兜底。相关词查询不携带上一个词的原文。相同词／语境的在途快捷收藏共用请求，按原生提交确认成功；取消查询与关闭 UI 不取消收藏。页面标记 `data-obt-dictionary-card`／`data-obt-dictionary-toast` 区分两个闭合 Shadow DOM 层，不携带词语或个人数据。

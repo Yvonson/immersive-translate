@@ -30,12 +30,14 @@ test.beforeAll(async()=>{
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
   await worker.evaluate(url=>{
     globalThis.favoriteNativeCalls=[];
+    globalThis.favoriteFixtureDelay={};globalThis.favoriteFixtureFailCollect=false;
     chrome.runtime.connectNative=()=>{
       let listener,closed=false;
-      return {onMessage:{addListener:fn=>listener=fn},onDisconnect:{addListener(){}},disconnect(){closed=true;},postMessage(message){favoriteNativeCalls.push(message);fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(message)}).then(response=>response.json()).then(value=>{if(!closed)listener(value);});}};
+      return {onMessage:{addListener:fn=>listener=fn},onDisconnect:{addListener(){}},disconnect(){closed=true;},postMessage(message){favoriteNativeCalls.push(message);if(message.op==='favorites.collect' && favoriteFixtureFailCollect){queueMicrotask(()=>listener({v:1,id:message.id,ok:false,error:{code:'STORAGE_ERROR',message:'测试：本地数据写入失败。'}}));return;}fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(message)}).then(response=>response.json()).then(value=>{setTimeout(()=>{if(!closed)listener(value);},favoriteFixtureDelay[message.op] || 0);});}};
     };
   },url);
 });
+test.beforeEach(async()=>{await worker.evaluate(()=>chrome.storage.local.set({pageShortcuts:twpConfig.getDefault('pageShortcuts'),paragraphTrigger:'Control'}));});
 test.afterAll(async()=>{await context?.close();host?.stdin.end();host?.kill();await new Promise(resolve=>server?.close(resolve));});
 async function api(op,data={}){return worker.evaluate(async({op,data})=>dictionaryService.handle({action:'dictionaryFavorites',op,...data},{id:chrome.runtime.id,url:chrome.runtime.getURL('dictionary/favorites.html'),documentId:'test-page'}),{op,data});}
 async function card(page,fn){
@@ -44,6 +46,12 @@ async function card(page,fn){
     const node=find(tree.root);if(!node)return null;const remote=await cdp.send('DOM.resolveNode',{backendNodeId:node.backendNodeId});return (await cdp.send('Runtime.callFunctionOn',{objectId:remote.object.objectId,functionDeclaration:fn,returnByValue:true})).result.value;
   }finally{await cdp.detach();}
 }
+async function feedback(page){
+  const cdp=await context.newCDPSession(page);
+  try{await cdp.send('DOM.enable');const {root}=await cdp.send('DOM.getDocument',{depth:-1,pierce:true}),matches=[];function walk(node){if(node.nodeName==='DIV' && node.attributes?.includes('status'))matches.push(node);for(const child of [...node.children||[],...node.shadowRoots||[]])walk(child);}walk(root);if(!matches.length)return '';const remote=await cdp.send('DOM.resolveNode',{backendNodeId:matches.at(-1).backendNodeId});return (await cdp.send('Runtime.callFunctionOn',{objectId:remote.object.objectId,functionDeclaration:'function(){return this.textContent}',returnByValue:true})).result.value;}finally{await cdp.detach();}
+}
+async function selectWord(locator){await locator.evaluate(element=>{element.tabIndex=-1;element.focus();const range=document.createRange();range.selectNodeContents(element);getSelection().removeAllRanges();getSelection().addRange(range);});}
+async function shortcutPage(){const page=await context.newPage();await page.route('https://keys.example.org/**',route=>route.fulfill({contentType:'text/html',body:'<html lang="en"><title>Keyboard lesson</title><body style="font:20px Georgia;padding:40px"><p id="old">A moment of <b>serendipity</b>.</p><p id="new">Say <b>hello</b> in the new paragraph.<span hidden>隐藏文字</span><span data-obt-translation>插件译文</span></p><input><textarea></textarea><div contenteditable="true">Editable hello</div><iframe src="https://keys-frame.example.org/inner"></iframe></body></html>'}));await page.route('https://keys-frame.example.org/**',route=>route.fulfill({contentType:'text/html',body:'<html lang="en"><body><p>A frame of <b>serendipity</b>.</p></body></html>'}));await page.goto('https://keys.example.org/lesson');await page.waitForTimeout(200);return page;}
 test('card star and right-click persist only visible original contexts in real SQLite',async()=>{
   const page=await context.newPage();await page.route('https://reading.example.org/**',route=>route.fulfill({contentType:'text/html',body:'<html lang="en"><title>Reading lesson</title><body style="font:20px Georgia;padding:60px"><p id="text">Say <b>hello</b> to a stranger.<span hidden>隐藏元数据</span><span style="display:none">了解细节</span><button>合集</button><span data-obt-translation>插件译文</span></p></body></html>'}));
   await page.goto('https://reading.example.org/lesson?token=private');await page.waitForTimeout(300);
@@ -83,6 +91,59 @@ test('review hides meaning until flip, persists each rating, excludes mastered a
   await page.keyboard.press('Space');await expect(page.locator('#ratings')).toBeVisible();await expect(page.locator('#review-card')).toContainText('不期而遇');await page.screenshot({path:'.local/browser-results/favorites-review.png'});await page.keyboard.press('3');await expect(page.locator('#review-card')).toContainText('个词，多熟悉了一点');await page.keyboard.press('Escape');expect((await api('get',{wordId:saved.id})).reviewCount).toBe(1);
   await page.locator('#start-review').click();await expect(page.locator('#notice')).toContainText('没有可复习');await page.locator('#include-mastered').check();await page.locator('#start-review').click();await expect(page.locator('.review-word')).toHaveText('serendipity');await page.keyboard.press('Space');await expect(page.locator('#ratings')).toBeVisible();await page.keyboard.press('1');await expect(page.locator('#review-card')).toContainText('个词，多熟悉了一点');await page.keyboard.press('Escape');expect((await api('get',{wordId:saved.id})).state).toBe('learning');
   await page.close();
+});
+
+test('Alt+Q and Alt+S capture fresh context, preserve card fallback, coalesce pending writes and survive Escape',async()=>{
+  const page=await shortcutPage();
+  try{
+    await selectWord(page.locator('#old b'));await page.locator('#old b').dispatchEvent('contextmenu');
+    await selectWord(page.locator('#new b'));await worker.evaluate(()=>favoriteFixtureDelay.lookup=650);
+    await page.keyboard.press('Alt+q');await expect.poll(()=>card(page,'function(){return this.textContent}')).toContain('正在查询');await expect.poll(()=>card(page,'function(){return this.textContent}')).toContain('你好');
+    await page.evaluate(()=>getSelection().removeAllRanges());await worker.evaluate(()=>{favoriteFixtureDelay['favorites.collect']=650;});
+    const before=await worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='favorites.collect').length);
+    await page.keyboard.press('Alt+s');await expect.poll(()=>feedback(page)).toContain('正在保存');await page.keyboard.press('Alt+s');await page.keyboard.down('Alt');await page.keyboard.down('s');await page.keyboard.down('s');await page.keyboard.up('s');await page.keyboard.up('Alt');await page.keyboard.press('Escape');
+    await expect.poll(()=>feedback(page)).toContain('★ 已收藏 hello');expect(await worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='favorites.collect').length)).toBe(before+1);await expect(page.locator('[data-obt-dictionary-card]')).toHaveCount(0);
+    const saved=(await api('list',{filters:{search:'hello'}})).items[0],entry=await api('get',{wordId:saved.id});expect(entry.contexts.some(context=>context.sentence==='Say hello in the new paragraph.')).toBe(true);expect(entry.contexts.some(context=>context.sentence.includes('隐藏文字') || context.sentence.includes('插件译文'))).toBe(false);
+    // A fresh range takes priority over the still-open card, even without closing it first.
+    await worker.evaluate(()=>favoriteFixtureDelay.lookup=0);await selectWord(page.locator('#new b'));await page.keyboard.press('Alt+q');await expect.poll(()=>card(page,'function(){return this.textContent}')).toContain('你好');await page.locator('#old b').evaluate(element=>{const range=document.createRange();range.selectNodeContents(element);getSelection().removeAllRanges();getSelection().addRange(range);});await page.keyboard.press('Alt+s');await expect.poll(()=>feedback(page)).toContain('★ 已收藏 serendipity');
+  }finally{await worker.evaluate(()=>{favoriteFixtureDelay={};});await page.close();}
+});
+
+test('dictionary shortcuts guard empty/long selections, editing and composition and report failed writes',async()=>{
+  const page=await shortcutPage();
+  try{
+    const before=await worker.evaluate(()=>favoriteNativeCalls.filter(item=>['lookup','favorites.collect'].includes(item.op)).length);
+    await page.locator('body').click({position:{x:5,y:5}});await page.evaluate(()=>getSelection().removeAllRanges());await page.keyboard.press('Alt+q');await expect.poll(()=>feedback(page)).toContain('请先选中词语');
+    for(const selector of ['input','textarea','[contenteditable]']){await page.locator(selector).focus();await page.keyboard.press('Alt+q');await page.keyboard.press('Alt+s');}
+    await selectWord(page.locator('#new b'));await page.evaluate(()=>document.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true})));await page.keyboard.press('Alt+q');await page.keyboard.press('Alt+s');await page.evaluate(()=>document.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true})));
+    expect(await worker.evaluate(()=>favoriteNativeCalls.filter(item=>['lookup','favorites.collect'].includes(item.op)).length)).toBe(before);
+    await page.locator('#new b').evaluate(element=>element.textContent='a'.repeat(121));await selectWord(page.locator('#new b'));await page.keyboard.press('Alt+s');await expect.poll(()=>feedback(page)).toContain('120');
+    await page.locator('#new b').evaluate(element=>element.textContent='hello');await selectWord(page.locator('#new b'));await worker.evaluate(()=>favoriteFixtureFailCollect=true);await page.keyboard.press('Alt+s');await expect.poll(()=>feedback(page)).toContain('写入失败');expect(await feedback(page)).not.toContain('★ 已收藏');
+  }finally{await worker.evaluate(()=>favoriteFixtureFailCollect=false);await page.close();}
+});
+
+test('shortcuts record, clear and restore inside settings and reject conflicts without overwriting another action',async()=>{
+  const web=await shortcutPage(),page=await context.newPage();await page.goto(`chrome-extension://${id}/options/options.html#hotkeys`);
+  const lookup=page.getByRole('textbox',{name:'查询选词',exact:true}),collect=page.getByRole('textbox',{name:'收藏选词',exact:true});await expect(lookup).toHaveValue('Alt+Q');await expect(collect).toHaveValue('Alt+S');
+  await lookup.focus();await page.keyboard.press('Alt+s');await expect(lookup).toHaveValue('Alt+Q');await expect(lookup.locator('xpath=ancestor::div[contains(@class,"obt-key-row")]')).toContainText('另一个动作');
+  await lookup.focus();await page.keyboard.press('Alt+Shift+e');await expect(lookup).toHaveValue('Alt+Shift+E');await web.bringToFront();await selectWord(web.locator('#new b'));await web.keyboard.press('Alt+Shift+e');await expect.poll(()=>card(web,'function(){return this.textContent}')).toContain('你好');await web.keyboard.press('Escape');await page.bringToFront();await page.reload();await expect(lookup).toHaveValue('Alt+Shift+E');
+  const row=lookup.locator('xpath=ancestor::div[contains(@class,"obt-key-row")]');await row.getByRole('button',{name:'清除',exact:true}).click();await expect(lookup).toHaveValue('');await page.reload();await expect(lookup).toHaveValue('');await row.getByRole('button',{name:'恢复默认',exact:true}).click();await expect(lookup).toHaveValue('Alt+Q');await page.screenshot({path:'.local/browser-results/dictionary-shortcut-settings.png',fullPage:true});await page.close();await web.close();
+});
+
+test('cross-origin frame handles native/page shortcuts once and native execution clears a pending Alt paragraph tap',async()=>{
+  const page=await shortcutPage();
+  try{
+    const frame=page.frameLocator('iframe');await selectWord(frame.locator('b'));await page.keyboard.press('Alt+q');await expect(frame.locator('[data-obt-dictionary-card]')).toHaveCount(1);expect(await page.locator('[data-obt-dictionary-card]').count()).toBe(0);await page.keyboard.press('Alt+s');
+    await expect.poll(async()=> (await api('get',{wordId:(await api('list',{filters:{search:'serendipity'}})).items[0].id})).contexts.some(item=>item.url==='https://keys-frame.example.org/inner')).toBe(true);
+    await page.keyboard.press('Escape');await worker.evaluate(()=>{globalThis.favoriteOriginalGetAll=chrome.commands.getAll;chrome.commands.getAll=callback=>callback([{name:'hotkey-dictionary-lookup',shortcut:'Alt+Q'},{name:'hotkey-dictionary-collect',shortcut:'Alt+S'}]);return chrome.storage.local.set({paragraphTrigger:'Alt'});});
+    // Refresh actual bindings after returning focus to this frame.
+    await selectWord(page.locator('#new b'));await selectWord(frame.locator('b'));await frame.locator('p').hover();
+    const before=await worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='lookup').length),tabId=await worker.evaluate(async()=> (await chrome.tabs.query({})).find(tab=>tab.url==='https://keys.example.org/lesson').id);
+    await page.keyboard.press('Alt+q');await page.waitForTimeout(120);expect(await worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='lookup').length)).toBe(before);
+    await page.keyboard.down('Alt');await worker.evaluate(tabId=>dictionaryService.dispatchShortcut('hotkey-dictionary-lookup',{id:tabId}),tabId);await expect(frame.locator('[data-obt-dictionary-card]')).toHaveCount(1);await page.keyboard.up('Alt');await expect.poll(()=>worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='lookup').length)).toBe(before+1);expect(await frame.locator('[data-obt-translation]').count()).toBe(0);expect(await page.locator('[data-obt-dictionary-card]').count()).toBe(0);
+    await worker.evaluate(tabId=>dictionaryService.dispatchShortcut('hotkey-dictionary-lookup',{id:tabId}),tabId);await expect.poll(()=>worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='lookup').length)).toBe(before+2);
+    await page.keyboard.press('Escape');await frame.locator('body').evaluate(body=>{const host=document.createElement('div'),input=document.createElement('input');host.attachShadow({mode:'open'}).append(input);body.append(host);input.focus();});await worker.evaluate(tabId=>dictionaryService.dispatchShortcut('hotkey-dictionary-lookup',{id:tabId}),tabId);await page.waitForTimeout(150);expect(await worker.evaluate(()=>favoriteNativeCalls.filter(item=>item.op==='lookup').length)).toBe(before+2);
+  }finally{await worker.evaluate(()=>{if(favoriteOriginalGetAll)chrome.commands.getAll=favoriteOriginalGetAll;return chrome.storage.local.set({paragraphTrigger:'Control'});});await page.close();}
 });
 
 test('chunked JSON backup restores snapshots and survives damaged dictionary resources',async()=>{

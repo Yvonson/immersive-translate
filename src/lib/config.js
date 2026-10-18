@@ -14,7 +14,7 @@ const twpConfig = (function () {
     subtitleTranslation: "no",
     paragraphTranslation: "yes",
     paragraphTrigger: "Control",
-    pageShortcuts: { "hotkey-toggle-translation": "Alt+Shift+T", "hotkey-toggle-dual": "Alt+Shift+D" },
+    pageShortcuts: { "hotkey-toggle-translation": "Alt+Shift+T", "hotkey-toggle-dual": "Alt+Shift+D", "hotkey-dictionary-lookup": "Alt+Q", "hotkey-dictionary-collect": "Alt+S" },
     subtitleAutoSites: [],
     subtitleStyle: { mode: "dual", order: "source-first", size: 22, color: "#ffffff", opacity: 0.75, offset: 12 },
     ttsSpeed: 1.0,
@@ -99,6 +99,7 @@ const twpConfig = (function () {
   twpConfig.get = function (name) {
     return config[name];
   };
+  twpConfig.getDefault = name => JSON.parse(JSON.stringify(defaultConfig[name]));
 
   /**
    * set the value of a config
@@ -108,6 +109,7 @@ const twpConfig = (function () {
    * @param {*} value
    */
   twpConfig.set = function (name, value) {
+    if (name === "pageShortcuts") value = fixObjectType(name, value);
     // @ts-ignore
     config[name] = value;
     const obj = {};
@@ -517,6 +519,17 @@ const twpConfig = (function () {
    * @returns {Map | Set | *}
    */
   function fixObjectType(key, value) {
+    if (key === "pageShortcuts") {
+      const previous = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+      const merged = {...defaultConfig.pageShortcuts, ...previous};
+      // Old profiles have only the two reading actions. Never steal a custom key
+      // or turn an explicitly cleared binding back on during upgrade/import.
+      for (const command of Object.keys(defaultConfig.pageShortcuts)) {
+        if (Object.prototype.hasOwnProperty.call(previous, command)) continue;
+        if (Object.entries(previous).some(([other, shortcut]) => other !== command && other in defaultConfig.pageShortcuts && shortcut === merged[command])) merged[command] = "";
+      }
+      return merged;
+    }
     if (defaultConfig[key] instanceof Map) {
       return new Map(Object.entries(value));
     } else if (defaultConfig[key] instanceof Set) {

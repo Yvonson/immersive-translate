@@ -88,3 +88,17 @@ test('old native hosts keep lookup while favorites explicitly require component 
   try{await assert.rejects(api.handle({action:'dictionaryFavorites',op:'state',text:'hello'},sender),error=>error.code==='UPDATE_REQUIRED');assert.equal((await api.handle({action:'dictionaryLookup',text:'hello'},sender)).query,'hello');}
   finally{api.disconnect();}
 });
+
+test('optional native shortcut is claimed once by its own tab and executes only in the claiming document',async()=>{
+  const {api,chrome,sender}=service(),sent=[];
+  chrome.tabs.sendMessage=async(tabId,message,options)=>{sent.push({tabId,message,options});return {ok:true}};
+  try{
+    await api.dispatchShortcut('hotkey-dictionary-collect',{id:1});const requestId=sent[0].message.requestId;
+    await assert.rejects(api.handle({action:'dictionaryShortcutClaim',requestId},{...sender,tab:{id:2}}),error=>error.code==='FORBIDDEN');
+    assert.equal((await api.handle({action:'dictionaryShortcutClaim',requestId},sender)).claimed,true);
+    assert.equal(sent[1].message.command,'hotkey-dictionary-collect');assert.equal(sent[1].options.documentId,'doc');
+    await assert.rejects(api.handle({action:'dictionaryShortcutClaim',requestId},sender),error=>error.code==='FORBIDDEN');
+    assert.equal(sent.filter(item=>item.message.action==='dictionaryShortcutExecute').length,1);
+    assert.equal(await api.dispatchShortcut('not-a-dictionary-command',{id:1}),false);
+  }finally{api.disconnect();}
+});

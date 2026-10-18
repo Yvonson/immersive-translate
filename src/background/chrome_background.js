@@ -498,8 +498,10 @@ twpConfig.onReady(() => {
 })
 
 if (typeof chrome.commands !== "undefined") {
-    chrome.commands.onCommand.addListener(command => {
-        if (command === "hotkey-toggle-translation") {
+    chrome.commands.onCommand.addListener((command, tab) => {
+        if (["hotkey-dictionary-lookup", "hotkey-dictionary-collect"].includes(command)) {
+            dictionaryService.dispatchShortcut(command, tab).catch(console.error)
+        } else if (command === "hotkey-toggle-translation") {
             chrome.tabs.query({
                 currentWindow: true,
                 active: true
