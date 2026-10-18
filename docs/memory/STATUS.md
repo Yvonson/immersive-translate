@@ -23,6 +23,7 @@
 - 2026-10-18 `npm test` 16 项、Python `unittest` 4 项、浏览器回归 19 项通过，包含真实 DOM／跨域 iframe 词卡、取消迟到结果、选择限制、设置与 Key 不回显，以及模拟 Cloud 响应在真实离屏页解码播放、鉴权失败不降级；网页／字幕原有回归也通过。
 - Chrome／Firefox 构建和产物检查通过；本功能仍只验收 Chrome。Windows PyInstaller 组件打包、实际安装／注册、Tk／SQLite 诊断、完整词库导入／校验通过；断网查询 hello／took／US／us／record／read／neural network／未收录词通过，证据 `.local/dictionary/native-verification.json`。
 - 真实独立 Chromium 普通窗口仅列出本机三种中文音色，无英美音；Chrome 临时配置的 Web Speech 英美音列表也为空。缺音色提示已验证，**未通过真实英文发音播放或人工听辨**，需用户安装对应系统英文语音或配置 Cloud。不能把模拟声音成功写成真实读音准确。
+- 功能提交 `8dd1617` 已推送 `main`；[扩展 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39094048789) 的单元／Python／构建／检查／19 项 Linux 浏览器回归及 artifact 上传均成功；[Windows 组件 CI](https://github.com/Yvonson/immersive-translate/actions/runs/39094048812) 的依赖安装／测试／二进制与源码归档／artifact 上传成功。大词库远程资源任务未触发，沿用已校验本地词库，不下载录音或模型。
 - 未提供真实 Cloud Key，因此未调用真实计费 API；官方接口、计费和认证约定已核对，模拟请求／音频播放不替代账户端到端验收。真实使用仍取决于网络、API 启用／限制／结算与配额。
 
 ## 评论正文污染修复（2026-10-17）
