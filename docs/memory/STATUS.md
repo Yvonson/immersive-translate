@@ -11,6 +11,7 @@
 - 真实站点布局检查：独立无登录 Chromium、仅加载本次扩展，Google／模型调用未开启。公开 [课程 Introduction](https://learn.deeplearning.ai/courses/chatgpt-prompt-eng/lesson/dfbds/introduction) 最终按钮 38×38px，位于 CC tooltip 后；[B 站公开视频](https://www.bilibili.com/video/BV1ZYnP6ZEAi/) 按钮 36×35px，紧邻原生字幕；[YouTube 样本](https://www.youtube.com/watch?v=EWX0bbGAd0k) 48×40px，位于 CC 与设置之间。三站菜单均在播放器可见边界内，并已检查截图。只关闭课程登录提示以检查公开播放器布局，没有登录、验证受限课程播放或重新验收字幕翻译端到端。
 - 验证证据保存在忽略目录 `.local/subtitle-layout/`：`unit-test.log`、`browser-test.log`、`live-verification.json`、最后基线调整后的 `bilibili-verification.json`，以及三站 `*-live-menu.png`、模拟课程／B 站全屏、悬浮菜单截图。公开页面检查不代表正常用户 Chrome 或所有 B 站／番剧版本已验收，旧版 B 站只在结构模拟中回归，真实全屏与登录播放继续保留待办。
 - 交付为扩展源码与本地构建 `dist/chrome`／`dist/chrome.zip`；重新加载扩展并刷新原网页生效。版本仍 0.2.0，已有 v0.2.0／Resources 标签与附件不变；不新增字幕抓取、API、权限、配置迁移或词库／伴随程序更新。README、变更记录和实现说明已同步。
+- 修复提交 `507320ec6f10039a73e7494d78bceae94405847e` 已推送 `main`；[远程 CI 39729386055](https://github.com/Yvonson/immersive-translate/actions/runs/39729386055) 成功，包含 Linux 单元／Python／发布工具测试、构建检查、浏览器回归和扩展 artifact 上传。本条仅补录验证，不创建版本标签或更新线上 Release。
 
 ## 对话交接（2026-10-22）
 
