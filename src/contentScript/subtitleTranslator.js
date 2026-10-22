@@ -4,6 +4,50 @@
   let tracksYT = [], tracksCourse = [], enabledTab = null, ready = false, discoverTimer;
   const youtube = /(^|\.)youtube\.com$/.test(location.hostname);
   const course = location.hostname === "learn.deeplearning.ai";
+  const bilibili = /(^|\.)bilibili\.com$/.test(location.hostname);
+  const playerRoots = ".html5-video-player,.lesson-video-player,media-player,[data-media-player],.video-js,.bpx-player-container,.bilibili-player";
+  const intersects = (a,b,gap = 0) => a.left < b.right + gap && a.right > b.left - gap && a.top < b.bottom + gap && a.bottom > b.top - gap;
+  function visible(node) {
+    if (!node?.getClientRects().length) return false;
+    for (let parent = node; parent; parent = parent.parentElement) {
+      const style = getComputedStyle(parent);
+      if (style.visibility === "hidden" || style.display === "none" || Number(style.opacity) === 0) return false;
+    }
+    return true;
+  }
+  // Resolve semantic controls within this video's player, rather than a page-wide last row.
+  function playerLayout(video) {
+    const base = video.closest(playerRoots) || video.parentElement;
+    const fullscreen = document.fullscreenElement;
+    const root = fullscreen && fullscreen !== video && fullscreen.contains(video) ? fullscreen : base;
+    const own = selector => [...root.querySelectorAll(selector)].filter(node => !node.closest("[data-obt-ui]") && (!node.closest(playerRoots) || node.closest(playerRoots) === base));
+    const shown = selector => own(selector).find(node => node.getClientRects().length);
+    let kind = "generic", controls, cc, gear, row;
+    if (youtube) {
+      kind = "youtube"; controls = own(".ytp-right-controls")[0];
+      cc = shown(".ytp-subtitles-button"); gear = shown(".ytp-settings-button"); row = controls?.closest(".ytp-chrome-bottom");
+      // Current YouTube splits left/right subgroups inside its right control area.
+      // Keep the icon beside CC itself, including when that subgroup is rebuilt.
+      if (cc || gear) controls = (cc || gear).parentElement;
+    } else if (bilibili) {
+      kind = "bilibili"; controls = own(".bpx-player-control-bottom-right,.bilibili-player-video-control-bottom-right")[0];
+      cc = shown(".bpx-player-ctrl-subtitle,.bilibili-player-video-btn-subtitle"); gear = shown(".bpx-player-ctrl-setting,.bilibili-player-video-btn-setting");
+      row = controls?.closest(".bpx-player-control-bottom,.bilibili-player-video-control-bottom") || controls?.parentElement;
+    } else {
+      cc = shown(".vds-caption-button,media-caption-button"); gear = shown(".vds-settings-menu .vds-menu-button,media-menu-button[aria-label=Settings]");
+      controls = (cc || gear)?.closest(".vds-controls-group,media-controls-group");
+      if (controls) { kind = "vidstack"; row = controls; }
+    }
+    // A responsive layout can hide CC while still exposing its settings menu.
+    const button = cc || gear;
+    if (controls && button && controls.contains(button)) {
+      let anchor = button;
+      while (anchor.parentElement !== controls) anchor = anchor.parentElement;
+      if (cc) while (anchor.nextElementSibling?.matches(".vds-tooltip-content,[role=tooltip]")) anchor = anchor.nextElementSibling;
+      return {root,kind,controls,row:row || controls,anchor,after:!!cc,native:kind === "bilibili" ? gear || cc : button};
+    }
+    return {root,kind,controls:null,row:null};
+  }
   const identity = () => youtube ? new URL(location.href).searchParams.get("v") || location.pathname : location.pathname;
   function send(request) {
     return new Promise((resolve,reject) => chrome.runtime.sendMessage(request,response => {
@@ -28,11 +72,8 @@
   class Player {
     constructor(video) {
       this.video = video; this.id = identity(); this.version = 0; this.enabled = false; this.cues = []; this.translations = new Map(); this.pending = new Set(); this.retryAt = 0; this.failures = 0;
-      this.container = video.closest(youtube ? ".html5-video-player" : ".lesson-video-player,media-player,[data-media-player],.video-js") || video.parentElement;
-      if (!this.container || /^(BODY|HTML)$/.test(this.container.tagName)) this.container = video.parentElement;
       this.abort = new AbortController(); this.hiddenNodes = new Map(); this.hiddenTracks = new Map();
-      this.position = this.container.style.position;
-      if (getComputedStyle(this.container).position === "static") { this.container.style.position = "relative"; this.changedPosition = true; }
+      this.resize = new ResizeObserver(() => this.attach());
       this.settings = {...{mode:"dual",order:"source-first",size:22,color:"#ffffff",opacity:.75,offset:12},...twpConfig.get("subtitleStyle")};
       this.createUI(); this.reset();
       for (const event of ["timeupdate","seeking","seeked","play","pause","ratechange","loadedmetadata","emptied"]) video.addEventListener(event,() => {
@@ -42,7 +83,6 @@
       video.textTracks.addEventListener?.("addtrack",() => this.update(),{signal:this.abort.signal});
       document.addEventListener("fullscreenchange",() => { this.attach(); this.update(); },{signal:this.abort.signal});
       document.addEventListener("visibilitychange",() => { this.update(); },{signal:this.abort.signal});
-      this.resize = new ResizeObserver(() => this.layout()); this.resize.observe(this.container);
       this.timer = setInterval(() => this.update(),250);
     }
     reset() {
@@ -54,12 +94,14 @@
       this.host = mark(element("span")); this.host.classList.add("obt-subtitle-control");
       this.shadow = this.host.attachShadow({mode:"closed"}); this.shadow.appendChild(element("style",css));
       this.button = element("button"); this.button.className = "toggle"; this.button.type = "button";
-      this.button.innerHTML = '<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="5" width="22" height="18" rx="3"/><path d="M7 10h7m-4-2v2m-2 0c0 4 4 6 6 7m-1-7c0 4-3 6-6 7m10-5 4 8m-6 0 4-8m-3 6h6"/></svg><span class="tooltip">双语字幕</span>';
+      this.button.innerHTML = '<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="5" width="22" height="18" rx="3"/><path d="M7 10h7m-4-2v2m-2 0c0 4 4 6 6 7m-1-7c0 4-3 6-6 7m10-5 4 8m-6 0 4-8m-3 6h6"/></svg>';
+      this.icon = this.button.querySelector("svg");
       this.button.setAttribute("aria-pressed","false"); this.button.setAttribute("aria-expanded","false"); this.button.setAttribute("aria-label","双语字幕设置"); this.button.setAttribute("aria-haspopup","dialog"); this.shadow.appendChild(this.button);
       // A sibling of the control bar avoids YouTube's overflow and transform contexts.
       this.panelHost = mark(element("div")); this.panelHost.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:100;";
       this.panelShadow = this.panelHost.attachShadow({mode:"closed"}); this.panelShadow.appendChild(element("style",css));
       this.menu = element("section"); this.menu.id = "obt-subtitle-menu"; this.menu.className = "menu"; this.menu.setAttribute("role","dialog"); this.menu.hidden = true; this.menu.setAttribute("aria-label","双语字幕设置");
+      this.tip = element("span","双语字幕"); this.tip.className = "tooltip"; this.tip.hidden = true; this.tip.style.display = "block"; this.tip.style.bottom = "auto"; this.tip.setAttribute("role","tooltip"); this.panelShadow.appendChild(this.tip);
       this.home = element("div"); this.styles = element("div"); this.styles.hidden = true; this.menu.append(this.home,this.styles); this.panelShadow.appendChild(this.menu);
       this.home.appendChild(element("h2","双语字幕"));
       const switchLabel = element("label","翻译当前视频"); switchLabel.className = "switch"; this.switch = element("input"); this.switch.type = "checkbox"; switchLabel.appendChild(this.switch); this.home.appendChild(switchLabel);
@@ -79,10 +121,17 @@
       const colorLabel = element("label","译文颜色"), color = element("input"); color.type = "color"; color.value = this.settings.color; colorLabel.appendChild(color); this.styles.appendChild(colorLabel); this.styleControls.set("color",color); color.addEventListener("input",() => { this.settings.color = color.value; this.save(); });
       this.status = element("p","开启后读取已有字幕，翻译服务跟随网页设置。"); this.status.className = "status"; this.status.setAttribute("role","status"); this.menu.appendChild(this.status);
       const retry = element("button","重新读取 / 重试"); retry.className = "menu-row retry"; retry.onclick = () => { this.reset(); this.update(); }; this.menu.appendChild(retry);
-      this.button.onclick = () => this.setMenuOpen(this.menu.hidden);
+      this.button.onclick = event => { event.stopPropagation(); this.setMenuOpen(this.menu.hidden); };
+      // Do not let player click/keyboard handlers treat our button as a playback action.
+      for (const type of ["pointerdown","mousedown","dblclick","keyup"]) this.shadow.addEventListener(type,event => event.stopPropagation());
+      for (const type of ["pointerdown","mousedown","click","dblclick"]) this.panelShadow.addEventListener(type,event => event.stopPropagation());
+      this.button.addEventListener("pointerenter",() => { this.tip.hidden = !this.menu.hidden; this.placeTip(); });
+      this.button.addEventListener("pointerleave",() => { this.tip.hidden = true; });
+      this.button.addEventListener("focus",() => { this.syncVisibility(); this.tip.hidden = !this.menu.hidden; this.placeTip(); });
+      this.button.addEventListener("blur",() => { this.tip.hidden = true; });
       document.addEventListener("pointerdown",event => { const path = event.composedPath(); if (!path.includes(this.host) && !path.includes(this.panelHost)) this.setMenuOpen(false); },{signal:this.abort.signal});
       const keydown = event => {
-        if (this.menu.hidden) return;
+        if (this.menu.hidden) { event.stopPropagation(); return; }
         event.stopPropagation();
         if (event.key === "Escape") { event.preventDefault(); this.styles.hidden ? this.setMenuOpen(false,true) : this.showStyles(false); }
         if (["ArrowDown","ArrowUp"].includes(event.key) && !["SELECT","INPUT"].includes(event.target.tagName)) {
@@ -101,14 +150,57 @@
     setMenuOpen(value,focus = false) {
       const changed = this.menu.hidden === value;
       this.menu.hidden = !value; this.button.setAttribute("aria-expanded",String(value));
-      if (youtube) {
-        // Keep the controls visible only while our own menu is open.
-        if (value && !this.keepControls) { this.keepControls = element("style",`.html5-video-player.obt-menu-open .ytp-chrome-bottom{opacity:1!important;visibility:visible!important}`); this.container.appendChild(this.keepControls); }
-        this.container.classList.toggle("obt-menu-open",value);
-        if (value) { const gear = this.container.querySelector('.ytp-settings-button[aria-expanded="true"]'); gear?.click(); }
-      }
+      this.tip.hidden = true;
+      this.lockControls(value);
       if (value) { this.home.hidden = false; this.styles.hidden = true; this.placeMenu(); if (changed) this.switch.focus(); }
       else if (focus) this.button.focus();
+      this.syncVisibility();
+    }
+    lockControls(value) {
+      if (!this.container || this.locked === value) return;
+      this.locked = value;
+      this.container.classList.toggle("obt-menu-open",value);
+      if (value) {
+        this.keepControls = mark(element("style",`
+          .obt-menu-open .ytp-chrome-bottom,.obt-menu-open .vds-controls,
+          .obt-menu-open .bpx-player-control-wrap,.obt-menu-open .bpx-player-control-bottom,
+          .obt-menu-open .bilibili-player-video-control-wrap,.obt-menu-open .bilibili-player-video-control-bottom {
+            opacity:1!important;visibility:visible!important;pointer-events:auto!important;transform:none!important;
+          }
+          .obt-menu-open .bpx-player-ctrl-subtitle-box,.obt-menu-open .bpx-player-ctrl-setting-box,
+          .obt-menu-open .bpx-player-ctrl-quality-menu,.obt-menu-open .bpx-player-ctrl-playbackrate-menu {visibility:hidden!important;pointer-events:none!important}
+        `)); this.container.appendChild(this.keepControls);
+        for (const button of this.container.querySelectorAll('.ytp-settings-button[aria-expanded="true"],.vds-menu-button[aria-expanded="true"],.bpx-player-ctrl-btn[aria-expanded="true"],.bilibili-player-video-btn[aria-expanded="true"]')) button.click();
+      } else { this.keepControls?.remove(); this.keepControls = null; }
+      if (this.adapter?.kind === "vidstack") this.video.dispatchEvent(new Event(value ? "media-pause-controls-request" : "media-resume-controls-request",{bubbles:true,composed:true}));
+    }
+    setContainer(root) {
+      if (this.container === root) return;
+      if (this.container) {
+        this.setMenuOpen(false); this.rootAbort.abort(); this.resize.disconnect();
+        if (this.changedPosition && this.container.style.position === "relative") this.container.style.position = this.position;
+      }
+      clearTimeout(this.hideTimer); this.pointerInside = false; this.container = root; this.rootAbort = new AbortController();
+      this.position = root.style.position; this.changedPosition = getComputedStyle(root).position === "static";
+      if (this.changedPosition) root.style.position = "relative";
+      const options = {signal:this.rootAbort.signal};
+      root.addEventListener("pointerenter",() => { clearTimeout(this.hideTimer); this.pointerInside = true; this.syncVisibility(); },options);
+      root.addEventListener("pointerleave",() => {
+        clearTimeout(this.hideTimer); this.hideTimer = setTimeout(() => { this.pointerInside = false; this.tip.hidden = true; this.syncVisibility(); },2000);
+      },options);
+      root.addEventListener("focusin",() => this.syncVisibility(),options);
+      root.addEventListener("focusout",() => { queueMicrotask(() => this.syncVisibility()); },options);
+      root.addEventListener("pointerover",event => {
+        if (event.target.closest?.('.ytp-settings-button,.ytp-subtitles-button,.vds-menu-button,.vds-caption-button,.bpx-player-ctrl-btn,.bilibili-player-video-btn')) this.setMenuOpen(false);
+      },options);
+      this.resize.observe(root);
+    }
+    syncVisibility() {
+      if (!this.host || this.inControls) return;
+      const shown = this.pointerInside || !this.menu.hidden || this.container?.contains(document.activeElement);
+      this.host.style.opacity = shown ? "1" : "0";
+      this.host.style.pointerEvents = shown ? "auto" : "none";
+      if (!shown) this.tip.hidden = true;
     }
     select(title,options,onChange,value,parent = this.home) {
       const label = element("label",title), select = element("select"); options.forEach(([id,text]) => { const option = element("option",text); option.value = id; select.appendChild(option); }); label.appendChild(select); parent.appendChild(label); select.value = value || options[0][0]; select.addEventListener("change",() => onChange(select.value)); return select;
@@ -124,35 +216,109 @@
       const scaleX = parent.width / this.container.offsetWidth || 1, scaleY = parent.height / this.container.offsetHeight || 1;
       const left = Math.max(parent.left,0) + 8, right = Math.min(parent.right,innerWidth) - 8;
       const top = Math.max(parent.top,0) + 8, bottom = Math.min(parent.bottom,innerHeight) - 8;
-      const anchor = this.inControls ? Math.min(button.top - 8,bottom) : Math.max(button.bottom + 8,top);
+      const anchor = Math.max(top,Math.min(button.top - 8,bottom));
       this.menu.style.width = `${Math.max(0,Math.min(300,(right - left) / scaleX))}px`;
-      this.menu.style.maxHeight = `${Math.max(0,(this.inControls ? anchor - top : bottom - anchor) / scaleY)}px`;
-      const x = this.inControls ? right - this.menu.offsetWidth * scaleX : Math.min(button.right,right) - this.menu.offsetWidth * scaleX;
-      const y = this.inControls ? anchor - this.menu.offsetHeight * scaleY : anchor;
+      this.menu.style.maxHeight = `${Math.max(0,(anchor - top) / scaleY)}px`;
+      const x = right - this.menu.offsetWidth * scaleX;
+      const y = anchor - this.menu.offsetHeight * scaleY;
       this.menu.style.left = `${(Math.max(left,x) - parent.left) / scaleX}px`;
       this.menu.style.top = `${(Math.max(top,y) - parent.top) / scaleY}px`;
     }
+    placeTip() {
+      if (this.tip.hidden || this.host.hidden) return;
+      const parent = this.container.getBoundingClientRect(), button = this.host.getBoundingClientRect();
+      const sx = parent.width / this.container.offsetWidth || 1, sy = parent.height / this.container.offsetHeight || 1;
+      const left = Math.max(parent.left,0) + 8, right = Math.min(parent.right,innerWidth) - 8;
+      this.tip.style.maxWidth = `${Math.max(0,(right - left) / sx)}px`; this.tip.style.whiteSpace = "normal"; this.tip.style.right = "auto";
+      this.tip.style.left = `${(Math.max(left,Math.min(button.right - this.tip.offsetWidth * sx,right - this.tip.offsetWidth * sx)) - parent.left) / sx}px`;
+      this.tip.style.top = `${(Math.max(Math.max(parent.top,0) + 8,button.top - 8 - this.tip.offsetHeight * sy) - parent.top) / sy}px`;
+    }
     layout() {
       const rect = this.video.getBoundingClientRect(), parent = this.container.getBoundingClientRect();
-      this.overlay.style.left = `${rect.left - parent.left}px`; this.overlay.style.right = "auto"; this.overlay.style.width = `${rect.width}px`;
-      this.overlay.style.top = `${rect.bottom - parent.top - rect.height * this.settings.offset / 100}px`; this.overlay.style.bottom = "auto"; this.overlay.style.transform = "translateY(-100%)";
-      if (!this.inControls) { this.host.style.left = `${Math.max(0,rect.right - parent.left - 52)}px`; this.host.style.top = `${rect.top - parent.top + 10}px`; }
-      else if (youtube) { const native = this.host.parentElement.querySelector(".ytp-settings-button,.ytp-subtitles-button"); if (native) { this.host.style.width = `${native.offsetWidth || 48}px`; this.host.style.height = `${native.offsetHeight || 48}px`; } }
+      const sx = parent.width / this.container.offsetWidth || 1, sy = parent.height / this.container.offsetHeight || 1;
+      this.overlay.style.left = `${(rect.left - parent.left) / sx}px`; this.overlay.style.right = "auto"; this.overlay.style.width = `${rect.width / sx}px`;
+      this.overlay.style.top = `${(rect.bottom - parent.top - rect.height * this.settings.offset / 100) / sy}px`; this.overlay.style.bottom = "auto"; this.overlay.style.transform = "translateY(-100%)";
       this.lines.style.fontSize = `${this.settings.size}px`; this.lines.style.backgroundColor = `rgba(0,0,0,${this.settings.opacity})`; this.translation.style.color = this.settings.color; this.source.style.color = "#ffffff";
-      this.placeMenu();
+      if (!this.inControls) this.placeFloating(rect,parent,sx,sy);
+      this.placeMenu(); this.placeTip();
+    }
+    placeFloating(video,parent,sx,sy) {
+      const left = Math.max(video.left,parent.left,0) + 12 * sx, right = Math.min(video.right,parent.right,innerWidth) - 12 * sx;
+      const middle = Math.max(video.top + video.height / 2,parent.top,0), bottom = Math.min(video.bottom,parent.bottom,innerHeight) - (this.video.controls ? 64 : 12) * sy;
+      const obstacles = [...this.container.querySelectorAll('button,a,input,select,[role=button],[role=slider],[role=menu],[role=dialog],[role=toolbar],.vds-controls-group,.bpx-player-control-wrap,.bilibili-player-video-control-wrap,.vjs-control-bar')]
+        .filter(node => !node.closest("[data-obt-ui]") && visible(node)).map(node => node.getBoundingClientRect());
+      if (visible(this.overlay) && this.source.textContent) obstacles.push(this.lines.getBoundingClientRect());
+      let point;
+      for (let y = bottom - 36 * sy; y >= middle && !point; y -= 44 * sy) {
+        for (let x = right - 36 * sx; x >= left; x -= 44 * sx) {
+          const box = {left:x,right:x + 36 * sx,top:y,bottom:y + 36 * sy};
+          if (obstacles.some(rect => intersects(box,rect,8 * Math.max(sx,sy)))) continue;
+          const target = document.elementFromPoint(x + 18 * sx,y + 18 * sy);
+          if (target && this.container.contains(target)) { point = {x,y}; break; }
+        }
+      }
+      this.host.hidden = !point;
+      // An inline display value overrides the browser's default [hidden] rule.
+      this.host.style.display = point ? "inline-flex" : "none";
+      if (point) { this.host.style.left = `${(point.x - parent.left) / sx}px`; this.host.style.top = `${(point.y - parent.top) / sy}px`; }
+      else { this.tip.hidden = true; if (!this.menu.hidden) this.setMenuOpen(false); }
+      this.syncVisibility();
+    }
+    controlsFit(adapter) {
+      const root = this.container.getBoundingClientRect(), row = adapter.row.getBoundingClientRect(), host = this.host.getBoundingClientRect();
+      if (!row.width || !row.height || !visible(adapter.row)) return true; // Auto-hidden controls retain their native slot.
+      const inside = rect => rect.left >= Math.max(root.left,row.left) - 1 && rect.right <= Math.min(root.right,row.right) + 1 && rect.top >= root.top - 1 && rect.bottom <= root.bottom + 1;
+      if (!inside(host) || adapter.row.scrollWidth > adapter.row.clientWidth + 1) return false;
+      return [...adapter.row.querySelectorAll('.ytp-button,.vds-button,media-caption-button,media-menu-button,.bpx-player-ctrl-btn,.bilibili-player-video-btn')]
+        .filter(node => !node.closest("[data-obt-ui]") && node.getClientRects().length && !node.closest('[role=menu],.vds-menu-items'))
+        .every(node => inside(node.getBoundingClientRect()) && !intersects(host,node.getBoundingClientRect()));
     }
     attach() {
-      const controls = youtube ? this.container.querySelector(".ytp-right-controls") : this.container.querySelector(".vds-controls-group:last-child");
-      if (document.fullscreenElement === this.video) { this.setMenuOpen(false); this.restoreNative(); this.status.textContent = "此原生全屏模式无法叠加字幕，请使用播放器全屏按钮。"; return; }
-      this.container.append(this.overlay,this.panelHost); this.controls = controls; this.inControls = !!controls;
-      if (controls) {
-        for (const node of controls.querySelectorAll(".obt-subtitle-control")) if (node !== this.host && ![...players.values()].some(player => player.host === node)) node.remove();
-        const cc = controls.querySelector(".ytp-subtitles-button"), gear = controls.querySelector(".ytp-settings-button");
-        if (youtube && cc) cc.after(this.host); else if (youtube && gear) gear.before(this.host); else controls.prepend(this.host);
-        this.host.style.cssText = "display:inline-block;position:relative;vertical-align:top;width:40px;height:40px;flex-shrink:0;";
-        if (youtube) this.host.classList.add("ytp-button");
-      } else { this.container.appendChild(this.host); this.host.style.cssText = "position:absolute;width:36px;height:36px;z-index:40;background:#202020c9;border-radius:6px;"; }
-      this.layout();
+      if (this.attaching) return;
+      this.attaching = true;
+      try {
+        const adapter = playerLayout(this.video); this.setContainer(adapter.root); this.adapter = adapter;
+        if (document.fullscreenElement === this.video) { this.setMenuOpen(false); this.restoreNative(); this.host.hidden = true; this.host.style.display = "none"; this.status.textContent = "此原生全屏模式无法叠加字幕，请使用播放器全屏按钮。"; return; }
+        for (const node of [this.overlay,this.panelHost]) if (node.parentElement !== this.container) this.container.appendChild(node);
+        for (const node of this.container.querySelectorAll(".obt-subtitle-control")) if (node !== this.host && ![...players.values()].some(player => player.host === node)) node.remove();
+        const {controls,row,anchor} = adapter;
+        // Cache a crowded row until its width, anchors or native children change. This avoids
+        // repeatedly inserting/removing a button (and shifting controls) on every playback tick.
+        const children = controls ? [...controls.children].filter(node => node !== this.host) : [];
+        const width = row?.getBoundingClientRect().width;
+        const crowded = this.crowded && this.crowded.controls === controls && this.crowded.anchor === anchor && this.crowded.width === width && children.length === this.crowded.children.length && children.every((node,index) => node === this.crowded.children[index]);
+        this.inControls = !!controls && !crowded;
+        this.host.classList.toggle("ytp-button",this.inControls && adapter.kind === "youtube");
+        this.host.hidden = false;
+        if (this.inControls) {
+          const height = adapter.kind === "bilibili" ? Math.max(32,Math.min(48,row.clientHeight || 35)) : adapter.native.offsetHeight || (youtube ? 48 : 38);
+          const size = adapter.kind === "bilibili" ? 36 : adapter.native.offsetWidth || height;
+          const native = getComputedStyle(adapter.native);
+          this.host.style.cssText = `display:inline-flex;position:relative;vertical-align:top;align-items:center;align-self:center;justify-content:center;box-sizing:border-box;width:${size}px;height:${height}px;flex:0 0 ${size}px;margin:${adapter.kind === "bilibili" ? `0 ${native.marginRight} 0 ${native.marginLeft}` : "0"};`;
+          this.icon.style.width = this.icon.style.height = `${adapter.kind === "bilibili" ? 22 : 26}px`;
+          this.icon.style.transform = "";
+          const sibling = adapter.after ? anchor.nextElementSibling : anchor;
+          if (this.host.parentElement !== controls || (adapter.after ? anchor.nextElementSibling !== this.host : this.host.nextElementSibling !== anchor)) controls.insertBefore(this.host,sibling);
+          // Bilibili's 22px native icons can be top-aligned inside a 35px row.
+          // Match their visual center while retaining our full-height click target.
+          if (adapter.kind === "bilibili") {
+            const reference = adapter.native.getBoundingClientRect(), slot = this.host.getBoundingClientRect();
+            const scale = this.container.getBoundingClientRect().height / this.container.offsetHeight || 1;
+            const delta = (reference.top + reference.height / 2 - slot.top - slot.height / 2) / scale;
+            if (reference.height && Math.abs(delta) <= 16) this.icon.style.transform = `translateY(${delta}px)`;
+          }
+          if (!this.controlsFit(adapter)) { this.crowded = {controls,anchor,width,children}; this.inControls = false; }
+          else this.crowded = null;
+        }
+        if (!this.inControls) {
+          if (this.host.parentElement !== this.container) this.container.appendChild(this.host);
+          this.host.classList.remove("ytp-button");
+          this.host.style.cssText = "display:inline-flex;position:absolute;box-sizing:border-box;width:36px;height:36px;z-index:40;background:#202020c9;border-radius:6px;";
+          this.icon.style.width = this.icon.style.height = "24px"; this.icon.style.transform = "";
+        }
+        this.host.setAttribute("data-obt-placement",this.inControls ? adapter.kind : "floating");
+        this.controls = controls; this.layout();
+      } finally { this.attaching = false; }
     }
     setEnabled(value) {
       this.enabled = value; this.switch.checked = value; this.button.setAttribute("aria-pressed",String(value)); this.reset();
@@ -227,9 +393,7 @@
     }
     update() {
       if (identity() !== this.id) { this.id = identity(); this.selectedTrack = "native"; tracksCourse = []; this.reset(); if (youtube) window.postMessage({type:"obt-caption-request"},location.origin); if (course) window.postMessage({type:"obt-course-request"},location.origin); }
-      const controls = this.container.querySelector(youtube ? ".ytp-right-controls" : ".vds-controls-group:last-child");
-      if (controls !== this.controls || !this.host.isConnected || !this.overlay.isConnected || !this.panelHost.isConnected) this.attach();
-      this.layout();
+      this.attach();
       if (!this.enabled || document.hidden || this.video.ended || document.fullscreenElement === this.video) { this.overlay.style.display = "none"; this.restoreNative(); return; }
       if (course && Date.now() >= this.retryAt) this.loadCourse();
       if (youtube) {
@@ -252,6 +416,7 @@
       this.source.style.display = this.settings.mode === "translation" && translated ? "none" : "block";
       this.lines.replaceChildren(...(this.settings.order === "translation-first" ? [this.translation,this.source] : [this.source,this.translation]));
       this.overlay.style.display = "block"; this.hideNative();
+      if (!this.inControls) this.layout();
       if (Date.now() >= this.retryAt) this.status.textContent = `${this.cues.length ? "时间轴模式（可预取）" : "即时字幕模式（无预取）"} · ${translated ? "已翻译" : "正在翻译"} · 跟随网页引擎`;
       if (Date.now() >= this.stableAt) this.request(active.length ? active : [{text}],"interactive");
       if (this.cues.length && !this.video.paused && Date.now() >= this.retryAt && !this.prefetching) {
@@ -259,7 +424,7 @@
         setTimeout(() => { this.prefetching = false; },1000);
       }
     }
-    destroy() { this.reset(); clearInterval(this.timer); this.abort.abort(); this.resize.disconnect(); this.host.remove(); this.panelHost.remove(); this.keepControls?.remove(); this.container.classList.remove("obt-menu-open"); this.overlay.remove(); if (this.changedPosition && this.container.style.position === "relative") this.container.style.position = this.position; }
+    destroy() { this.reset(); this.setMenuOpen(false); clearInterval(this.timer); clearTimeout(this.hideTimer); this.abort.abort(); this.rootAbort?.abort(); this.resize.disconnect(); this.host.remove(); this.panelHost.remove(); this.overlay.remove(); if (this.changedPosition && this.container.style.position === "relative") this.container.style.position = this.position; }
   }
   window.addEventListener("message",event => {
     if (course && event.source === window && event.origin === location.origin && event.data?.type === "obt-course-data" && event.data.path === location.pathname && Array.isArray(event.data.tracks) && event.data.tracks.length <= 100) {
